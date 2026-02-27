@@ -1,0 +1,19 @@
+<mvc:View
+    controllerName="crm.controller.Home"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:layout="sap.ui.layout">
+    <Page title="{i18n>homeTitle}" class="sapUiResponsiveContentPadding">
+        <headerContent>
+            <Button text="{i18n>buttonLogout}" type="Transparent" press="onLogout" />
+        </headerContent>
+        <content>
+            <layout:Grid defaultSpan="XL6 L6 M12 S12" class="sapUiResponsiveMargin">
+                <VBox class="sapUiSmallMargin" width="100%">
+                    <Title text="{i18n>homeWelcomeTitle}" level="H2" />
+                    <Text text="{i18n>homeWelcomeText}" class="sapUiSmallMarginTop" />
+                </VBox>
+            </layout:Grid>
+        </content>
+    </Page>
+</mvc:View>

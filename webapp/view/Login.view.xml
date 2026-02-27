@@ -1,0 +1,35 @@
+<mvc:View
+    controllerName="crm.controller.Login"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:layout="sap.ui.layout">
+    <Page showHeader="false" class="sapUiResponsiveContentPadding">
+        <content>
+            <layout:VerticalLayout width="100%" class="sapUiLargeMarginTop sapUiResponsiveMargin">
+                <Panel width="auto" class="sapUiResponsiveMargin" expandable="false">
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title text="{i18n>loginTitle}" level="H2" />
+                        </Toolbar>
+                    </headerToolbar>
+                    <content>
+                        <VBox class="sapUiSmallMargin" renderType="Bare">
+                            <Label text="{i18n>labelUsername}" labelFor="usernameInput" />
+                            <Input id="usernameInput" value="{session>/username}" width="100%" />
+
+                            <Label text="{i18n>labelPassword}" labelFor="passwordInput" class="sapUiSmallMarginTop" />
+                            <Input id="passwordInput" type="Password" value="{session>/password}" width="100%" />
+
+                            <Button
+                                text="{i18n>buttonLogin}"
+                                type="Emphasized"
+                                class="sapUiMediumMarginTop"
+                                width="100%"
+                                press="onLogin" />
+                        </VBox>
+                    </content>
+                </Panel>
+            </layout:VerticalLayout>
+        </content>
+    </Page>
+</mvc:View>
