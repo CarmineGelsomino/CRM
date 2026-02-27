@@ -1,0 +1,19 @@
+<mvc:View
+    controllerName="crm.controller.Home"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:layout="sap.ui.layout">
+    <Page title="CRM Home" class="sapUiResponsiveContentPadding">
+        <headerContent>
+            <Button text="Logout" type="Transparent" press="onLogout" />
+        </headerContent>
+        <content>
+            <layout:Grid defaultSpan="XL6 L6 M12 S12" class="sapUiResponsiveMargin">
+                <VBox class="sapUiSmallMargin" width="100%">
+                    <Title text="Benvenuto nel CRM" level="H2" />
+                    <Text text="Questa dashboard è pronta per essere estesa con moduli Clienti, Opportunità e Ticket." class="sapUiSmallMarginTop" />
+                </VBox>
+            </layout:Grid>
+        </content>
+    </Page>
+</mvc:View>

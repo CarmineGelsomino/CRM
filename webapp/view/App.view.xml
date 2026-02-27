@@ -1,0 +1,7 @@
+<mvc:View
+    controllerName="crm.controller.BaseController"
+    displayBlock="true"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc">
+    <NavContainer id="appNavContainer" />
+</mvc:View>
