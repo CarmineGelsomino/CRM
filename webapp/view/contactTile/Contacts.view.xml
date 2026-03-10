@@ -3,10 +3,9 @@
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core">
+    <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
     <Page title="Contatti" class="sapUiResponsiveContentPadding">
         <content>
-            <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
-
             <Toolbar>
                 <Title text="Filtri" level="H5" />
                 <ToolbarSpacer />

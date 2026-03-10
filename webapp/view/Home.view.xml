@@ -5,10 +5,9 @@
     xmlns:layout="sap.ui.layout"
     xmlns:core="sap.ui.core">
     <Page class="sapUiResponsiveContentPadding" enableScrolling="true">
-        <subHeader>
+        <customHeader>
             <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
-        </subHeader>
-
+        </customHeader>
         <content>
             <VBox class="sapUiSmallMarginBottom" width="100%">
                 <Title text="prova nel CRM" level="H2" />
