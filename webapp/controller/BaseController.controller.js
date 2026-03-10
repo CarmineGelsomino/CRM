@@ -1,7 +1,10 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/core/routing/History"
-], function (Controller, History) {
+    "sap/ui/core/routing/History",
+    "sap/m/MessageToast",
+    "sap/m/ActionSheet",
+    "sap/m/Button"
+], function (Controller, History, MessageToast, ActionSheet, Button) {
     "use strict";
 
     return Controller.extend("crm.controller.BaseController", {
@@ -31,6 +34,110 @@ sap.ui.define([
                 window.history.go(-1);
             } else {
                 this.navTo("home", {}, true);
+            }
+        },
+
+        onShellNavHome: function () {
+            if ((window.location.hash || "").indexOf("home") > -1) {
+                MessageToast.show(this.getResourceBundle().getText("shellNavHomeFeedback"));
+                return;
+            }
+
+            this.navTo("home");
+        },
+
+        onShellMainMenuSelect: function (oEvent) {
+            var oItem = oEvent.getParameter("item");
+            if (!oItem) {
+                return;
+            }
+
+            var sText = oItem.getText();
+            var oBundle = this.getResourceBundle();
+
+            if (sText === oBundle.getText("shellMenuHome")) {
+                this.navTo("home");
+                return;
+            }
+
+            if (sText === oBundle.getText("shellMenuContacts")) {
+                this.navTo("contacts");
+                return;
+            }
+
+            if (sText === oBundle.getText("shellMenuProfile")) {
+                this.navTo("userProfile");
+                return;
+            }
+
+            MessageToast.show(oBundle.getText("shellMenuFeedback", [sText]));
+        },
+
+        onShellNotificationsPress: function () {
+            MessageToast.show(this.getResourceBundle().getText("shellNotificationsFeedback"));
+        },
+
+        onShellSearch: function (oEvent) {
+            var sQuery = (oEvent.getParameter("query") || "").trim();
+            if (!sQuery) {
+                MessageToast.show(this.getResourceBundle().getText("shellSearchEmptyFeedback"));
+                return;
+            }
+
+            MessageToast.show(this.getResourceBundle().getText("shellSearchFeedback", [sQuery]));
+        },
+
+        onShellProfilePress: function (oEvent) {
+            if (!this._oProfileActionSheet) {
+                this._oProfileActionSheet = new ActionSheet({
+                    buttons: [
+                        new Button({
+                            text: this.getResourceBundle().getText("shellProfileSettings"),
+                            icon: "sap-icon://action-settings",
+                            press: this.onShellProfileSettingsPress.bind(this)
+                        }),
+                        new Button({
+                            text: this.getResourceBundle().getText("shellProfileLogout"),
+                            type: "Emphasized",
+                            icon: "sap-icon://log",
+                            press: this.onLogout.bind(this)
+                        })
+                    ]
+                });
+                this.getView().addDependent(this._oProfileActionSheet);
+            }
+
+            this._oProfileActionSheet.openBy(oEvent.getSource());
+        },
+
+        onShellProfileSettingsPress: function () {
+            this.navTo("userProfile");
+        },
+
+        onLogout: function () {
+            fetch(window.CRM_CONFIG.apiBaseUrl + "/logout.php", {
+                method: "POST",
+                credentials: "same-origin"
+            })
+                .then(function () {
+                    var oSessionModel = this.getModel("session");
+                    if (oSessionModel) {
+                        oSessionModel.setProperty("/isAuthorized", false);
+                        oSessionModel.setProperty("/username", "");
+                        oSessionModel.setProperty("/userId", null);
+                        oSessionModel.setProperty("/password", "");
+                    }
+                    window.location.reload();
+                }.bind(this))
+                .catch(function () {
+                    MessageToast.show(this.getResourceBundle().getText("shellLogoutError"));
+                }.bind(this));
+        },
+
+        onExit: function () {
+            if (this._oProfileActionSheet) {
+                this._oProfileActionSheet.destroy();
+                this._oProfileActionSheet = null;
             }
         }
     });
