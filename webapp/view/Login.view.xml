@@ -9,19 +9,42 @@
                 <Panel width="auto" class="sapUiResponsiveMargin" expandable="false">
                     <headerToolbar>
                         <Toolbar>
-                            <Title text="CRM Login" level="H2" />
+                            <Title text="{i18n>loginTitle}" level="H2" />
                         </Toolbar>
                     </headerToolbar>
                     <content>
                         <VBox class="sapUiSmallMargin" renderType="Bare">
-                            <Label text="Username" labelFor="usernameInput" />
-                            <Input id="usernameInput" value="{session>/username}" width="100%" />
+                            <Text text="{i18n>loginSubtitle}" wrapping="true" class="sapUiSmallMarginBottom" />
 
-                            <Label text="Password" labelFor="passwordInput" class="sapUiSmallMarginTop" />
-                            <Input id="passwordInput" type="Password" value="{session>/password}" width="100%" />
+                            <Label text="{i18n>loginUsernameLabel}" labelFor="usernameInput" />
+                            <Input
+                                id="usernameInput"
+                                value="{session>/username}"
+                                valueState="{session>/usernameState}"
+                                valueStateText="{i18n>loginUsernameRequired}"
+                                placeholder="{i18n>loginUsernamePlaceholder}"
+                                width="100%"
+                                submit="onLogin" />
+
+                            <Label text="{i18n>loginPasswordLabel}" labelFor="passwordInput" class="sapUiSmallMarginTop" />
+                            <Input
+                                id="passwordInput"
+                                type="Password"
+                                value="{session>/password}"
+                                valueState="{session>/passwordState}"
+                                valueStateText="{i18n>loginPasswordRequired}"
+                                placeholder="{i18n>loginPasswordPlaceholder}"
+                                width="100%"
+                                submit="onLogin" />
+
+                            <MessageStrip
+                                text="{session>/loginMessage}"
+                                type="Error"
+                                visible="{= !!${session>/loginMessage} }"
+                                class="sapUiSmallMarginTop" />
 
                             <Button
-                                text="Accedi"
+                                text="{i18n>loginButton}"
                                 type="Emphasized"
                                 class="sapUiMediumMarginTop"
                                 width="100%"

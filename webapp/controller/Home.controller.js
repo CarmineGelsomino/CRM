@@ -10,7 +10,7 @@ sap.ui.define([
         },
 
         onLogout: function () {
-            fetch("api/logout.php", {
+            fetch(window.CRM_CONFIG.apiBaseUrl + "/logout.php", {
                 method: "POST",
                 credentials: "same-origin"
             })
