@@ -3,16 +3,33 @@
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:layout="sap.ui.layout">
-    <Page title="CRM Home" class="sapUiResponsiveContentPadding">
-        <headerContent>
-            <Button text="Logout" type="Transparent" press="onLogout" />
-        </headerContent>
+    <Page title="{i18n>homeTitle}" class="sapUiResponsiveContentPadding">
         <content>
-            <layout:Grid defaultSpan="XL6 L6 M12 S12" class="sapUiResponsiveMargin">
-                <VBox class="sapUiSmallMargin" width="100%">
+            <layout:Grid defaultSpan="XL12 L12 M12 S12" class="sapUiResponsiveMargin">
+                <VBox class="sapUiSmallMarginBottom" width="100%">
                     <Title text="Benvenuto nel CRM" level="H2" />
-                    <Text text="Questa dashboard è pronta per essere estesa con moduli Clienti, Opportunità e Ticket." class="sapUiSmallMarginTop" />
+                    <Text text="Accedi rapidamente ai moduli principali del portale." class="sapUiSmallMarginTop" />
                 </VBox>
+
+                <TileContainer class="sapUiTinyMarginTop" width="100%">
+                    <GenericTile header="Clienti" subheader="Anagrafiche e contatti" press="onTilePress" frameType="TwoByOne">
+                        <TileContent footer="Apri modulo">
+                            <NumericContent value="128" scale="attivi" valueColor="Good" />
+                        </TileContent>
+                    </GenericTile>
+
+                    <GenericTile header="Opportunità" subheader="Pipeline commerciale" press="onTilePress" frameType="TwoByOne">
+                        <TileContent footer="Apri modulo">
+                            <NumericContent value="36" scale="aperte" valueColor="Critical" />
+                        </TileContent>
+                    </GenericTile>
+
+                    <GenericTile header="Ticket" subheader="Assistenza clienti" press="onTilePress" frameType="TwoByOne">
+                        <TileContent footer="Apri modulo">
+                            <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                        </TileContent>
+                    </GenericTile>
+                </TileContainer>
             </layout:Grid>
         </content>
     </Page>
