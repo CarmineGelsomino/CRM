@@ -3,7 +3,7 @@
   "sap.app": {
     "id": "crm",
     "type": "application",
-    "title": "CRM OpenUI5",
+    "title": "Trade Immobiliare CRM",
     "applicationVersion": {
       "version": "1.0.0"
     }

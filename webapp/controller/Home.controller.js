@@ -9,18 +9,9 @@ sap.ui.define([
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
         },
 
-        onLogout: function () {
-            fetch(window.CRM_CONFIG.apiBaseUrl + "/logout.php", {
-                method: "POST",
-                credentials: "same-origin"
-            })
-                .then(function () {
-                    var oSessionModel = this.getModel("session");
-                    oSessionModel.setProperty("/isAuthorized", false);
-                    oSessionModel.setProperty("/username", "");
-                    MessageToast.show("Logout effettuato");
-                    window.location.reload();
-                }.bind(this));
+        onTilePress: function (oEvent) {
+            var sModuleName = oEvent.getSource().getHeader();
+            MessageToast.show("Modulo " + sModuleName + " in preparazione");
         }
     });
 });

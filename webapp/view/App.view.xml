@@ -3,7 +3,14 @@
     displayBlock="true"
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc">
-    <App>
-        <NavContainer id="appNavContainer" />
-    </App>
+    <Shell
+        id="appShell"
+        title="{i18n>appTitle}"
+        appWidthLimited="false"
+        showLogout="{session>/isAuthorized}"
+        logout="onLogout">
+        <App>
+            <NavContainer id="appNavContainer" />
+        </App>
+    </Shell>
 </mvc:View>

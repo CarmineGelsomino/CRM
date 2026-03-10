@@ -7,7 +7,7 @@ $isAuthorized = !empty($_SESSION['crm_user']);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM OpenUI5</title>
+    <title>Trade Immobiliare CRM</title>
     <script>
         window.CRM_CONFIG = {
             authorized: <?php echo $isAuthorized ? 'true' : 'false'; ?>,
