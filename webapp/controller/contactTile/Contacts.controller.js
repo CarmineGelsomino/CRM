@@ -40,8 +40,11 @@ sap.ui.define([
     return BaseController.extend("crm.controller.contactTile.Contacts", {
         onInit: function () {
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
-            this.setModel(new JSONModel([]), "categoryFilterOptions");
-            this.setModel(new JSONModel([]), "statusFilterOptions");
+            this.setModel(new JSONModel({
+                searchQuery: "",
+                categoryKey: "",
+                statusKey: ""
+            }), "contactFilters");
 
             this.setModel(new JSONModel({
                 contacts: [],
@@ -51,39 +54,7 @@ sap.ui.define([
             }), "contacts");
 
             this._oSortState = { path: "last_name", descending: false };
-            this._initFilterOptions();
             this._loadContacts();
-        },
-
-        _initFilterOptions: function () {
-            var oCategoriesModel = this.getOwnerComponent().getModel("categoriesContact");
-            var oStatesModel = this.getOwnerComponent().getModel("statesContact");
-            var fnSyncOptions = this._syncFilterOptions.bind(this);
-
-            if (oCategoriesModel) {
-                oCategoriesModel.attachRequestCompleted(fnSyncOptions);
-            }
-
-            if (oStatesModel) {
-                oStatesModel.attachRequestCompleted(fnSyncOptions);
-            }
-
-            fnSyncOptions();
-        },
-
-        _syncFilterOptions: function () {
-            var aCategories = this.getOwnerComponent().getModel("categoriesContact").getData() || [];
-            var aStates = this.getOwnerComponent().getModel("statesContact").getData() || [];
-
-            this.getModel("categoryFilterOptions").setData([{
-                key: "",
-                value: "Tutte le categorie"
-            }].concat(aCategories));
-
-            this.getModel("statusFilterOptions").setData([{
-                key: "",
-                value: "Tutti gli stati"
-            }].concat(aStates));
         },
 
         _loadContacts: async function () {
@@ -93,6 +64,9 @@ sap.ui.define([
             try {
                 var aContacts = await ContactApi.listContacts();
                 oModel.setProperty("/contacts", aContacts || []);
+                oModel.setProperty("/selectedContactId", null);
+                oModel.setProperty("/selectedContact", null);
+                this.byId("contactsTable").removeSelections(true);
                 this._applyFiltersAndSort();
             } catch (oError) {
                 // Error feedback is already handled in ContactApi
@@ -106,18 +80,25 @@ sap.ui.define([
         },
 
         onClearFilters: function () {
-            this.byId("contactSearchField").setValue("");
-            this.byId("categorySelect").setSelectedKey("");
-            this.byId("statusSelect").setSelectedKey("");
+            this.getModel("contactFilters").setData({
+                searchQuery: "",
+                categoryKey: "",
+                statusKey: ""
+            });
             this._applyFiltersAndSort();
         },
 
         _applyFiltersAndSort: function () {
-            var sQuery = (this.byId("contactSearchField").getValue() || "").trim();
-            var sCategory = this.byId("categorySelect").getSelectedKey();
-            var sStatus = this.byId("statusSelect").getSelectedKey();
-            var oBinding = this.byId("contactsTable").getBinding("items");
+            var oFilterData = this.getModel("contactFilters")?.getData() || {};
+            var sQuery = (oFilterData.searchQuery || "").trim();
+            var sCategory = (oFilterData.categoryKey || "").trim();
+            var sStatus = (oFilterData.statusKey || "").trim();
+            var oBinding = this.byId("contactsTable")?.getBinding("items");
             var aFilters = [];
+
+            if (!oBinding) {
+                return;
+            }
 
             if (sQuery) {
                 aFilters.push(new Filter({
@@ -140,6 +121,10 @@ sap.ui.define([
 
             oBinding.filter(aFilters, "Application");
             oBinding.sort(new Sorter(this._oSortState.path, this._oSortState.descending));
+        },
+
+        onRefreshContacts: async function () {
+            await this._loadContacts();
         },
 
         onOpenSortDialog: function () {

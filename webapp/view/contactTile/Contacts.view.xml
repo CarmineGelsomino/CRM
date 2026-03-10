@@ -2,44 +2,87 @@
     controllerName="crm.controller.contactTile.Contacts"
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:core="sap.ui.core">
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
     <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
     <Page title="Contatti" class="sapUiResponsiveContentPadding">
         <content>
-            <Toolbar>
-                <Title text="Filtri" level="H5" />
-                <ToolbarSpacer />
-                <SearchField id="contactSearchField" width="16rem" placeholder="Cerca per nome o email" liveChange="onFilterChange" search="onFilterChange" />
-                <Select id="categorySelect" width="11rem" change="onFilterChange" selectedKey="" items="{categoryFilterOptions>/}">
-                    <core:Item key="{categoryFilterOptions>key}" text="{categoryFilterOptions>value}" />
-                </Select>
-                <Select id="statusSelect" width="10rem" change="onFilterChange" selectedKey="" items="{statusFilterOptions>/}">
-                    <core:Item key="{statusFilterOptions>key}" text="{statusFilterOptions>value}" />
-                </Select>
-                <Button icon="sap-icon://clear-filter" type="Transparent" tooltip="Azzera filtri" press="onClearFilters" />
-            </Toolbar>
-
-            <OverflowToolbar class="sapUiTinyMarginBottom">
-                <Title text="Lista contatti" level="H3" />
-                <ToolbarSpacer />
-                <Button text="Ordina" icon="sap-icon://sort" press="onOpenSortDialog" />
-                <Button text="Nuovo" type="Emphasized" icon="sap-icon://add" press="onCreateContact" />
-                <Button text="Modifica" icon="sap-icon://edit" enabled="{= !!${contacts>/selectedContactId}}" press="onEditContact" />
-                <Button text="Elimina" type="Negative" icon="sap-icon://delete" enabled="{= !!${contacts>/selectedContactId}}" press="onDeleteContact" />
-            </OverflowToolbar>
+            <Panel class="sapUiTinyMarginBottom" expandable="true">
+                <headerToolbar>
+                    <Toolbar>
+                        <Title text="Filtri" level="H5" />
+                    </Toolbar>
+                </headerToolbar>
+                <content>
+                    <f:SimpleForm
+                        editable="true"
+                        layout="ColumnLayout"
+                        labelSpanXL="2"
+                        labelSpanL="2"
+                        labelSpanM="12"
+                        labelSpanS="12"
+                        emptySpanXL="0"
+                        emptySpanL="0"
+                        emptySpanM="0"
+                        emptySpanS="0"
+                        columnsXL="3"
+                        columnsL="3"
+                        columnsM="2"
+                        singleContainerFullSize="false">
+                        <Label text="Ricerca" labelFor="contactSearchField" />
+                        <SearchField
+                            id="contactSearchField"
+                            width="100%"
+                            value="{contactFilters>/searchQuery}"
+                            placeholder="Cerca per nome o email"
+                            liveChange="onFilterChange"
+                            search="onFilterChange" />
+                        <Label text="Categoria" labelFor="categorySelect" />
+                        <Select
+                            id="categorySelect"
+                            width="100%"
+                            forceSelection="false"
+                            selectedKey="{contactFilters>/categoryKey}"
+                            change="onFilterChange"
+                            items="{categoriesContact>/}">
+                            <core:Item key="" text="Tutte le categorie" />
+                            <core:Item key="{categoriesContact>key}" text="{categoriesContact>value}" />
+                        </Select>
+                        <Label text="Stato" labelFor="statusSelect" />
+                        <Select
+                            id="statusSelect"
+                            width="100%"
+                            forceSelection="false"
+                            selectedKey="{contactFilters>/statusKey}"
+                            change="onFilterChange"
+                            items="{statesContact>/}">
+                            <core:Item key="" text="Tutti gli stati" />
+                            <core:Item key="{statesContact>key}" text="{statesContact>value}" />
+                        </Select>
+                    </f:SimpleForm>
+                    <Button text="Azzera filtri" icon="sap-icon://clear-filter" type="Transparent" press="onClearFilters" />
+                </content>
+            </Panel>
 
             <Table
                 id="contactsTable"
                 mode="SingleSelectLeft"
                 growing="true"
                 growingScrollToLoad="true"
+                busy="{contacts>/busy}"
                 items="{contacts>/contacts}"
                 selectionChange="onSelectionChange"
                 noDataText="Nessun contatto disponibile">
                 <headerToolbar>
-                    <Toolbar>
-                        <Title text="{= ${contacts>/contacts}.length + ' contatti'}" level="H4" />
-                    </Toolbar>
+                    <OverflowToolbar>
+                        <Title text="{= 'Lista contatti (' + ${contacts>/contacts}.length + ')'}" level="H3" />
+                        <ToolbarSpacer />
+                        <Button icon="sap-icon://refresh" tooltip="Aggiorna tabella" press="onRefreshContacts" />
+                        <Button text="Ordina" icon="sap-icon://sort" press="onOpenSortDialog" />
+                        <Button text="Nuovo" type="Emphasized" icon="sap-icon://add" press="onCreateContact" />
+                        <Button text="Modifica" icon="sap-icon://edit" enabled="{= !!${contacts>/selectedContactId}}" press="onEditContact" />
+                        <Button text="Elimina" type="Negative" icon="sap-icon://delete" enabled="{= !!${contacts>/selectedContactId}}" press="onDeleteContact" />
+                    </OverflowToolbar>
                 </headerToolbar>
                 <columns>
                     <Column width="13rem"><Text text="Nome" /></Column>
