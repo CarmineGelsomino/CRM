@@ -11,7 +11,6 @@ $isAuthorized = !empty($_SESSION['crm_user']);
     <script>
         window.CRM_CONFIG = {
             authorized: <?php echo $isAuthorized ? 'true' : 'false'; ?>,
-            manifestUrl: "manifest.php",
             apiBaseUrl: "../api"
         };
     </script>
