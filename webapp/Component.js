@@ -14,8 +14,6 @@ sap.ui.define([
 
             this.setModel(models.createDeviceModel(), "device");
             this.setModel(models.createSessionModel(window.CRM_CONFIG.authorized, window.CRM_CONFIG.userId), "session");
-            this.setModel(models.createJsonFileModel("crm/model/modelCategoriesContact.json"), "categoriesContact");
-            this.setModel(models.createJsonFileModel("crm/model/modelStatesContact.json"), "statesContact");
 
             var oRouter = this.getRouter();
             oRouter.initialize();

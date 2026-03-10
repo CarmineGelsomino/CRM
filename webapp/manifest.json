@@ -28,6 +28,14 @@
         "settings": {
           "bundleName": "crm.i18n.i18n"
         }
+      },
+      "categoriesContact": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/modelCategoriesContact.json"
+      },
+      "statesContact": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/modelStatesContact.json"
       }
     },
     "routing": {
