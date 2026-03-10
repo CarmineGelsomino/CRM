@@ -1,0 +1,69 @@
+{
+  "_version": "1.60.0",
+  "sap.app": {
+    "id": "crm",
+    "type": "application",
+    "title": "CRM OpenUI5",
+    "applicationVersion": {
+      "version": "1.0.0"
+    }
+  },
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "crm.view.App",
+      "type": "XML",
+      "id": "app"
+    },
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.ui.layout": {}
+      }
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "crm.i18n.i18n"
+        }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "viewPath": "crm.view",
+        "controlId": "appNavContainer",
+        "controlAggregation": "pages",
+        "async": true,
+        "bypassed": {
+          "target": "login"
+        }
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "login",
+          "target": "login"
+        },
+        {
+          "pattern": "home",
+          "name": "home",
+          "target": "home"
+        }
+      ],
+      "targets": {
+        "login": {
+          "viewName": "Login",
+          "viewId": "login"
+        },
+        "home": {
+          "viewName": "Home",
+          "viewId": "home"
+        }
+      }
+    }
+  }
+}

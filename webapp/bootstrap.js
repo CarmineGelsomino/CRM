@@ -4,28 +4,16 @@ sap.ui.define([
 ], function (ComponentContainer, Component) {
     "use strict";
 
-    function startApp(manifest) {
-        Component.create({
-            name: "crm",
-            manifest: manifest
-        }).then(function (oComponent) {
-            new ComponentContainer({
-                component: oComponent,
-                height: "100%"
-            }).placeAt("content");
+    Component.create({
+        name: "crm"
+    }).then(function (oComponent) {
+        new ComponentContainer({
+            component: oComponent,
+            height: "100%"
+        }).placeAt("content");
+    }).catch(function () {
+        sap.ui.require(["sap/m/MessageBox"], function (MessageBox) {
+            MessageBox.error("Errore caricamento applicazione.");
         });
-    }
-
-    fetch(window.CRM_CONFIG.manifestUrl, { credentials: "same-origin" })
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (manifest) {
-            startApp(manifest);
-        })
-        .catch(function () {
-            sap.ui.require(["sap/m/MessageBox"], function (MessageBox) {
-                MessageBox.error("Errore caricamento configurazione applicazione.");
-            });
-        });
+    });
 });

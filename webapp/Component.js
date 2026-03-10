@@ -6,7 +6,7 @@ sap.ui.define([
 
     return UIComponent.extend("crm.Component", {
         metadata: {
-            manifest: false
+            manifest: "json"
         },
 
         init: function () {
@@ -15,7 +15,12 @@ sap.ui.define([
             this.setModel(models.createDeviceModel(), "device");
             this.setModel(models.createSessionModel(window.CRM_CONFIG.authorized), "session");
 
-            this.getRouter().initialize();
+            var oRouter = this.getRouter();
+            oRouter.initialize();
+
+            if (window.CRM_CONFIG.authorized) {
+                oRouter.navTo("home", {}, true);
+            }
         }
     });
 });
