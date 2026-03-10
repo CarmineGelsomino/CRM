@@ -1,0 +1,49 @@
+<mvc:View
+    controllerName="crm.controller.UserProfile"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:layout="sap.ui.layout">
+    <Page title="Profilo utente" class="sapUiResponsiveContentPadding" busy="{profile>/busy}">
+        <headerContent>
+            <Button icon="sap-icon://nav-back" type="Transparent" press="onBack" tooltip="Indietro" />
+        </headerContent>
+        <content>
+            <layout:VerticalLayout width="100%" class="sapUiContentPadding">
+                <Panel headerText="Dati profilo" class="sapUiResponsiveMargin">
+                    <content>
+                        <VBox class="sapUiMediumMargin" renderType="Bare">
+                            <Label text="Nome" labelFor="profileFirstName" />
+                            <Input id="profileFirstName" value="{profile>/data/first_name}" />
+
+                            <Label text="Cognome" labelFor="profileLastName" class="sapUiSmallMarginTop" />
+                            <Input id="profileLastName" value="{profile>/data/last_name}" />
+
+                            <Label text="Email" labelFor="profileEmail" class="sapUiSmallMarginTop" />
+                            <Input id="profileEmail" value="{profile>/data/email}" type="Email" />
+
+                            <Label text="Utente attivo" labelFor="profileIsActive" class="sapUiSmallMarginTop" />
+                            <Switch id="profileIsActive" state="{= ${profile>/data/is_active} === 1 }" customTextOn="Si" customTextOff="No" change="onActiveSwitchChange" />
+
+                            <Button text="Salva profilo" type="Emphasized" class="sapUiMediumMarginTop" press="onSaveProfile" />
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <Panel headerText="Reset password" class="sapUiResponsiveMargin">
+                    <content>
+                        <VBox class="sapUiMediumMargin" renderType="Bare">
+                            <Text text="Inserisci una nuova password oppure lascia vuoto per generarne una automatica." />
+                            <Input value="{profile>/passwordInput}" type="Password" placeholder="Nuova password (opzionale)" class="sapUiSmallMarginTop" />
+                            <Button text="Reimposta password" type="Attention" class="sapUiSmallMarginTop" press="onResetPassword" />
+                            <MessageStrip
+                                text="{= ${profile>/generatedPassword} ? 'Password generata: ' + ${profile>/generatedPassword} : '' }"
+                                type="Information"
+                                visible="{= !!${profile>/generatedPassword} }"
+                                class="sapUiSmallMarginTop" />
+                        </VBox>
+                    </content>
+                </Panel>
+            </layout:VerticalLayout>
+        </content>
+    </Page>
+</mvc:View>
