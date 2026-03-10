@@ -1,0 +1,10 @@
+<mvc:View
+    controllerName="crm.controller.contactTile.Contacts"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc">
+    <Page title="Contatti">
+        <content>
+            <Text text="Lista contatti" />
+        </content>
+    </Page>
+</mvc:View>
