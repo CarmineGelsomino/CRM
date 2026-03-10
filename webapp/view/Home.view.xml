@@ -10,8 +10,6 @@
                     <Title text="Benvenuto nel CRM" level="H2" />
                     <Text text="Accedi rapidamente ai moduli principali del portale." class="sapUiSmallMarginTop" />
                 </VBox>
-
-                <TileContainer class="sapUiTinyMarginTop" width="100%">
                     <GenericTile header="Clienti" subheader="Anagrafiche e contatti" press="onTilePress" frameType="TwoByOne">
                         <TileContent footer="Apri modulo">
                             <NumericContent value="128" scale="attivi" valueColor="Good" />
@@ -29,7 +27,6 @@
                             <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
                         </TileContent>
                     </GenericTile>
-                </TileContainer>
             </layout:Grid>
         </content>
     </Page>
