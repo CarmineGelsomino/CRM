@@ -8,264 +8,270 @@ sap.ui.define([
     return BaseController.extend("crm.controller.contactTile.ContactDetail", {
         onInit: function () {
             this.getRouter().getRoute("contactDetail").attachPatternMatched(this._onRouteMatched, this);
-            this.getView().setModel(this.getOwnerComponent().getModel("contacts"), "contacts");
-            this._sActivitySearch = "";
-            this._sActivityStatus = "all";
-            this._sNoteSearch = "";
-            this._sSelectedActivityId = null;
-            this._sSelectedNoteId = null;
+            this.setModel(this.getOwnerComponent().getModel("contacts"), "contacts");
+            this._sContactId = null;
+            this._selectedActivityId = null;
+            this._selectedNoteId = null;
+        },
+
+        _apiRequest: function (sPath, mOptions) {
+            return fetch(window.CRM_CONFIG.apiBaseUrl + "/index.php" + sPath, Object.assign({
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }, mOptions || {})).then(function (oResponse) {
+                return oResponse.json();
+            });
         },
 
         _onRouteMatched: function (oEvent) {
             var sContactId = oEvent.getParameter("arguments").contactId;
-            var oModel = this.getModel("contacts");
-            var aContacts = oModel.getProperty("/contacts") || [];
-            var oContact = aContacts.find(function (oItem) {
-                return oItem.id === sContactId;
-            });
+            this._sContactId = sContactId;
 
-            if (!oContact) {
-                MessageToast.show("Contatto non trovato");
+            if (sContactId === "new") {
+                this.getModel("contacts").setProperty("/selectedContact", {
+                    id: null,
+                    user_id: 1,
+                    first_name: "",
+                    last_name: "",
+                    email: "",
+                    category: "cliente",
+                    status: "attivo",
+                    generic_info: "",
+                    phone: ""
+                });
+                this.getModel("contacts").setProperty("/filteredActivities", []);
+                this.getModel("contacts").setProperty("/filteredNotes", []);
+                return;
+            }
+
+            this._loadContactData(sContactId);
+        },
+
+        _loadContactData: function (sContactId) {
+            Promise.all([
+                this._apiRequest("?entity=contacts&id=" + encodeURIComponent(sContactId)),
+                this._apiRequest("?entity=contact_phones&contact_id=" + encodeURIComponent(sContactId)),
+                this._apiRequest("?entity=activities&contact_id=" + encodeURIComponent(sContactId)),
+                this._apiRequest("?entity=notes&contact_id=" + encodeURIComponent(sContactId))
+            ]).then(function (aResponses) {
+                var oContact = aResponses[0].data;
+                if (!oContact) {
+                    MessageBox.error("Contatto non trovato");
+                    this.navTo("contacts");
+                    return;
+                }
+
+                var aPhones = aResponses[1].data || [];
+                var oPrimaryPhone = aPhones.find(function (oPhone) {
+                    return Number(oPhone.is_primary) === 1;
+                }) || aPhones[0];
+                oContact.phone = oPrimaryPhone ? oPrimaryPhone.phone : "";
+
+                this.getModel("contacts").setProperty("/selectedContact", oContact);
+                this.getModel("contacts").setProperty("/filteredActivities", aResponses[2].data || []);
+                this.getModel("contacts").setProperty("/filteredNotes", aResponses[3].data || []);
+            }.bind(this)).catch(function () {
+                MessageBox.error("Errore caricamento dettaglio contatto.");
+            });
+        },
+
+        onSaveContact: function () {
+            var oContact = Object.assign({}, this.getModel("contacts").getProperty("/selectedContact"));
+            var sPhone = oContact.phone || "";
+            delete oContact.phone;
+
+            var bIsNew = !oContact.id;
+            var sPath = bIsNew ? "?entity=contacts" : "?entity=contacts&id=" + encodeURIComponent(oContact.id);
+            var sMethod = bIsNew ? "POST" : "PUT";
+
+            this._apiRequest(sPath, {
+                method: sMethod,
+                body: JSON.stringify(oContact)
+            }).then(function (oResponse) {
+                var oSaved = oResponse.data;
+                if (!oSaved) {
+                    MessageBox.error("Salvataggio contatto fallito.");
+                    return;
+                }
+
+                var pPhone = Promise.resolve();
+                if (sPhone) {
+                    pPhone = this._apiRequest("?entity=contact_phones&contact_id=" + encodeURIComponent(oSaved.id))
+                        .then(function (oPhoneRes) {
+                            var aPhones = oPhoneRes.data || [];
+                            var oExisting = aPhones[0];
+                            if (oExisting) {
+                                return this._apiRequest("?entity=contact_phones&id=" + encodeURIComponent(oExisting.id), {
+                                    method: "PUT",
+                                    body: JSON.stringify({ phone: sPhone, is_primary: 1 })
+                                });
+                            }
+
+                            return this._apiRequest("?entity=contact_phones", {
+                                method: "POST",
+                                body: JSON.stringify({ contact_id: oSaved.id, phone: sPhone, is_primary: 1, note: "" })
+                            });
+                        }.bind(this));
+                }
+
+                pPhone.then(function () {
+                    MessageToast.show("Contatto salvato");
+                    this.navTo("contactDetail", { contactId: String(oSaved.id) }, true);
+                    this._loadContactData(String(oSaved.id));
+                }.bind(this));
+            }.bind(this)).catch(function () {
+                MessageBox.error("Salvataggio contatto fallito.");
+            });
+        },
+
+        onDeleteContact: function () {
+            var oContact = this.getModel("contacts").getProperty("/selectedContact");
+            if (!oContact || !oContact.id) {
                 this.navTo("contacts");
                 return;
             }
 
-            oModel.setProperty("/selectedContact", Object.assign({}, oContact));
-            this._loadRelatedData(sContactId);
-        },
-
-        _loadRelatedData: function (sContactId) {
-            var oModel = this.getModel("contacts");
-            var aActivities = (oModel.getProperty("/activities") || []).filter(function (oActivity) {
-                return oActivity.contactId === sContactId;
-            });
-            var aNotes = (oModel.getProperty("/notes") || []).filter(function (oNote) {
-                return oNote.contactId === sContactId;
-            });
-
-            oModel.setProperty("/filteredActivities", aActivities);
-            oModel.setProperty("/filteredNotes", aNotes);
-        },
-
-        onSaveContact: function () {
-            var oModel = this.getModel("contacts");
-            var oSelected = oModel.getProperty("/selectedContact");
-            var aContacts = oModel.getProperty("/contacts") || [];
-            var iIndex = aContacts.findIndex(function (oContact) {
-                return oContact.id === oSelected.id;
-            });
-
-            if (iIndex === -1) {
-                MessageToast.show("Impossibile aggiornare il contatto");
-                return;
-            }
-
-            aContacts[iIndex] = Object.assign({}, oSelected);
-            oModel.setProperty("/contacts", aContacts);
-            MessageToast.show("Contatto aggiornato");
-        },
-
-        onDeleteContact: function () {
-            var oModel = this.getModel("contacts");
-            var oSelected = oModel.getProperty("/selectedContact");
-            if (!oSelected) {
-                return;
-            }
-
-            MessageBox.confirm("Eliminare il contatto e i dati correlati?", {
+            MessageBox.confirm("Eliminare il contatto?", {
                 onClose: function (sAction) {
                     if (sAction !== MessageBox.Action.OK) {
                         return;
                     }
-
-                    oModel.setProperty("/contacts", (oModel.getProperty("/contacts") || []).filter(function (oContact) {
-                        return oContact.id !== oSelected.id;
-                    }));
-                    oModel.setProperty("/activities", (oModel.getProperty("/activities") || []).filter(function (oActivity) {
-                        return oActivity.contactId !== oSelected.id;
-                    }));
-                    oModel.setProperty("/notes", (oModel.getProperty("/notes") || []).filter(function (oNote) {
-                        return oNote.contactId !== oSelected.id;
-                    }));
-                    MessageToast.show("Contatto eliminato");
-                    this.navTo("contacts");
+                    this._apiRequest("?entity=contacts&id=" + encodeURIComponent(oContact.id), { method: "DELETE" })
+                        .then(function () {
+                            MessageToast.show("Contatto eliminato");
+                            this.navTo("contacts");
+                        }.bind(this));
                 }.bind(this)
             });
         },
 
         onActivityFilter: function () {
-            this._sActivitySearch = this.byId("activitySearch").getValue().trim().toLowerCase();
-            this._sActivityStatus = this.byId("activityStatusFilter").getSelectedKey();
-            this._applyActivityFilter();
-        },
-
-        _applyActivityFilter: function () {
-            var oModel = this.getModel("contacts");
-            var sContactId = oModel.getProperty("/selectedContact/id");
-            var aActivities = (oModel.getProperty("/activities") || []).filter(function (oActivity) {
-                if (oActivity.contactId !== sContactId) {
-                    return false;
-                }
-
-                var bMatchesText = !this._sActivitySearch || oActivity.description.toLowerCase().indexOf(this._sActivitySearch) > -1 || oActivity.type.toLowerCase().indexOf(this._sActivitySearch) > -1;
-                var bMatchesStatus = this._sActivityStatus === "all" || oActivity.status === this._sActivityStatus;
-                return bMatchesText && bMatchesStatus;
-            }.bind(this));
-
-            oModel.setProperty("/filteredActivities", aActivities);
+            var sText = (this.byId("activitySearch").getValue() || "").toLowerCase();
+            var sStatus = this.byId("activityStatusFilter").getSelectedKey();
+            this._apiRequest("?entity=activities&contact_id=" + encodeURIComponent(this.getModel("contacts").getProperty("/selectedContact/id")))
+                .then(function (oRes) {
+                    var aActivities = (oRes.data || []).filter(function (oActivity) {
+                        var bStatus = sStatus === "all" || oActivity.status === sStatus;
+                        var bText = !sText || (oActivity.title || "").toLowerCase().indexOf(sText) > -1 || (oActivity.description || "").toLowerCase().indexOf(sText) > -1;
+                        return bStatus && bText;
+                    });
+                    this.getModel("contacts").setProperty("/filteredActivities", aActivities);
+                }.bind(this));
         },
 
         onNotesFilter: function (oEvent) {
-            var sValue = oEvent && oEvent.getParameter ? oEvent.getParameter("newValue") : this.byId("notesSearch").getValue();
-            this._sNoteSearch = (sValue || "").trim().toLowerCase();
-            var oModel = this.getModel("contacts");
-            var sContactId = oModel.getProperty("/selectedContact/id");
-            var aNotes = (oModel.getProperty("/notes") || []).filter(function (oNote) {
-                if (oNote.contactId !== sContactId) {
-                    return false;
-                }
-
-                if (!this._sNoteSearch) {
-                    return true;
-                }
-
-                return oNote.title.toLowerCase().indexOf(this._sNoteSearch) > -1 || oNote.text.toLowerCase().indexOf(this._sNoteSearch) > -1;
-            }.bind(this));
-
-            oModel.setProperty("/filteredNotes", aNotes);
+            var sText = ((oEvent && oEvent.getParameter("newValue")) || this.byId("notesSearch").getValue() || "").toLowerCase();
+            this._apiRequest("?entity=notes&contact_id=" + encodeURIComponent(this.getModel("contacts").getProperty("/selectedContact/id")))
+                .then(function (oRes) {
+                    var aNotes = (oRes.data || []).filter(function (oNote) {
+                        return !sText || (oNote.message || "").toLowerCase().indexOf(sText) > -1;
+                    });
+                    this.getModel("contacts").setProperty("/filteredNotes", aNotes);
+                }.bind(this));
         },
 
         onActivitySelectionChange: function (oEvent) {
-            this._sSelectedActivityId = oEvent.getParameter("listItem").getBindingContext("contacts").getProperty("id");
+            this._selectedActivityId = oEvent.getParameter("listItem").getBindingContext("contacts").getProperty("id");
         },
 
         onNoteSelectionChange: function (oEvent) {
-            this._sSelectedNoteId = oEvent.getParameter("listItem").getBindingContext("contacts").getProperty("id");
+            this._selectedNoteId = oEvent.getParameter("listItem").getBindingContext("contacts").getProperty("id");
         },
 
         onAddActivity: function () {
-            var sDescription = window.prompt("Descrizione attività:");
-            if (!sDescription) {
-                return;
-            }
-
-            var oModel = this.getModel("contacts");
-            var sContactId = oModel.getProperty("/selectedContact/id");
-            var aActivities = oModel.getProperty("/activities") || [];
-            aActivities.push({
-                id: "A" + String(Date.now()).slice(-6),
-                contactId: sContactId,
-                type: "Task",
-                status: "aperta",
-                date: new Date().toISOString().slice(0, 10),
-                description: sDescription
-            });
-            oModel.setProperty("/activities", aActivities);
-            this._applyActivityFilter();
-            MessageToast.show("Attività aggiunta");
+            var sTitle = window.prompt("Titolo attività");
+            if (!sTitle) { return; }
+            this._apiRequest("?entity=activities", {
+                method: "POST",
+                body: JSON.stringify({
+                    user_id: 1,
+                    contact_id: this.getModel("contacts").getProperty("/selectedContact/id"),
+                    activity_type: "task",
+                    title: sTitle,
+                    description: "",
+                    priority: "media",
+                    status: "aperta"
+                })
+            }).then(function () {
+                this.onActivityFilter();
+                MessageToast.show("Attività aggiunta");
+            }.bind(this));
         },
 
         onUpdateActivity: function () {
-            if (!this._sSelectedActivityId) {
+            if (!this._selectedActivityId) {
                 MessageToast.show("Seleziona un'attività");
                 return;
             }
-
-            var oModel = this.getModel("contacts");
-            var aActivities = oModel.getProperty("/activities") || [];
-            var oActivity = aActivities.find(function (oItem) {
-                return oItem.id === this._sSelectedActivityId;
+            var sTitle = window.prompt("Nuovo titolo attività");
+            if (!sTitle) { return; }
+            this._apiRequest("?entity=activities&id=" + encodeURIComponent(this._selectedActivityId), {
+                method: "PUT",
+                body: JSON.stringify({ title: sTitle })
+            }).then(function () {
+                this.onActivityFilter();
+                MessageToast.show("Attività aggiornata");
             }.bind(this));
-            if (!oActivity) {
-                return;
-            }
-
-            var sValue = window.prompt("Nuova descrizione:", oActivity.description);
-            if (!sValue) {
-                return;
-            }
-
-            oActivity.description = sValue;
-            oModel.setProperty("/activities", aActivities);
-            this._applyActivityFilter();
-            MessageToast.show("Attività aggiornata");
         },
 
         onDeleteActivity: function () {
-            if (!this._sSelectedActivityId) {
+            if (!this._selectedActivityId) {
                 MessageToast.show("Seleziona un'attività");
                 return;
             }
-
-            var oModel = this.getModel("contacts");
-            oModel.setProperty("/activities", (oModel.getProperty("/activities") || []).filter(function (oItem) {
-                return oItem.id !== this._sSelectedActivityId;
-            }.bind(this)));
-            this._sSelectedActivityId = null;
-            this._applyActivityFilter();
-            MessageToast.show("Attività eliminata");
+            this._apiRequest("?entity=activities&id=" + encodeURIComponent(this._selectedActivityId), { method: "DELETE" })
+                .then(function () {
+                    this._selectedActivityId = null;
+                    this.onActivityFilter();
+                    MessageToast.show("Attività eliminata");
+                }.bind(this));
         },
 
         onAddNote: function () {
-            var sTitle = window.prompt("Titolo nota:");
-            if (!sTitle) {
-                return;
-            }
-
-            var sText = window.prompt("Contenuto nota:") || "";
-            var oModel = this.getModel("contacts");
-            var aNotes = oModel.getProperty("/notes") || [];
-            aNotes.push({
-                id: "N" + String(Date.now()).slice(-6),
-                contactId: oModel.getProperty("/selectedContact/id"),
-                title: sTitle,
-                text: sText,
-                createdAt: new Date().toISOString().slice(0, 10)
-            });
-            oModel.setProperty("/notes", aNotes);
-            this.onNotesFilter({ getParameter: function () { return this._sNoteSearch; }.bind(this) });
-            MessageToast.show("Nota aggiunta");
+            var sMessage = window.prompt("Testo nota");
+            if (!sMessage) { return; }
+            this._apiRequest("?entity=notes", {
+                method: "POST",
+                body: JSON.stringify({
+                    user_id: 1,
+                    contact_id: this.getModel("contacts").getProperty("/selectedContact/id"),
+                    message: sMessage
+                })
+            }).then(function () {
+                this.onNotesFilter();
+                MessageToast.show("Nota aggiunta");
+            }.bind(this));
         },
 
         onUpdateNote: function () {
-            if (!this._sSelectedNoteId) {
+            if (!this._selectedNoteId) {
                 MessageToast.show("Seleziona una nota");
                 return;
             }
-
-            var oModel = this.getModel("contacts");
-            var aNotes = oModel.getProperty("/notes") || [];
-            var oNote = aNotes.find(function (oItem) {
-                return oItem.id === this._sSelectedNoteId;
+            var sMessage = window.prompt("Nuovo testo nota");
+            if (!sMessage) { return; }
+            this._apiRequest("?entity=notes&id=" + encodeURIComponent(this._selectedNoteId), {
+                method: "PUT",
+                body: JSON.stringify({ message: sMessage })
+            }).then(function () {
+                this.onNotesFilter();
+                MessageToast.show("Nota aggiornata");
             }.bind(this));
-            if (!oNote) {
-                return;
-            }
-
-            var sText = window.prompt("Aggiorna testo nota:", oNote.text);
-            if (sText === null) {
-                return;
-            }
-
-            oNote.text = sText;
-            oModel.setProperty("/notes", aNotes);
-            this.onNotesFilter({ getParameter: function () { return this._sNoteSearch; }.bind(this) });
-            MessageToast.show("Nota aggiornata");
         },
 
         onDeleteNote: function () {
-            if (!this._sSelectedNoteId) {
+            if (!this._selectedNoteId) {
                 MessageToast.show("Seleziona una nota");
                 return;
             }
-
-            var oModel = this.getModel("contacts");
-            oModel.setProperty("/notes", (oModel.getProperty("/notes") || []).filter(function (oItem) {
-                return oItem.id !== this._sSelectedNoteId;
-            }.bind(this)));
-            this._sSelectedNoteId = null;
-            this.onNotesFilter({ getParameter: function () { return this._sNoteSearch; }.bind(this) });
-            MessageToast.show("Nota eliminata");
+            this._apiRequest("?entity=notes&id=" + encodeURIComponent(this._selectedNoteId), { method: "DELETE" })
+                .then(function () {
+                    this._selectedNoteId = null;
+                    this.onNotesFilter();
+                    MessageToast.show("Nota eliminata");
+                }.bind(this));
         }
     });
 });

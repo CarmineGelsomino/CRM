@@ -1,7 +1,8 @@
 <mvc:View
     controllerName="crm.controller.contactTile.Contacts"
     xmlns="sap.m"
-    xmlns:mvc="sap.ui.core.mvc">
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core">
     <Page title="Contatti" class="sapUiResponsiveContentPadding">
         <content>
             <VBox class="sapUiSmallMarginBottom">
@@ -11,25 +12,25 @@
                     <SearchField width="20rem" placeholder="Cerca per nome, email o telefono" search="onSearch" liveChange="onSearchLiveChange" />
                     <Select id="statusFilter" width="10rem" change="onFilterChange" selectedKey="all">
                         <items>
-                            <core:Item xmlns:core="sap.ui.core" key="all" text="Tutti gli stati" />
-                            <core:Item xmlns:core="sap.ui.core" key="attivo" text="Attivo" />
-                            <core:Item xmlns:core="sap.ui.core" key="inattivo" text="Inattivo" />
-                            <core:Item xmlns:core="sap.ui.core" key="prospect" text="Prospect" />
+                            <core:Item key="all" text="Tutti gli stati" />
+                            <core:Item key="attivo" text="Attivo" />
+                            <core:Item key="inattivo" text="Inattivo" />
+                            <core:Item key="prospect" text="Prospect" />
                         </items>
                     </Select>
                     <Select id="categoryFilter" width="11rem" change="onFilterChange" selectedKey="all">
                         <items>
-                            <core:Item xmlns:core="sap.ui.core" key="all" text="Tutte le categorie" />
-                            <core:Item xmlns:core="sap.ui.core" key="cliente" text="Cliente" />
-                            <core:Item xmlns:core="sap.ui.core" key="fornitore" text="Fornitore" />
-                            <core:Item xmlns:core="sap.ui.core" key="partner" text="Partner" />
+                            <core:Item key="all" text="Tutte le categorie" />
+                            <core:Item key="cliente" text="Cliente" />
+                            <core:Item key="fornitore" text="Fornitore" />
+                            <core:Item key="partner" text="Partner" />
                         </items>
                     </Select>
-                    <Select id="sortSelect" width="10rem" change="onSortChange" selectedKey="lastName">
+                    <Select id="sortSelect" width="12rem" change="onSortChange" selectedKey="last_name">
                         <items>
-                            <core:Item xmlns:core="sap.ui.core" key="lastName" text="Ordina per cognome" />
-                            <core:Item xmlns:core="sap.ui.core" key="status" text="Ordina per stato" />
-                            <core:Item xmlns:core="sap.ui.core" key="category" text="Ordina per categoria" />
+                            <core:Item key="last_name" text="Ordina per cognome" />
+                            <core:Item key="status" text="Ordina per stato" />
+                            <core:Item key="category" text="Ordina per categoria" />
                         </items>
                     </Select>
                     <ToggleButton text="Desc" press="onToggleSortDirection" />
@@ -39,9 +40,8 @@
             <Table
                 id="contactsTable"
                 mode="SingleSelectLeft"
-                items="{path: 'contacts>/contacts'}"
+                items="{contacts>/contacts}"
                 selectionChange="onSelectionChange"
-                itemPress="onItemPress"
                 noDataText="Nessun contatto disponibile">
                 <headerToolbar>
                     <OverflowToolbar>
@@ -62,13 +62,11 @@
                 <items>
                     <ColumnListItem type="Navigation" press="onItemPress">
                         <cells>
-                            <Text text="{= ${contacts>firstName} + ' ' + ${contacts>lastName}}" />
+                            <Text text="{= ${contacts>first_name} + ' ' + ${contacts>last_name}}" />
                             <Text text="{contacts>email}" />
                             <Text text="{contacts>phone}" />
                             <ObjectStatus text="{contacts>category}" state="Information" />
-                            <ObjectStatus
-                                text="{contacts>status}"
-                                state="{= ${contacts>status} === 'attivo' ? 'Success' : ${contacts>status} === 'inattivo' ? 'Error' : 'Warning'}" />
+                            <ObjectStatus text="{contacts>status}" />
                         </cells>
                     </ColumnListItem>
                 </items>

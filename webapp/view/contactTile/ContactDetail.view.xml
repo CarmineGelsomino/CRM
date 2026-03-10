@@ -7,10 +7,9 @@
     <Page title="Dettaglio contatto" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
         <content>
             <ObjectHeader
-                title="{= ${contacts>selectedContact/firstName} + ' ' + ${contacts>selectedContact/lastName}}"
+                title="{= ${contacts>selectedContact/first_name} + ' ' + ${contacts>selectedContact/last_name}}"
                 intro="ID: {contacts>selectedContact/id}"
                 number="{contacts>selectedContact/status}"
-                numberState="Success"
                 responsive="true">
                 <attributes>
                     <ObjectAttribute title="Categoria" text="{contacts>selectedContact/category}" />
@@ -21,9 +20,9 @@
 
             <form:SimpleForm editable="true" layout="ResponsiveGridLayout" title="Dati anagrafici principali" class="sapUiSmallMarginTop">
                 <Label text="Nome" />
-                <Input value="{contacts>selectedContact/firstName}" />
+                <Input value="{contacts>selectedContact/first_name}" />
                 <Label text="Cognome" />
-                <Input value="{contacts>selectedContact/lastName}" />
+                <Input value="{contacts>selectedContact/last_name}" />
                 <Label text="Email" />
                 <Input value="{contacts>selectedContact/email}" type="Email" />
                 <Label text="Telefono" />
@@ -44,6 +43,8 @@
                         <core:Item key="prospect" text="Prospect" />
                     </items>
                 </Select>
+                <Label text="Info" />
+                <TextArea value="{contacts>selectedContact/generic_info}" rows="3" />
             </form:SimpleForm>
 
             <VBox class="sapUiMediumMarginTop">
@@ -62,7 +63,7 @@
                 </Toolbar>
                 <List id="activityList" mode="SingleSelectLeft" items="{contacts>/filteredActivities}" selectionChange="onActivitySelectionChange">
                     <items>
-                        <StandardListItem title="{contacts>description}" description="{= ${contacts>type} + ' • ' + ${contacts>date}}" info="{contacts>status}" />
+                        <StandardListItem title="{contacts>title}" description="{contacts>description}" info="{contacts>status}" />
                     </items>
                 </List>
                 <HBox class="sapUiTinyMarginTop" justifyContent="End">
@@ -80,7 +81,7 @@
                 </Toolbar>
                 <List id="notesList" mode="SingleSelectLeft" items="{contacts>/filteredNotes}" selectionChange="onNoteSelectionChange">
                     <items>
-                        <StandardListItem title="{contacts>title}" description="{contacts>text}" info="{contacts>createdAt}" />
+                        <StandardListItem title="{= 'Nota #' + ${contacts>id}}" description="{contacts>message}" />
                     </items>
                 </List>
                 <HBox class="sapUiTinyMarginTop" justifyContent="End">
