@@ -3,30 +3,64 @@
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:layout="sap.ui.layout">
-    <Page title="{i18n>homeTitle}" class="sapUiResponsiveContentPadding">
+    <Page class="sapUiResponsiveContentPadding" enableScrolling="true">
+        <customHeader>
+            <ShellBar
+                id="homeShellBar"
+                title="{i18n>shellBarTitle}"
+                secondTitle="{i18n>shellBarSubtitle}"
+                homeIcon="img/logo-crm.svg"
+                showNavButton="true"
+                navButtonPressed="onNavToHome"
+                showMenuButton="true"
+                menuButtonPressed="onOpenMainMenu"
+                showNotifications="true"
+                notificationsNumber="3"
+                notificationsPressed="onNotificationsPress"
+                showProductSwitcher="true"
+                productSwitcherPressed="onProductSwitcherPress"
+                showSearch="true"
+                search="onSearch"
+                showCopilot="true"
+                copilotPressed="onCopilotPress"
+                showProfile="true"
+                profilePressed="onProfilePress">
+                <menu>
+                    <Menu id="homeMainMenu" itemSelected="onMainMenuSelect">
+                        <items>
+                            <MenuItem text="{i18n>shellMenuHome}" icon="sap-icon://home" />
+                            <MenuItem text="{i18n>shellMenuContacts}" icon="sap-icon://customer" />
+                            <MenuItem text="{i18n>shellMenuDeals}" icon="sap-icon://business-objects-experience" />
+                            <MenuItem text="{i18n>shellMenuTickets}" icon="sap-icon://sys-help" />
+                        </items>
+                    </Menu>
+                </menu>
+            </ShellBar>
+        </customHeader>
+
         <content>
             <layout:Grid defaultSpan="XL12 L12 M12 S12" class="sapUiResponsiveMargin">
                 <VBox class="sapUiSmallMarginBottom" width="100%">
                     <Title text="Benvenuto nel CRM" level="H2" />
                     <Text text="Accedi rapidamente ai moduli principali del portale." class="sapUiSmallMarginTop" />
                 </VBox>
-                    <GenericTile header="Clienti" subheader="Anagrafiche e contatti" press="onTilePress" frameType="TwoByOne">
-                        <TileContent footer="Apri modulo">
-                            <NumericContent value="128" scale="attivi" valueColor="Good" />
-                        </TileContent>
-                    </GenericTile>
+                <GenericTile header="Clienti" subheader="Anagrafiche e contatti" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="Apri modulo">
+                        <NumericContent value="128" scale="attivi" valueColor="Good" />
+                    </TileContent>
+                </GenericTile>
 
-                    <GenericTile header="Opportunità" subheader="Pipeline commerciale" press="onTilePress" frameType="TwoByOne">
-                        <TileContent footer="Apri modulo">
-                            <NumericContent value="36" scale="aperte" valueColor="Critical" />
-                        </TileContent>
-                    </GenericTile>
+                <GenericTile header="Opportunità" subheader="Pipeline commerciale" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="Apri modulo">
+                        <NumericContent value="36" scale="aperte" valueColor="Critical" />
+                    </TileContent>
+                </GenericTile>
 
-                    <GenericTile header="Ticket" subheader="Assistenza clienti" press="onTilePress" frameType="TwoByOne">
-                        <TileContent footer="Apri modulo">
-                            <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
-                        </TileContent>
-                    </GenericTile>
+                <GenericTile header="Ticket" subheader="Assistenza clienti" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="Apri modulo">
+                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                    </TileContent>
+                </GenericTile>
             </layout:Grid>
         </content>
     </Page>
