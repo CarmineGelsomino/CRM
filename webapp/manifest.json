@@ -36,6 +36,22 @@
       "statesContact": {
         "type": "sap.ui.model.json.JSONModel",
         "uri": "model/modelStatesContact.json"
+      },
+      "valueMutuo": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/modelValueMutuo.json"
+      },
+      "statesProperty": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/modelStatesProperty.json"
+      },
+      "favoriteFloor": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/modelFavoriteFloor.json"
+      },
+      "characteristicsProperty": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/modelCharacteristicsProperty.json"
       }
     },
     "routing": {
