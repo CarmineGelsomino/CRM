@@ -1,10 +1,103 @@
 <mvc:View
     controllerName="crm.controller.contactTile.ContactDetail"
     xmlns="sap.m"
-    xmlns:mvc="sap.ui.core.mvc">
-    <Page title="Dettaglio contatto">
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
+    <Page title="Dettaglio contatto" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
         <content>
-            <Text text="Dettaglio contatto" />
+            <ObjectHeader
+                title="{= ${contactDetail>/contact/first_name} + ' ' + ${contactDetail>/contact/last_name}}"
+                number="{contactDetail>/contact/id}"
+                numberUnit="ID"
+                intro="{contactDetail>/contact/category}"
+                responsive="true">
+                <attributes>
+                    <ObjectAttribute text="Email: {contactDetail>/contact/email}" />
+                    <ObjectAttribute text="PEC: {contactDetail>/contact/pec_email}" />
+                </attributes>
+                <statuses>
+                    <ObjectStatus
+                        text="{contactDetail>/contact/status}"
+                        state="{= ${contactDetail>/contact/status} === 'attivo' ? 'Success' : (${contactDetail>/contact/status} === 'inattivo' ? 'Warning' : 'None')}" />
+                </statuses>
+            </ObjectHeader>
+
+            <f:SimpleForm editable="true" layout="ResponsiveGridLayout" title="Dati contatto" class="sapUiSmallMarginTop">
+                <f:content>
+                    <Label text="Nome" />
+                    <Input value="{contactDetail>/contact/first_name}" />
+                    <Label text="Cognome" />
+                    <Input value="{contactDetail>/contact/last_name}" />
+                    <Label text="Email" />
+                    <Input value="{contactDetail>/contact/email}" type="Email" />
+                    <Label text="PEC" />
+                    <Input value="{contactDetail>/contact/pec_email}" type="Email" />
+                    <Label text="Categoria" />
+                    <Select selectedKey="{contactDetail>/contact/category}">
+                        <core:Item key="cliente" text="Cliente" />
+                        <core:Item key="proprietario" text="Proprietario" />
+                        <core:Item key="acquirente" text="Acquirente" />
+                        <core:Item key="fornitore" text="Fornitore" />
+                    </Select>
+                    <Label text="Stato" />
+                    <Select selectedKey="{contactDetail>/contact/status}">
+                        <core:Item key="attivo" text="Attivo" />
+                        <core:Item key="inattivo" text="Inattivo" />
+                        <core:Item key="archiviato" text="Archiviato" />
+                    </Select>
+                    <Label text="Informazioni" />
+                    <TextArea rows="4" value="{contactDetail>/contact/generic_info}" />
+                </f:content>
+            </f:SimpleForm>
+
+            <Toolbar class="sapUiSmallMarginTop sapUiTinyMarginBottom">
+                <ToolbarSpacer />
+                <Button text="Salva contatto" type="Emphasized" icon="sap-icon://save" press="onSaveContact" />
+            </Toolbar>
+
+            <Panel headerText="Attività" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="Attività" level="H4" />
+                        <ToolbarSpacer />
+                        <SearchField id="activitySearchField" width="14rem" placeholder="Filtra attività" liveChange="onFilterActivities" search="onFilterActivities" />
+                        <Select width="10rem" selectedKey="" change="onFilterActivities" id="activityStatusFilter">
+                            <core:Item key="" text="Tutti" />
+                            <core:Item key="todo" text="To do" />
+                            <core:Item key="in_corso" text="In corso" />
+                            <core:Item key="completata" text="Completata" />
+                        </Select>
+                        <Button text="Aggiungi" icon="sap-icon://add" press="onAddActivity" />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <List id="activitiesList" items="{contactDetail>/activities}" noDataText="Nessuna attività registrata">
+                    <CustomListItem>
+                        <VBox>
+                            <Title text="{contactDetail>title}" level="H5" />
+                            <Text text="{contactDetail>description}" />
+                            <HBox renderType="Bare" class="sapUiTinyMarginTop">
+                                <ObjectStatus text="{contactDetail>priority}" state="Information" class="sapUiTinyMarginEnd" />
+                                <ObjectStatus text="{contactDetail>status}" state="{= ${contactDetail>status} === 'completata' ? 'Success' : 'Warning'}" />
+                            </HBox>
+                        </VBox>
+                    </CustomListItem>
+                </List>
+            </Panel>
+
+            <Panel headerText="Note" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="Note" level="H4" />
+                        <ToolbarSpacer />
+                        <SearchField width="14rem" placeholder="Filtra note" liveChange="onFilterNotes" search="onFilterNotes" />
+                        <Button text="Aggiungi" icon="sap-icon://add" press="onAddNote" />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <List id="notesList" items="{contactDetail>/notes}" noDataText="Nessuna nota registrata">
+                    <StandardListItem title="{contactDetail>message}" description="Creata il: {contactDetail>created_at}" />
+                </List>
+            </Panel>
         </content>
     </Page>
 </mvc:View>
