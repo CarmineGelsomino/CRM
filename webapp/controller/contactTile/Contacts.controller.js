@@ -247,6 +247,8 @@ sap.ui.define([
             var oDialog = new Dialog({
                 title: bEdit ? "Modifica contatto" : "Nuovo contatto",
                 contentWidth: "32rem",
+                resizable: true,
+                type: "Message",
                 content: [
                     new Label({ text: "Nome", required: true }),
                     new Input("contactFirstName", { value: bEdit ? oContact.first_name : "" }),
@@ -259,6 +261,7 @@ sap.ui.define([
                     new Label({ text: "Categoria" }),
                     new Select("contactCategory", {
                         selectedKey: bEdit ? (oContact.category || "Venditore") : "Venditore",
+                        width: "100%",
                         items: {
                             path: "categoriesContact>/",
                             templateShareable: false,
@@ -268,14 +271,15 @@ sap.ui.define([
                     new Label({ text: "Stato" }),
                     new Select("contactStatus", {
                         selectedKey: bEdit ? (oContact.status || "Attivo") : "Attivo",
+                        width: "100%",
                         items: {
                             path: "statesContact>/",
                             templateShareable: false,
                             template: new Item({ key: "{statesContact>key}", text: "{statesContact>value}" })
                         }
                     }),
-                    new Label({ text: "Note" }),
-                    new TextArea("contactInfo", { rows: 4, value: bEdit ? (oContact.generic_info || "") : "" })
+                    new Label({ text: "Informazioni generiche" }),
+                    new TextArea("contactInfo", { width: "100%", rows: 4, value: bEdit ? (oContact.generic_info || "") : "" })
                 ],
                 beginButton: new Button({
                     text: "Salva",
