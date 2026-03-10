@@ -70,6 +70,25 @@ if ($entity === null || !isset($entities[$entity])) {
 $definition = $entities[$entity];
 $repository = new CrudRepository($pdo, $definition['table'], $definition['fields']);
 
+function isEnumTruncationError(Throwable $exception): bool
+{
+    $message = strtolower($exception->getMessage());
+
+    return str_contains($message, "data truncated for column 'category'")
+        || str_contains($message, 'data truncated for column "category"')
+        || str_contains($message, "data truncated for column 'status'")
+        || str_contains($message, 'data truncated for column "status"');
+}
+
+function removeInvalidEnumFields(array $payload): array
+{
+    $cleanPayload = $payload;
+
+    unset($cleanPayload['category'], $cleanPayload['status']);
+
+    return $cleanPayload;
+}
+
 try {
     if ($method === 'GET' && $id === null) {
         $filters = $_GET;
@@ -89,7 +108,16 @@ try {
     }
 
     if ($method === 'POST') {
-        $created = $repository->create($payload);
+        try {
+            $created = $repository->create($payload);
+        } catch (Throwable $exception) {
+            if ($entity === 'contacts' && isEnumTruncationError($exception)) {
+                $created = $repository->create(removeInvalidEnumFields($payload));
+            } else {
+                throw $exception;
+            }
+        }
+
         JsonResponse::send(['ok' => true, 'data' => $created], 201);
         exit;
     }
@@ -100,7 +128,16 @@ try {
             exit;
         }
 
-        $updated = $repository->update($id, $payload);
+        try {
+            $updated = $repository->update($id, $payload);
+        } catch (Throwable $exception) {
+            if ($entity === 'contacts' && isEnumTruncationError($exception)) {
+                $updated = $repository->update($id, removeInvalidEnumFields($payload));
+            } else {
+                throw $exception;
+            }
+        }
+
         JsonResponse::send([
             'ok' => $updated !== null,
             'data' => $updated,
