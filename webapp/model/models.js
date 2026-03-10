@@ -15,7 +15,10 @@ sap.ui.define([
             return new JSONModel({
                 isAuthorized: !!isAuthorized,
                 username: "",
-                password: ""
+                password: "",
+                usernameState: "None",
+                passwordState: "None",
+                loginMessage: ""
             });
         }
     };

@@ -6,15 +6,38 @@ sap.ui.define([
 
     return BaseController.extend("crm.controller.Login", {
         onInit: function () {
-            this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
+            var oSessionModel = this.getOwnerComponent().getModel("session");
+            this.getView().setModel(oSessionModel, "session");
+            this._resetValidation();
         },
 
         onLogin: function () {
             var oViewModel = this.getModel("session");
-            var sUsername = oViewModel.getProperty("/username");
-            var sPassword = oViewModel.getProperty("/password");
+            var oBundle = this.getResourceBundle();
+            var sUsername = (oViewModel.getProperty("/username") || "").trim();
+            var sPassword = (oViewModel.getProperty("/password") || "").trim();
+            var bValid = true;
 
-            fetch("api/login.php", {
+            oViewModel.setProperty("/loginMessage", "");
+            oViewModel.setProperty("/usernameState", "None");
+            oViewModel.setProperty("/passwordState", "None");
+
+            if (!sUsername) {
+                oViewModel.setProperty("/usernameState", "Error");
+                bValid = false;
+            }
+
+            if (!sPassword) {
+                oViewModel.setProperty("/passwordState", "Error");
+                bValid = false;
+            }
+
+            if (!bValid) {
+                oViewModel.setProperty("/loginMessage", oBundle.getText("loginValidationError"));
+                return;
+            }
+
+            fetch(window.CRM_CONFIG.apiBaseUrl + "/login.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -29,16 +52,24 @@ sap.ui.define([
                     if (data.authorized) {
                         oViewModel.setProperty("/isAuthorized", true);
                         oViewModel.setProperty("/password", "");
-                        MessageToast.show("Accesso effettuato");
+                        oViewModel.setProperty("/loginMessage", "");
+                        MessageToast.show(oBundle.getText("loginSuccess"));
                         this.navTo("home", {}, true);
                         return;
                     }
 
-                    MessageToast.show("Credenziali non valide");
+                    oViewModel.setProperty("/loginMessage", oBundle.getText("loginUnauthorized"));
                 }.bind(this))
                 .catch(function () {
-                    MessageToast.show("Errore durante il login");
+                    oViewModel.setProperty("/loginMessage", oBundle.getText("loginRequestError"));
                 });
+        },
+
+        _resetValidation: function () {
+            var oViewModel = this.getModel("session");
+            oViewModel.setProperty("/loginMessage", "");
+            oViewModel.setProperty("/usernameState", "None");
+            oViewModel.setProperty("/passwordState", "None");
         }
     });
 });

@@ -11,7 +11,8 @@ $isAuthorized = !empty($_SESSION['crm_user']);
     <script>
         window.CRM_CONFIG = {
             authorized: <?php echo $isAuthorized ? 'true' : 'false'; ?>,
-            manifestUrl: "webapp/manifest.php"
+            manifestUrl: "manifest.php",
+            apiBaseUrl: "../api"
         };
     </script>
     <script
@@ -22,7 +23,7 @@ $isAuthorized = !empty($_SESSION['crm_user']);
         data-sap-ui-compatVersion="edge"
         data-sap-ui-async="true"
         data-sap-ui-oninit="module:crm/bootstrap"
-        data-sap-ui-resourceroots='{"crm": "./webapp"}'>
+        data-sap-ui-resourceroots='{"crm": "./"}'>
     </script>
 </head>
 <body class="sapUiBody sapUiSizeCompact" id="content"></body>
