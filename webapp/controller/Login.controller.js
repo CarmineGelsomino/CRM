@@ -54,7 +54,7 @@ sap.ui.define([
                         oViewModel.setProperty("/password", "");
                         oViewModel.setProperty("/loginMessage", "");
                         MessageToast.show(oBundle.getText("loginSuccess"));
-                        this.navTo("home", {}, true);
+                        window.location.reload();
                         return;
                     }
 

@@ -19,7 +19,7 @@ sap.ui.define([
                     oSessionModel.setProperty("/isAuthorized", false);
                     oSessionModel.setProperty("/username", "");
                     MessageToast.show("Logout effettuato");
-                    this.navTo("login", {}, true);
+                    window.location.reload();
                 }.bind(this));
         }
     });
