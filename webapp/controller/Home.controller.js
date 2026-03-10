@@ -12,8 +12,16 @@ sap.ui.define([
         },
 
         onTilePress: function (oEvent) {
-            var sModuleName = oEvent.getSource().getHeader();
-            MessageToast.show("Modulo " + sModuleName + " in preparazione");
+            var oTile = oEvent.getSource();
+
+            if (oTile.getId().endsWith("contactsTile")) {
+                this.navTo("contacts");
+                return;
+            }
+
+            if (oTile.getHeader() === "Opportunità" || oTile.getHeader() === "Ticket") {
+                MessageToast.show("Modulo " + oTile.getHeader() + " in preparazione");
+            }
         },
 
         onNavToHome: function () {
@@ -29,9 +37,17 @@ sap.ui.define([
 
         onMainMenuSelect: function (oEvent) {
             var oItem = oEvent.getParameter("item");
-            if (oItem) {
-                MessageToast.show(this.getResourceBundle().getText("shellMenuFeedback", [oItem.getText()]));
+
+            if (!oItem) {
+                return;
             }
+
+            if (oItem.getId().endsWith("homeMenuContacts")) {
+                this.navTo("contacts");
+                return;
+            }
+
+            MessageToast.show(this.getResourceBundle().getText("shellMenuFeedback", [oItem.getText()]));
         },
 
         onNotificationsPress: function () {

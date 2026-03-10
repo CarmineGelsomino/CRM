@@ -28,10 +28,10 @@
                 <menu>
                     <Menu id="homeMainMenu" itemSelected="onMainMenuSelect">
                         <items>
-                            <MenuItem text="{i18n>shellMenuHome}" icon="sap-icon://home" />
-                            <MenuItem text="{i18n>shellMenuContacts}" icon="sap-icon://customer" />
-                            <MenuItem text="{i18n>shellMenuDeals}" icon="sap-icon://business-objects-experience" />
-                            <MenuItem text="{i18n>shellMenuTickets}" icon="sap-icon://sys-help" />
+                            <MenuItem id="homeMenuHome" text="{i18n>shellMenuHome}" icon="sap-icon://home" />
+                            <MenuItem id="homeMenuContacts" text="{i18n>shellMenuContacts}" icon="sap-icon://customer" />
+                            <MenuItem id="homeMenuDeals" text="{i18n>shellMenuDeals}" icon="sap-icon://business-objects-experience" />
+                            <MenuItem id="homeMenuTickets" text="{i18n>shellMenuTickets}" icon="sap-icon://sys-help" />
                         </items>
                     </Menu>
                 </menu>
@@ -44,7 +44,7 @@
                     <Title text="Benvenuto nel CRM" level="H2" />
                     <Text text="Accedi rapidamente ai moduli principali del portale." class="sapUiSmallMarginTop" />
                 </VBox>
-                <GenericTile header="Clienti" subheader="Anagrafiche e contatti" press="onTilePress" frameType="TwoByOne">
+                <GenericTile id="contactsTile" header="Clienti" subheader="Anagrafiche e contatti" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="Apri modulo">
                         <NumericContent value="128" scale="attivi" valueColor="Good" />
                     </TileContent>
