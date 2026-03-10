@@ -10,24 +10,53 @@
         </customHeader>
         <content>
             <VBox class="sapUiSmallMarginBottom" width="100%">
-                <Title text="prova nel CRM" level="H2" />
+                <Title text="Versione 2026 v1.0" level="H2" />
                 <Text text="{i18n>shellBarSubtitle}" class="sapUiTinyMarginTop" />
-                <Text text="Accedi rapidamente ai moduli principali del portale." class="sapUiSmallMarginTop" />
             </VBox>
             <HBox justifyContent="Center" gap="30px" renderType="Bare" wrap="Wrap">
-                <GenericTile id="contactsTile" header="Clienti" subheader="Anagrafiche e contatti" press="onTilePress" frameType="TwoByOne">
+                <GenericTile header="TodayBoard" subheader="Tutte le attività da fare oggi" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="Apri modulo">
+                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                    </TileContent>
+                </GenericTile>
+
+                <GenericTile id="contactsTile" header="Contatti" subheader="Contatti e relative anagrafiche" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="Apri modulo">
                         <NumericContent value="128" scale="attivi" valueColor="Good" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Opportunità" subheader="Pipeline commerciale" press="onTilePress" frameType="TwoByOne">
+                <GenericTile header="Proprietà" subheader="Proprietà e relativi dettagli" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="Apri modulo">
                         <NumericContent value="36" scale="aperte" valueColor="Critical" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Ticket" subheader="Assistenza clienti" press="onTilePress" frameType="TwoByOne">
+                <GenericTile header="Comunicazioni" subheader="Comunicazioni" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="Apri modulo">
+                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                    </TileContent>
+                </GenericTile>
+
+                <GenericTile header="Calendario" subheader="Calendario delle varie attività da fare" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="Apri modulo">
+                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                    </TileContent>
+                </GenericTile>
+
+                <GenericTile header="Attività" subheader="Storico delle attività generali" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="Apri modulo">
+                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                    </TileContent>
+                </GenericTile>
+
+                <GenericTile header="Note" subheader="Storico delle note generali" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="Apri modulo">
+                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                    </TileContent>
+                </GenericTile>
+
+                <GenericTile header="Statistiche" subheader="Varie statistiche" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="Apri modulo">
                         <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
                     </TileContent>
