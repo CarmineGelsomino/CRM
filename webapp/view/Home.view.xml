@@ -11,7 +11,7 @@
 
         <content>
             <VBox class="sapUiSmallMarginBottom" width="100%">
-                <Title text="Benvenuto nel CRM" level="H2" />
+                <Title text="prova nel CRM" level="H2" />
                 <Text text="{i18n>shellBarSubtitle}" class="sapUiTinyMarginTop" />
                 <Text text="Accedi rapidamente ai moduli principali del portale." class="sapUiSmallMarginTop" />
             </VBox>
