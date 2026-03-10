@@ -11,6 +11,13 @@ sap.ui.define([
             return oModel;
         },
 
+        createJsonFileModel: function (sPath) {
+            var oModel = new JSONModel();
+            oModel.setDefaultBindingMode("OneWay");
+            oModel.loadData(sap.ui.require.toUrl(sPath));
+            return oModel;
+        },
+
         createSessionModel: function (isAuthorized, userId) {
             return new JSONModel({
                 isAuthorized: !!isAuthorized,

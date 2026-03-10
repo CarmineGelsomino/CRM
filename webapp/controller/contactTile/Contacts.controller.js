@@ -40,6 +40,8 @@ sap.ui.define([
     return BaseController.extend("crm.controller.contactTile.Contacts", {
         onInit: function () {
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
+            this.setModel(new JSONModel([]), "categoryFilterOptions");
+            this.setModel(new JSONModel([]), "statusFilterOptions");
 
             this.setModel(new JSONModel({
                 contacts: [],
@@ -49,7 +51,39 @@ sap.ui.define([
             }), "contacts");
 
             this._oSortState = { path: "last_name", descending: false };
+            this._initFilterOptions();
             this._loadContacts();
+        },
+
+        _initFilterOptions: function () {
+            var oCategoriesModel = this.getOwnerComponent().getModel("categoriesContact");
+            var oStatesModel = this.getOwnerComponent().getModel("statesContact");
+            var fnSyncOptions = this._syncFilterOptions.bind(this);
+
+            if (oCategoriesModel) {
+                oCategoriesModel.attachRequestCompleted(fnSyncOptions);
+            }
+
+            if (oStatesModel) {
+                oStatesModel.attachRequestCompleted(fnSyncOptions);
+            }
+
+            fnSyncOptions();
+        },
+
+        _syncFilterOptions: function () {
+            var aCategories = this.getOwnerComponent().getModel("categoriesContact").getData() || [];
+            var aStates = this.getOwnerComponent().getModel("statesContact").getData() || [];
+
+            this.getModel("categoryFilterOptions").setData([{
+                key: "",
+                value: "Tutte le categorie"
+            }].concat(aCategories));
+
+            this.getModel("statusFilterOptions").setData([{
+                key: "",
+                value: "Tutti gli stati"
+            }].concat(aStates));
         },
 
         _loadContacts: async function () {
@@ -224,22 +258,21 @@ sap.ui.define([
                     new Input("contactPecEmail", { type: "Email", value: bEdit ? oContact.pec_email : "" }),
                     new Label({ text: "Categoria" }),
                     new Select("contactCategory", {
-                        selectedKey: bEdit ? (oContact.category || "cliente") : "cliente",
-                        items: [
-                            new Item({ key: "cliente", text: "Cliente" }),
-                            new Item({ key: "proprietario", text: "Proprietario" }),
-                            new Item({ key: "acquirente", text: "Acquirente" }),
-                            new Item({ key: "fornitore", text: "Fornitore" })
-                        ]
+                        selectedKey: bEdit ? (oContact.category || "Venditore") : "Venditore",
+                        items: {
+                            path: "categoriesContact>/",
+                            templateShareable: false,
+                            template: new Item({ key: "{categoriesContact>key}", text: "{categoriesContact>value}" })
+                        }
                     }),
                     new Label({ text: "Stato" }),
                     new Select("contactStatus", {
-                        selectedKey: bEdit ? (oContact.status || "attivo") : "attivo",
-                        items: [
-                            new Item({ key: "attivo", text: "Attivo" }),
-                            new Item({ key: "inattivo", text: "Inattivo" }),
-                            new Item({ key: "archiviato", text: "Archiviato" })
-                        ]
+                        selectedKey: bEdit ? (oContact.status || "Attivo") : "Attivo",
+                        items: {
+                            path: "statesContact>/",
+                            templateShareable: false,
+                            template: new Item({ key: "{statesContact>key}", text: "{statesContact>value}" })
+                        }
                     }),
                     new Label({ text: "Note" }),
                     new TextArea("contactInfo", { rows: 4, value: bEdit ? (oContact.generic_info || "") : "" })

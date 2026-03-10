@@ -20,7 +20,7 @@
                 <statuses>
                     <ObjectStatus
                         text="{contactDetail>/contact/status}"
-                        state="{= ${contactDetail>/contact/status} === 'attivo' ? 'Success' : (${contactDetail>/contact/status} === 'inattivo' ? 'Warning' : 'None')}" />
+                        state="{= ${contactDetail>/contact/status} === 'Attivo' || ${contactDetail>/contact/status} === 'attivo' ? 'Success' : (${contactDetail>/contact/status} === 'Futuro' ? 'Warning' : 'None')}" />
                 </statuses>
             </ObjectHeader>
 
@@ -35,17 +35,12 @@
                     <Label text="PEC" />
                     <Input value="{contactDetail>/contact/pec_email}" type="Email" />
                     <Label text="Categoria" />
-                    <Select selectedKey="{contactDetail>/contact/category}">
-                        <core:Item key="cliente" text="Cliente" />
-                        <core:Item key="proprietario" text="Proprietario" />
-                        <core:Item key="acquirente" text="Acquirente" />
-                        <core:Item key="fornitore" text="Fornitore" />
+                    <Select selectedKey="{contactDetail>/contact/category}" items="{categoriesContact>/}">
+                        <core:Item key="{categoriesContact>key}" text="{categoriesContact>value}" />
                     </Select>
                     <Label text="Stato" />
-                    <Select selectedKey="{contactDetail>/contact/status}">
-                        <core:Item key="attivo" text="Attivo" />
-                        <core:Item key="inattivo" text="Inattivo" />
-                        <core:Item key="archiviato" text="Archiviato" />
+                    <Select selectedKey="{contactDetail>/contact/status}" items="{statesContact>/}">
+                        <core:Item key="{statesContact>key}" text="{statesContact>value}" />
                     </Select>
                     <Label text="Informazioni" />
                     <TextArea rows="4" value="{contactDetail>/contact/generic_info}" />

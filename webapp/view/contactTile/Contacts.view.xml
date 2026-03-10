@@ -11,18 +11,11 @@
                 <Title text="Filtri" level="H5" />
                 <ToolbarSpacer />
                 <SearchField id="contactSearchField" width="16rem" placeholder="Cerca per nome o email" liveChange="onFilterChange" search="onFilterChange" />
-                <Select id="categorySelect" width="11rem" change="onFilterChange" selectedKey="">
-                    <core:Item key="" text="Tutte le categorie" />
-                    <core:Item key="cliente" text="Cliente" />
-                    <core:Item key="proprietario" text="Proprietario" />
-                    <core:Item key="acquirente" text="Acquirente" />
-                    <core:Item key="fornitore" text="Fornitore" />
+                <Select id="categorySelect" width="11rem" change="onFilterChange" selectedKey="" items="{categoryFilterOptions>/}">
+                    <core:Item key="{categoryFilterOptions>key}" text="{categoryFilterOptions>value}" />
                 </Select>
-                <Select id="statusSelect" width="10rem" change="onFilterChange" selectedKey="">
-                    <core:Item key="" text="Tutti gli stati" />
-                    <core:Item key="attivo" text="Attivo" />
-                    <core:Item key="inattivo" text="Inattivo" />
-                    <core:Item key="archiviato" text="Archiviato" />
+                <Select id="statusSelect" width="10rem" change="onFilterChange" selectedKey="" items="{statusFilterOptions>/}">
+                    <core:Item key="{statusFilterOptions>key}" text="{statusFilterOptions>value}" />
                 </Select>
                 <Button icon="sap-icon://clear-filter" type="Transparent" tooltip="Azzera filtri" press="onClearFilters" />
             </Toolbar>
@@ -64,7 +57,7 @@
                             <ObjectStatus text="{contacts>category}" state="Information" />
                             <ObjectStatus
                                 text="{contacts>status}"
-                                state="{= ${contacts>status} === 'attivo' ? 'Success' : (${contacts>status} === 'inattivo' ? 'Warning' : 'None')}" />
+                                state="{= ${contacts>status} === 'Attivo' || ${contacts>status} === 'attivo' ? 'Success' : (${contacts>status} === 'Futuro' ? 'Warning' : 'None')}" />
                             <HBox justifyContent="End">
                                 <Button icon="sap-icon://edit" type="Transparent" press="onRowEdit" />
                                 <Button icon="sap-icon://delete" type="Transparent" press="onRowDelete" />
