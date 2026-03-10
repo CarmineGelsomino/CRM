@@ -18,6 +18,7 @@ sap.ui.define([
                     var oSessionModel = this.getModel("session");
                     oSessionModel.setProperty("/isAuthorized", false);
                     oSessionModel.setProperty("/username", "");
+                    oSessionModel.setProperty("/userId", null);
                     MessageToast.show("Logout effettuato");
                     window.location.reload();
                 }.bind(this));

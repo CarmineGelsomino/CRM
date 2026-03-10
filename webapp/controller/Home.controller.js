@@ -40,6 +40,11 @@ sap.ui.define([
                 return;
             }
 
+            if (oItem.getId().endsWith("homeMenuProfile")) {
+                this.navTo("userProfile");
+                return;
+            }
+
             MessageToast.show(this.getResourceBundle().getText("shellMenuFeedback", [oItem.getText()]));
         },
 
@@ -89,7 +94,7 @@ sap.ui.define([
         },
 
         onProfileSettingsPress: function () {
-            MessageToast.show(this.getResourceBundle().getText("shellProfileSettingsFeedback"));
+            this.navTo("userProfile");
         },
 
         onLogout: function () {
@@ -101,6 +106,7 @@ sap.ui.define([
                     var oSessionModel = this.getModel("session");
                     oSessionModel.setProperty("/isAuthorized", false);
                     oSessionModel.setProperty("/username", "");
+                    oSessionModel.setProperty("/userId", null);
                     oSessionModel.setProperty("/password", "");
                     window.location.reload();
                 }.bind(this))

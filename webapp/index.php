@@ -1,6 +1,7 @@
 <?php
 session_start();
 $isAuthorized = !empty($_SESSION['crm_user']);
+$userId = isset($_SESSION['crm_user']['id']) ? (int) $_SESSION['crm_user']['id'] : null;
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -11,6 +12,7 @@ $isAuthorized = !empty($_SESSION['crm_user']);
     <script>
         window.CRM_CONFIG = {
             authorized: <?php echo $isAuthorized ? 'true' : 'false'; ?>,
+            userId: <?php echo $userId !== null ? $userId : 'null'; ?>,
             apiBaseUrl: "../api"
         };
     </script>
