@@ -5,53 +5,63 @@
     xmlns:layout="sap.ui.layout">
     <Page showHeader="false" class="sapUiResponsiveContentPadding">
         <content>
-            <layout:VerticalLayout width="100%" class="sapUiLargeMarginTop sapUiResponsiveMargin">
-                <Panel width="auto" class="sapUiResponsiveMargin" expandable="false">
-                    <headerToolbar>
-                        <Toolbar>
-                            <Title text="{i18n>loginTitle}" level="H2" />
-                        </Toolbar>
-                    </headerToolbar>
-                    <content>
-                        <VBox class="sapUiSmallMargin" renderType="Bare">
-                            <Text text="{i18n>loginSubtitle}" wrapping="true" class="sapUiSmallMarginBottom" />
+            <layout:VerticalLayout width="100%" class="sapUiContentPadding">
+                <FlexBox width="100%" justifyContent="Center" alignItems="Center" renderType="Bare">
+                    <VBox width="100%" class="sapUiResponsiveMargin" renderType="Bare">
+                        <Panel width="auto" class="sapUiResponsiveMargin" expandable="false">
+                            <content>
+                                <VBox class="sapUiMediumMargin" alignItems="Center" renderType="Bare">
+                                    <Image
+                                        src="img/logo-crm.svg"
+                                        alt="{i18n>loginLogoAlt}"
+                                        decorative="false"
+                                        width="72px"
+                                        height="72px"
+                                        class="sapUiSmallMarginBottom" />
 
-                            <Label text="{i18n>loginUsernameLabel}" labelFor="usernameInput" />
-                            <Input
-                                id="usernameInput"
-                                value="{session>/username}"
-                                valueState="{session>/usernameState}"
-                                valueStateText="{i18n>loginUsernameRequired}"
-                                placeholder="{i18n>loginUsernamePlaceholder}"
-                                width="100%"
-                                submit="onLogin" />
+                                    <Title text="{i18n>loginTitle}" level="H2" textAlign="Center" class="sapUiTinyMarginBottom" />
+                                    <Text text="{i18n>loginSubtitle}" wrapping="true" textAlign="Center" class="sapUiSmallMarginBottom" />
 
-                            <Label text="{i18n>loginPasswordLabel}" labelFor="passwordInput" class="sapUiSmallMarginTop" />
-                            <Input
-                                id="passwordInput"
-                                type="Password"
-                                value="{session>/password}"
-                                valueState="{session>/passwordState}"
-                                valueStateText="{i18n>loginPasswordRequired}"
-                                placeholder="{i18n>loginPasswordPlaceholder}"
-                                width="100%"
-                                submit="onLogin" />
+                                    <VBox width="100%" class="sapUiSmallMarginTop" renderType="Bare">
+                                        <Label text="{i18n>loginUsernameLabel}" labelFor="usernameInput" />
+                                        <Input
+                                            id="usernameInput"
+                                            value="{session>/username}"
+                                            valueState="{session>/usernameState}"
+                                            valueStateText="{i18n>loginUsernameRequired}"
+                                            placeholder="{i18n>loginUsernamePlaceholder}"
+                                            width="100%"
+                                            submit="onLogin" />
 
-                            <MessageStrip
-                                text="{session>/loginMessage}"
-                                type="Error"
-                                visible="{= !!${session>/loginMessage} }"
-                                class="sapUiSmallMarginTop" />
+                                        <Label text="{i18n>loginPasswordLabel}" labelFor="passwordInput" class="sapUiSmallMarginTop" />
+                                        <Input
+                                            id="passwordInput"
+                                            type="Password"
+                                            value="{session>/password}"
+                                            valueState="{session>/passwordState}"
+                                            valueStateText="{i18n>loginPasswordRequired}"
+                                            placeholder="{i18n>loginPasswordPlaceholder}"
+                                            width="100%"
+                                            submit="onLogin" />
 
-                            <Button
-                                text="{i18n>loginButton}"
-                                type="Emphasized"
-                                class="sapUiMediumMarginTop"
-                                width="100%"
-                                press="onLogin" />
-                        </VBox>
-                    </content>
-                </Panel>
+                                        <MessageStrip
+                                            text="{session>/loginMessage}"
+                                            type="Error"
+                                            visible="{= !!${session>/loginMessage} }"
+                                            class="sapUiSmallMarginTop" />
+
+                                        <Button
+                                            text="{i18n>loginButton}"
+                                            type="Emphasized"
+                                            class="sapUiMediumMarginTop"
+                                            width="100%"
+                                            press="onLogin" />
+                                    </VBox>
+                                </VBox>
+                            </content>
+                        </Panel>
+                    </VBox>
+                </FlexBox>
             </layout:VerticalLayout>
         </content>
     </Page>
