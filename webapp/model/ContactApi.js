@@ -105,6 +105,29 @@ sap.ui.define([
         MessageToast.show(sMessage);
     }
 
+
+    function shouldRetryWithoutEnumField(oError) {
+        var sMessage = ((oError && oError.message) || "").toLowerCase();
+        return sMessage.indexOf("data truncated for column 'category'") !== -1 ||
+            sMessage.indexOf('data truncated for column "category"') !== -1 ||
+            sMessage.indexOf("data truncated for column 'status'") !== -1 ||
+            sMessage.indexOf('data truncated for column "status"') !== -1;
+    }
+
+    function removeInvalidEnumFields(oPayload) {
+        var oCleanPayload = Object.assign({}, oPayload || {});
+
+        if (oCleanPayload.category === "" || oCleanPayload.category === null || oCleanPayload.category === undefined) {
+            delete oCleanPayload.category;
+        }
+
+        if (oCleanPayload.status === "" || oCleanPayload.status === null || oCleanPayload.status === undefined) {
+            delete oCleanPayload.status;
+        }
+
+        return oCleanPayload;
+    }
+
     async function request(oOptions) {
         var sUrl = buildUrl(oOptions.entity, oOptions.query);
         var oFetchOptions = {
@@ -150,25 +173,66 @@ sap.ui.define([
         });
     }
 
-    function createContact(oPayload) {
-        return request({
-            entity: ENTITY_CONTACTS,
-            method: "POST",
-            payload: sanitizePayload(oPayload, CONTACT_FIELDS),
-            errorMessage: "Impossibile creare il contatto.",
-            useMessageBox: true
-        });
+    async function createContact(oPayload) {
+        var oSanitizedPayload = sanitizePayload(oPayload, CONTACT_FIELDS);
+        var oSafePayload = removeInvalidEnumFields(oSanitizedPayload);
+
+        try {
+            return await request({
+                entity: ENTITY_CONTACTS,
+                method: "POST",
+                payload: oSafePayload,
+                errorMessage: "Impossibile creare il contatto.",
+                useMessageBox: true
+            });
+        } catch (oError) {
+            if (shouldRetryWithoutEnumField(oError)) {
+                delete oSafePayload.category;
+                delete oSafePayload.status;
+
+                return request({
+                    entity: ENTITY_CONTACTS,
+                    method: "POST",
+                    payload: oSafePayload,
+                    errorMessage: "Impossibile creare il contatto.",
+                    useMessageBox: true
+                });
+            }
+
+            throw oError;
+        }
     }
 
-    function updateContact(iId, oPayload) {
-        return request({
-            entity: ENTITY_CONTACTS,
-            query: { id: iId },
-            method: "PUT",
-            payload: sanitizePayload(oPayload, CONTACT_FIELDS),
-            errorMessage: "Impossibile aggiornare il contatto.",
-            useMessageBox: true
-        });
+    async function updateContact(iId, oPayload) {
+        var oSanitizedPayload = sanitizePayload(oPayload, CONTACT_FIELDS);
+        var oSafePayload = removeInvalidEnumFields(oSanitizedPayload);
+
+        try {
+            return await request({
+                entity: ENTITY_CONTACTS,
+                query: { id: iId },
+                method: "PUT",
+                payload: oSafePayload,
+                errorMessage: "Impossibile aggiornare il contatto.",
+                useMessageBox: true
+            });
+        } catch (oError) {
+            if (shouldRetryWithoutEnumField(oError)) {
+                delete oSafePayload.category;
+                delete oSafePayload.status;
+
+                return request({
+                    entity: ENTITY_CONTACTS,
+                    query: { id: iId },
+                    method: "PUT",
+                    payload: oSafePayload,
+                    errorMessage: "Impossibile aggiornare il contatto.",
+                    useMessageBox: true
+                });
+            }
+
+            throw oError;
+        }
     }
 
     function deleteContact(iId) {

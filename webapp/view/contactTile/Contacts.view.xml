@@ -1,10 +1,78 @@
 <mvc:View
     controllerName="crm.controller.contactTile.Contacts"
     xmlns="sap.m"
-    xmlns:mvc="sap.ui.core.mvc">
-    <Page title="Contatti">
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core">
+    <Page title="Contatti" class="sapUiResponsiveContentPadding">
+        <subHeader>
+            <Toolbar>
+                <Title text="Filtri" level="H5" />
+                <ToolbarSpacer />
+                <SearchField id="contactSearchField" width="16rem" placeholder="Cerca per nome o email" liveChange="onFilterChange" search="onFilterChange" />
+                <Select id="categorySelect" width="11rem" change="onFilterChange" selectedKey="">
+                    <core:Item key="" text="Tutte le categorie" />
+                    <core:Item key="cliente" text="Cliente" />
+                    <core:Item key="proprietario" text="Proprietario" />
+                    <core:Item key="acquirente" text="Acquirente" />
+                    <core:Item key="fornitore" text="Fornitore" />
+                </Select>
+                <Select id="statusSelect" width="10rem" change="onFilterChange" selectedKey="">
+                    <core:Item key="" text="Tutti gli stati" />
+                    <core:Item key="attivo" text="Attivo" />
+                    <core:Item key="inattivo" text="Inattivo" />
+                    <core:Item key="archiviato" text="Archiviato" />
+                </Select>
+                <Button icon="sap-icon://clear-filter" type="Transparent" tooltip="Azzera filtri" press="onClearFilters" />
+            </Toolbar>
+        </subHeader>
+
         <content>
-            <Text text="Lista contatti" />
+            <OverflowToolbar class="sapUiTinyMarginBottom">
+                <Title text="Lista contatti" level="H3" />
+                <ToolbarSpacer />
+                <Button text="Ordina" icon="sap-icon://sort" press="onOpenSortDialog" />
+                <Button text="Nuovo" type="Emphasized" icon="sap-icon://add" press="onCreateContact" />
+                <Button text="Modifica" icon="sap-icon://edit" enabled="{= !!${contacts>/selectedContactId}}" press="onEditContact" />
+                <Button text="Elimina" type="Negative" icon="sap-icon://delete" enabled="{= !!${contacts>/selectedContactId}}" press="onDeleteContact" />
+            </OverflowToolbar>
+
+            <Table
+                id="contactsTable"
+                mode="SingleSelectLeft"
+                growing="true"
+                growingScrollToLoad="true"
+                items="{contacts>/contacts}"
+                selectionChange="onSelectionChange"
+                noDataText="Nessun contatto disponibile">
+                <headerToolbar>
+                    <Toolbar>
+                        <Title text="{= ${contacts>/contacts}.length + ' contatti'}" level="H4" />
+                    </Toolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="13rem"><Text text="Nome" /></Column>
+                    <Column width="15rem"><Text text="Email" /></Column>
+                    <Column width="10rem"><Text text="Categoria" /></Column>
+                    <Column width="8rem"><Text text="Stato" /></Column>
+                    <Column width="8rem" hAlign="End"><Text text="Azioni" /></Column>
+                </columns>
+                <items>
+                    <ColumnListItem type="Navigation" press="onOpenDetail">
+                        <cells>
+                            <ObjectIdentifier title="{= ${contacts>first_name} + ' ' + ${contacts>last_name}}" text="ID: {contacts>id}" />
+                            <Text text="{contacts>email}" />
+                            <ObjectStatus text="{contacts>category}" state="Information" />
+                            <ObjectStatus
+                                text="{contacts>status}"
+                                state="{= ${contacts>status} === 'attivo' ? 'Success' : (${contacts>status} === 'inattivo' ? 'Warning' : 'None')}" />
+                            <HBox justifyContent="End">
+                                <Button icon="sap-icon://edit" type="Transparent" press="onRowEdit" />
+                                <Button icon="sap-icon://delete" type="Transparent" press="onRowDelete" />
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
         </content>
     </Page>
 </mvc:View>
