@@ -1,0 +1,25 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <OverflowToolbar>
+        <Button icon="sap-icon://nav-back" type="Transparent" press="onShellNavHome" tooltip="{i18n>shellMenuHome}" />
+        <Title text="{i18n>shellBarTitle}" level="H5" />
+        <ToolbarSpacer />
+        <SearchField width="16rem" search="onShellSearch" />
+        <MenuButton icon="sap-icon://menu2" type="Transparent" tooltip="Menu">
+            <menu>
+                <Menu itemSelected="onShellMainMenuSelect">
+                    <items>
+                        <MenuItem text="{i18n>shellMenuHome}" icon="sap-icon://home" />
+                        <MenuItem text="{i18n>shellMenuContacts}" icon="sap-icon://customer" />
+                        <MenuItem text="{i18n>shellMenuDeals}" icon="sap-icon://business-objects-experience" />
+                        <MenuItem text="{i18n>shellMenuTickets}" icon="sap-icon://sys-help" />
+                        <MenuItem text="{i18n>shellMenuProfile}" icon="sap-icon://employee" />
+                    </items>
+                </Menu>
+            </menu>
+        </MenuButton>
+        <Button icon="sap-icon://bell" type="Transparent" press="onShellNotificationsPress" tooltip="Notifiche" />
+        <Button icon="sap-icon://employee" type="Transparent" press="onShellProfilePress" tooltip="Profilo" />
+    </OverflowToolbar>
+</core:FragmentDefinition>

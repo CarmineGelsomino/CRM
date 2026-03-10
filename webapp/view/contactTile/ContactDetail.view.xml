@@ -6,6 +6,7 @@
     xmlns:f="sap.ui.layout.form">
     <Page title="Dettaglio contatto" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
         <content>
+            <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
             <ObjectHeader
                 title="{= ${contactDetail>/contact/first_name} + ' ' + ${contactDetail>/contact/last_name}}"
                 number="{contactDetail>/contact/id}"

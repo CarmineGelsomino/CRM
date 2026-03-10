@@ -2,12 +2,14 @@
     controllerName="crm.controller.UserProfile"
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:layout="sap.ui.layout">
+    xmlns:layout="sap.ui.layout"
+    xmlns:core="sap.ui.core">
     <Page title="Profilo utente" class="sapUiResponsiveContentPadding" busy="{profile>/busy}">
         <headerContent>
             <Button icon="sap-icon://nav-back" type="Transparent" press="onBack" tooltip="Indietro" />
         </headerContent>
         <content>
+            <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
             <layout:VerticalLayout width="100%" class="sapUiContentPadding">
                 <Panel headerText="Dati profilo" class="sapUiResponsiveMargin">
                     <content>

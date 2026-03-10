@@ -39,6 +39,8 @@ sap.ui.define([
 
     return BaseController.extend("crm.controller.contactTile.Contacts", {
         onInit: function () {
+            this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
+
             this.setModel(new JSONModel({
                 contacts: [],
                 selectedContactId: null,
