@@ -24,19 +24,17 @@
                     </menu>
                 </MenuButton>
                 <Button icon="sap-icon://bell" type="Transparent" press="onNotificationsPress" tooltip="Notifiche" />
-                <Button icon="sap-icon://grid" type="Transparent" press="onProductSwitcherPress" tooltip="Prodotti" />
-                <Button icon="sap-icon://sys-help" type="Transparent" press="onCopilotPress" tooltip="Copilot" />
                 <Button icon="sap-icon://employee" type="Transparent" press="onProfilePress" tooltip="Profilo" />
             </OverflowToolbar>
         </subHeader>
 
         <content>
-            <layout:Grid defaultSpan="XL12 L12 M12 S12" class="sapUiResponsiveMargin">
-                <VBox class="sapUiSmallMarginBottom" width="100%">
+            <VBox class="sapUiSmallMarginBottom" width="100%">
                     <Title text="Benvenuto nel CRM" level="H2" />
                     <Text text="{i18n>shellBarSubtitle}" class="sapUiTinyMarginTop" />
                     <Text text="Accedi rapidamente ai moduli principali del portale." class="sapUiSmallMarginTop" />
                 </VBox>
+            <HBox justifyContent="Center" gap="30px" renderType="Bare" wrap="Wrap">
                 <GenericTile id="contactsTile" header="Clienti" subheader="Anagrafiche e contatti" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="Apri modulo">
                         <NumericContent value="128" scale="attivi" valueColor="Good" />
@@ -54,7 +52,7 @@
                         <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
                     </TileContent>
                 </GenericTile>
-            </layout:Grid>
+            </HBox>
         </content>
     </Page>
 </mvc:View>
