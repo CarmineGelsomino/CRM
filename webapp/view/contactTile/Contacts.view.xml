@@ -1,0 +1,78 @@
+<mvc:View
+    controllerName="crm.controller.contactTile.Contacts"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc">
+    <Page title="Contatti" class="sapUiResponsiveContentPadding">
+        <content>
+            <VBox class="sapUiSmallMarginBottom">
+                <Toolbar>
+                    <Title text="Filtri" level="H5" />
+                    <ToolbarSpacer />
+                    <SearchField width="20rem" placeholder="Cerca per nome, email o telefono" search="onSearch" liveChange="onSearchLiveChange" />
+                    <Select id="statusFilter" width="10rem" change="onFilterChange" selectedKey="all">
+                        <items>
+                            <core:Item xmlns:core="sap.ui.core" key="all" text="Tutti gli stati" />
+                            <core:Item xmlns:core="sap.ui.core" key="attivo" text="Attivo" />
+                            <core:Item xmlns:core="sap.ui.core" key="inattivo" text="Inattivo" />
+                            <core:Item xmlns:core="sap.ui.core" key="prospect" text="Prospect" />
+                        </items>
+                    </Select>
+                    <Select id="categoryFilter" width="11rem" change="onFilterChange" selectedKey="all">
+                        <items>
+                            <core:Item xmlns:core="sap.ui.core" key="all" text="Tutte le categorie" />
+                            <core:Item xmlns:core="sap.ui.core" key="cliente" text="Cliente" />
+                            <core:Item xmlns:core="sap.ui.core" key="fornitore" text="Fornitore" />
+                            <core:Item xmlns:core="sap.ui.core" key="partner" text="Partner" />
+                        </items>
+                    </Select>
+                    <Select id="sortSelect" width="10rem" change="onSortChange" selectedKey="lastName">
+                        <items>
+                            <core:Item xmlns:core="sap.ui.core" key="lastName" text="Ordina per cognome" />
+                            <core:Item xmlns:core="sap.ui.core" key="status" text="Ordina per stato" />
+                            <core:Item xmlns:core="sap.ui.core" key="category" text="Ordina per categoria" />
+                        </items>
+                    </Select>
+                    <ToggleButton text="Desc" press="onToggleSortDirection" />
+                </Toolbar>
+            </VBox>
+
+            <Table
+                id="contactsTable"
+                mode="SingleSelectLeft"
+                items="{path: 'contacts>/contacts'}"
+                selectionChange="onSelectionChange"
+                itemPress="onItemPress"
+                noDataText="Nessun contatto disponibile">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="Elenco contatti" level="H4" />
+                        <ToolbarSpacer />
+                        <Button text="Crea" type="Emphasized" icon="sap-icon://add" press="onCreateContact" />
+                        <Button text="Modifica" icon="sap-icon://edit" press="onEditContact" />
+                        <Button text="Elimina" type="Negative" icon="sap-icon://delete" press="onDeleteContact" />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column><Text text="Nome" /></Column>
+                    <Column><Text text="Email" /></Column>
+                    <Column><Text text="Telefono" /></Column>
+                    <Column><Text text="Categoria" /></Column>
+                    <Column><Text text="Stato" /></Column>
+                </columns>
+                <items>
+                    <ColumnListItem type="Navigation" press="onItemPress">
+                        <cells>
+                            <Text text="{= ${contacts>firstName} + ' ' + ${contacts>lastName}}" />
+                            <Text text="{contacts>email}" />
+                            <Text text="{contacts>phone}" />
+                            <ObjectStatus text="{contacts>category}" state="Information" />
+                            <ObjectStatus
+                                text="{contacts>status}"
+                                state="{= ${contacts>status} === 'attivo' ? 'Success' : ${contacts>status} === 'inattivo' ? 'Error' : 'Warning'}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+    </Page>
+</mvc:View>

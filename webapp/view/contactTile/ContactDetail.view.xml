@@ -1,0 +1,100 @@
+<mvc:View
+    controllerName="crm.controller.contactTile.ContactDetail"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
+    <Page title="Dettaglio contatto" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
+        <content>
+            <ObjectHeader
+                title="{= ${contacts>selectedContact/firstName} + ' ' + ${contacts>selectedContact/lastName}}"
+                intro="ID: {contacts>selectedContact/id}"
+                number="{contacts>selectedContact/status}"
+                numberState="Success"
+                responsive="true">
+                <attributes>
+                    <ObjectAttribute title="Categoria" text="{contacts>selectedContact/category}" />
+                    <ObjectAttribute title="Email" text="{contacts>selectedContact/email}" />
+                    <ObjectAttribute title="Telefono" text="{contacts>selectedContact/phone}" />
+                </attributes>
+            </ObjectHeader>
+
+            <form:SimpleForm editable="true" layout="ResponsiveGridLayout" title="Dati anagrafici principali" class="sapUiSmallMarginTop">
+                <Label text="Nome" />
+                <Input value="{contacts>selectedContact/firstName}" />
+                <Label text="Cognome" />
+                <Input value="{contacts>selectedContact/lastName}" />
+                <Label text="Email" />
+                <Input value="{contacts>selectedContact/email}" type="Email" />
+                <Label text="Telefono" />
+                <Input value="{contacts>selectedContact/phone}" />
+                <Label text="Categoria" />
+                <Select selectedKey="{contacts>selectedContact/category}">
+                    <items>
+                        <core:Item key="cliente" text="Cliente" />
+                        <core:Item key="fornitore" text="Fornitore" />
+                        <core:Item key="partner" text="Partner" />
+                    </items>
+                </Select>
+                <Label text="Stato" />
+                <Select selectedKey="{contacts>selectedContact/status}">
+                    <items>
+                        <core:Item key="attivo" text="Attivo" />
+                        <core:Item key="inattivo" text="Inattivo" />
+                        <core:Item key="prospect" text="Prospect" />
+                    </items>
+                </Select>
+            </form:SimpleForm>
+
+            <VBox class="sapUiMediumMarginTop">
+                <Toolbar>
+                    <Title text="Attività" level="H4" />
+                    <ToolbarSpacer />
+                    <SearchField id="activitySearch" width="16rem" placeholder="Filtra attività" liveChange="onActivityFilter" />
+                    <Select id="activityStatusFilter" width="11rem" selectedKey="all" change="onActivityFilter">
+                        <items>
+                            <core:Item key="all" text="Tutti gli stati" />
+                            <core:Item key="aperta" text="Aperta" />
+                            <core:Item key="chiusa" text="Chiusa" />
+                        </items>
+                    </Select>
+                    <Button text="Aggiungi" type="Emphasized" press="onAddActivity" />
+                </Toolbar>
+                <List id="activityList" mode="SingleSelectLeft" items="{contacts>/filteredActivities}" selectionChange="onActivitySelectionChange">
+                    <items>
+                        <StandardListItem title="{contacts>description}" description="{= ${contacts>type} + ' • ' + ${contacts>date}}" info="{contacts>status}" />
+                    </items>
+                </List>
+                <HBox class="sapUiTinyMarginTop" justifyContent="End">
+                    <Button text="Modifica attività" press="onUpdateActivity" class="sapUiTinyMarginEnd" />
+                    <Button text="Elimina attività" type="Negative" press="onDeleteActivity" />
+                </HBox>
+            </VBox>
+
+            <VBox class="sapUiMediumMarginTop sapUiSmallMarginBottom">
+                <Toolbar>
+                    <Title text="Note" level="H4" />
+                    <ToolbarSpacer />
+                    <SearchField id="notesSearch" width="16rem" placeholder="Filtra note" liveChange="onNotesFilter" />
+                    <Button text="Aggiungi" type="Emphasized" press="onAddNote" />
+                </Toolbar>
+                <List id="notesList" mode="SingleSelectLeft" items="{contacts>/filteredNotes}" selectionChange="onNoteSelectionChange">
+                    <items>
+                        <StandardListItem title="{contacts>title}" description="{contacts>text}" info="{contacts>createdAt}" />
+                    </items>
+                </List>
+                <HBox class="sapUiTinyMarginTop" justifyContent="End">
+                    <Button text="Modifica nota" press="onUpdateNote" class="sapUiTinyMarginEnd" />
+                    <Button text="Elimina nota" type="Negative" press="onDeleteNote" />
+                </HBox>
+            </VBox>
+        </content>
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer />
+                <Button text="Salva contatto" type="Emphasized" press="onSaveContact" />
+                <Button text="Elimina contatto" type="Negative" press="onDeleteContact" />
+            </Toolbar>
+        </footer>
+    </Page>
+</mvc:View>

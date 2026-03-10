@@ -13,6 +13,11 @@ sap.ui.define([
 
         onTilePress: function (oEvent) {
             var sModuleName = oEvent.getSource().getHeader();
+            if (sModuleName === "Clienti") {
+                this.navTo("contacts");
+                return;
+            }
+
             MessageToast.show("Modulo " + sModuleName + " in preparazione");
         },
 

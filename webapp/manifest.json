@@ -52,6 +52,16 @@
           "pattern": "home",
           "name": "home",
           "target": "home"
+        },
+        {
+          "pattern": "contacts",
+          "name": "contacts",
+          "target": "contacts"
+        },
+        {
+          "pattern": "contacts/{contactId}",
+          "name": "contactDetail",
+          "target": "contactDetail"
         }
       ],
       "targets": {
@@ -62,6 +72,14 @@
         "home": {
           "viewName": "Home",
           "viewId": "home"
+        },
+        "contacts": {
+          "viewName": "contactTile.Contacts",
+          "viewId": "contacts"
+        },
+        "contactDetail": {
+          "viewName": "contactTile.ContactDetail",
+          "viewId": "contactDetail"
         }
       }
     }
