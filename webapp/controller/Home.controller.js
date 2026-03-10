@@ -28,13 +28,6 @@ sap.ui.define([
             MessageToast.show(this.getResourceBundle().getText("shellNavHomeFeedback"));
         },
 
-        onOpenMainMenu: function (oEvent) {
-            var oMenu = this.byId("homeMainMenu");
-            if (oMenu) {
-                oMenu.openBy(oEvent.getSource(), false, "BeginTop", "BeginBottom");
-            }
-        },
-
         onMainMenuSelect: function (oEvent) {
             var oItem = oEvent.getParameter("item");
 

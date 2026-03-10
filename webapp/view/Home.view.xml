@@ -4,44 +4,36 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:layout="sap.ui.layout">
     <Page class="sapUiResponsiveContentPadding" enableScrolling="true">
-        <customHeader>
-            <ShellBar
-                id="homeShellBar"
-                title="{i18n>shellBarTitle}"
-                secondTitle="{i18n>shellBarSubtitle}"
-                homeIcon="img/logo-crm.svg"
-                showNavButton="true"
-                navButtonPressed="onNavToHome"
-                showMenuButton="true"
-                menuButtonPressed="onOpenMainMenu"
-                showNotifications="true"
-                notificationsNumber="3"
-                notificationsPressed="onNotificationsPress"
-                showProductSwitcher="true"
-                productSwitcherPressed="onProductSwitcherPress"
-                showSearch="true"
-                search="onSearch"
-                showCopilot="true"
-                copilotPressed="onCopilotPress"
-                showProfile="true"
-                profilePressed="onProfilePress">
-                <menu>
-                    <Menu id="homeMainMenu" itemSelected="onMainMenuSelect">
-                        <items>
-                            <MenuItem id="homeMenuHome" text="{i18n>shellMenuHome}" icon="sap-icon://home" />
-                            <MenuItem id="homeMenuContacts" text="{i18n>shellMenuContacts}" icon="sap-icon://customer" />
-                            <MenuItem id="homeMenuDeals" text="{i18n>shellMenuDeals}" icon="sap-icon://business-objects-experience" />
-                            <MenuItem id="homeMenuTickets" text="{i18n>shellMenuTickets}" icon="sap-icon://sys-help" />
-                        </items>
-                    </Menu>
-                </menu>
-            </ShellBar>
-        </customHeader>
+        <subHeader>
+            <OverflowToolbar>
+                <Button icon="sap-icon://nav-back" type="Transparent" press="onNavToHome" tooltip="{i18n>shellMenuHome}" />
+                <Title text="{i18n>shellBarTitle}" level="H5" />
+                <ToolbarSpacer />
+                <SearchField width="16rem" search="onSearch" />
+                <MenuButton icon="sap-icon://menu2" type="Transparent" tooltip="Menu">
+                    <menu>
+                        <Menu id="homeMainMenu" itemSelected="onMainMenuSelect">
+                            <items>
+                                <MenuItem id="homeMenuHome" text="{i18n>shellMenuHome}" icon="sap-icon://home" />
+                                <MenuItem id="homeMenuContacts" text="{i18n>shellMenuContacts}" icon="sap-icon://customer" />
+                                <MenuItem id="homeMenuDeals" text="{i18n>shellMenuDeals}" icon="sap-icon://business-objects-experience" />
+                                <MenuItem id="homeMenuTickets" text="{i18n>shellMenuTickets}" icon="sap-icon://sys-help" />
+                            </items>
+                        </Menu>
+                    </menu>
+                </MenuButton>
+                <Button icon="sap-icon://bell" type="Transparent" press="onNotificationsPress" tooltip="Notifiche" />
+                <Button icon="sap-icon://grid" type="Transparent" press="onProductSwitcherPress" tooltip="Prodotti" />
+                <Button icon="sap-icon://sys-help" type="Transparent" press="onCopilotPress" tooltip="Copilot" />
+                <Button icon="sap-icon://employee" type="Transparent" press="onProfilePress" tooltip="Profilo" />
+            </OverflowToolbar>
+        </subHeader>
 
         <content>
             <layout:Grid defaultSpan="XL12 L12 M12 S12" class="sapUiResponsiveMargin">
                 <VBox class="sapUiSmallMarginBottom" width="100%">
                     <Title text="Benvenuto nel CRM" level="H2" />
+                    <Text text="{i18n>shellBarSubtitle}" class="sapUiTinyMarginTop" />
                     <Text text="Accedi rapidamente ai moduli principali del portale." class="sapUiSmallMarginTop" />
                 </VBox>
                 <GenericTile id="contactsTile" header="Clienti" subheader="Anagrafiche e contatti" press="onTilePress" frameType="TwoByOne">
