@@ -47,6 +47,47 @@
                 </f:content>
             </f:SimpleForm>
 
+            <f:SimpleForm
+                editable="true"
+                layout="ResponsiveGridLayout"
+                title="Profilo acquirente"
+                class="sapUiSmallMarginTop"
+                visible="{= ${contactDetail>/contact/category} === 'acquirente' }">
+                <f:content>
+                    <Label text="Zona richiesta" />
+                    <Input value="{contactDetail>/buyerProfile/requested_area}" />
+                    <Label text="Tipologia immobile" />
+                    <Input value="{contactDetail>/buyerProfile/property_type}" />
+                    <Label text="Piano preferito" />
+                    <Select selectedKey="{contactDetail>/buyerProfile/floor_preference}" items="{favoriteFloor>/}">
+                        <core:Item key="{favoriteFloor>key}" text="{favoriteFloor>value}" />
+                    </Select>
+                    <Label text="Budget ristrutturato" />
+                    <Input value="{contactDetail>/buyerProfile/purchase_price_renovated}" type="Number" />
+                    <Label text="Budget da ristrutturare" />
+                    <Input value="{contactDetail>/buyerProfile/purchase_price_to_renovate}" type="Number" />
+                    <Label text="Mutuo" />
+                    <Select selectedKey="{contactDetail>/buyerProfile/mortgage_type}" items="{valueMutuo>/}">
+                        <core:Item key="{valueMutuo>key}" text="{valueMutuo>value}" />
+                    </Select>
+                    <Label text="Dettaglio mutuo" visible="{= ${contactDetail>/buyerProfile/mortgage_type} === 'altro' }" />
+                    <TextArea
+                        rows="3"
+                        value="{contactDetail>/buyerProfile/mortgage_other}"
+                        visible="{= ${contactDetail>/buyerProfile/mortgage_type} === 'altro' }" />
+                    <Label text="Preferenze" />
+                    <VBox>
+                        <CheckBox text="Box" selected="{contactDetail>/buyerProfile/preferences/box}" />
+                        <CheckBox text="Posto auto" selected="{contactDetail>/buyerProfile/preferences/posto_auto}" />
+                        <CheckBox text="Cantina" selected="{contactDetail>/buyerProfile/preferences/cantina}" />
+                        <CheckBox text="Terrazzo" selected="{contactDetail>/buyerProfile/preferences/terrazzo}" />
+                        <CheckBox text="Altro" selected="{contactDetail>/buyerProfile/preferences/altro}" />
+                    </VBox>
+                    <Label text="Altro preferenze" visible="{= ${contactDetail>/buyerProfile/preferences/altro} }" />
+                    <Input value="{contactDetail>/buyerProfile/preference_other}" visible="{= ${contactDetail>/buyerProfile/preferences/altro} }" />
+                </f:content>
+            </f:SimpleForm>
+
             <Toolbar class="sapUiSmallMarginTop sapUiTinyMarginBottom">
                 <ToolbarSpacer />
                 <Button text="Salva contatto" type="Emphasized" icon="sap-icon://save" press="onSaveContact" />

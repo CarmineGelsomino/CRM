@@ -31,6 +31,62 @@ sap.ui.define([
 ) {
     "use strict";
 
+    var BUYER_PREFERENCE_KEYS = ["box", "posto_auto", "cantina", "terrazzo", "altro"];
+
+    function createEmptyBuyerProfile() {
+        return {
+            id: null,
+            requested_area: "",
+            property_type: "",
+            floor_preference: "indifferente",
+            purchase_price_renovated: "",
+            purchase_price_to_renovate: "",
+            mortgage_type: "no",
+            mortgage_other: "",
+            preferences: {
+                box: false,
+                posto_auto: false,
+                cantina: false,
+                terrazzo: false,
+                altro: false
+            },
+            preference_other: ""
+        };
+    }
+
+    function mapBuyerPreferences(aPreferences) {
+        var oPreferences = createEmptyBuyerProfile().preferences;
+        var sOtherValue = "";
+
+        (aPreferences || []).forEach(function (oPreference) {
+            if (Object.prototype.hasOwnProperty.call(oPreferences, oPreference.preference_type)) {
+                oPreferences[oPreference.preference_type] = true;
+            }
+
+            if (oPreference.preference_type === "altro") {
+                sOtherValue = oPreference.other_value || "";
+            }
+        });
+
+        return {
+            preferences: oPreferences,
+            preference_other: sOtherValue
+        };
+    }
+
+    function buildBuyerPreferencesPayload(oBuyerProfile) {
+        return BUYER_PREFERENCE_KEYS
+            .filter(function (sKey) {
+                return !!oBuyerProfile.preferences[sKey];
+            })
+            .map(function (sKey) {
+                return {
+                    preference_type: sKey,
+                    other_value: sKey === "altro" ? (oBuyerProfile.preference_other || "").trim() : null
+                };
+            });
+    }
+
     return BaseController.extend("crm.controller.contactTile.ContactDetail", {
         onInit: function () {
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
@@ -38,6 +94,7 @@ sap.ui.define([
             this.setModel(new JSONModel({
                 contactId: null,
                 contact: {},
+                buyerProfile: createEmptyBuyerProfile(),
                 activities: [],
                 notes: []
             }), "contactDetail");
@@ -54,11 +111,18 @@ sap.ui.define([
         _loadContact: async function (iContactId) {
             try {
                 var oContact = await ContactApi.getContact(iContactId);
+                var oBuyerProfile = createEmptyBuyerProfile();
+                var oExistingBuyerProfile = await ContactApi.getBuyerProfileByContactId(iContactId);
+                if (oExistingBuyerProfile) {
+                    var aPreferences = await ContactApi.listBuyerPreferences(oExistingBuyerProfile.id);
+                    oBuyerProfile = Object.assign(oBuyerProfile, oExistingBuyerProfile, mapBuyerPreferences(aPreferences));
+                }
                 var aActivities = await ContactApi.listActivities(iContactId);
                 var aNotes = await ContactApi.listNotes(iContactId);
                 var oModel = this.getModel("contactDetail");
 
                 oModel.setProperty("/contact", oContact || {});
+                oModel.setProperty("/buyerProfile", oBuyerProfile);
                 oModel.setProperty("/activities", aActivities || []);
                 oModel.setProperty("/notes", aNotes || []);
             } catch (oError) {
@@ -70,6 +134,7 @@ sap.ui.define([
             var oModel = this.getModel("contactDetail");
             var iContactId = oModel.getProperty("/contactId");
             var oContact = oModel.getProperty("/contact");
+            var oBuyerProfile = oModel.getProperty("/buyerProfile") || createEmptyBuyerProfile();
 
             if (!oContact.first_name || !oContact.last_name) {
                 MessageToast.show("Nome e cognome sono obbligatori.");
@@ -78,11 +143,35 @@ sap.ui.define([
 
             try {
                 await ContactApi.updateContact(iContactId, oContact);
+                await this._saveBuyerProfileData(iContactId, oContact, oBuyerProfile);
                 MessageToast.show("Contatto aggiornato.");
                 await this._loadContact(iContactId);
             } catch (oError) {
                 // Error feedback is already handled in ContactApi
             }
+        },
+
+        _saveBuyerProfileData: async function (iContactId, oContact, oBuyerProfile) {
+            var oBuyerPayload = {
+                contact_id: iContactId,
+                requested_area: (oBuyerProfile.requested_area || "").trim(),
+                property_type: (oBuyerProfile.property_type || "").trim(),
+                floor_preference: oBuyerProfile.floor_preference || "indifferente",
+                purchase_price_renovated: oBuyerProfile.purchase_price_renovated || null,
+                purchase_price_to_renovate: oBuyerProfile.purchase_price_to_renovate || null,
+                mortgage_type: oBuyerProfile.mortgage_type || "no",
+                mortgage_other: oBuyerProfile.mortgage_type === "altro" ? (oBuyerProfile.mortgage_other || "").trim() : null
+            };
+
+            if (oContact.category !== "acquirente") {
+                if (oBuyerProfile.id) {
+                    await ContactApi.deleteBuyerProfile(oBuyerProfile.id);
+                }
+                return;
+            }
+
+            var oSavedBuyerProfile = await ContactApi.upsertBuyerProfileByContactId(iContactId, oBuyerPayload);
+            await ContactApi.replaceBuyerPreferences(oSavedBuyerProfile.id, buildBuyerPreferencesPayload(oBuyerProfile));
         },
 
         onFilterActivities: function (oEvent) {
