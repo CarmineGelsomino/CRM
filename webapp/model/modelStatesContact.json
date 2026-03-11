@@ -1,14 +1,14 @@
 [
     {
-        "key": "Attivo",
+        "key": "attivo",
         "value": "Attivo"
     },
     {
-        "key": "Archiviato",
+        "key": "archiviato",
         "value": "Archiviato"
     },
     {
-        "key": "Futuro",
+        "key": "futuro",
         "value": "Futuro"
     }
 ]

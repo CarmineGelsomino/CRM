@@ -13,6 +13,7 @@ sap.ui.define([
     "sap/m/Input",
     "sap/m/TextArea",
     "sap/m/Select",
+    "sap/m/CheckBox",
     "sap/ui/core/Item",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem"
@@ -31,11 +32,68 @@ sap.ui.define([
     Input,
     TextArea,
     Select,
+    CheckBox,
     Item,
     ViewSettingsDialog,
     ViewSettingsItem
 ) {
     "use strict";
+
+    var BUYER_PREFERENCE_KEYS = ["box", "posto_auto", "cantina", "terrazzo", "altro"];
+
+    function createEmptyBuyerProfile() {
+        return {
+            id: null,
+            requested_area: "",
+            property_type: "",
+            floor_preference: "indifferente",
+            purchase_price_renovated: "",
+            purchase_price_to_renovate: "",
+            mortgage_type: "no",
+            mortgage_other: "",
+            preferences: {
+                box: false,
+                posto_auto: false,
+                cantina: false,
+                terrazzo: false,
+                altro: false
+            },
+            preference_other: ""
+        };
+    }
+
+    function mapBuyerPreferences(aPreferences) {
+        var oPreferences = createEmptyBuyerProfile().preferences;
+        var sOtherValue = "";
+
+        (aPreferences || []).forEach(function (oPreference) {
+            if (Object.prototype.hasOwnProperty.call(oPreferences, oPreference.preference_type)) {
+                oPreferences[oPreference.preference_type] = true;
+            }
+
+            if (oPreference.preference_type === "altro") {
+                sOtherValue = oPreference.other_value || "";
+            }
+        });
+
+        return {
+            preferences: oPreferences,
+            preference_other: sOtherValue
+        };
+    }
+
+    function buildBuyerPreferencesPayload(oBuyerProfile) {
+        return BUYER_PREFERENCE_KEYS
+            .filter(function (sKey) {
+                return !!oBuyerProfile.preferences[sKey];
+            })
+            .map(function (sKey) {
+                return {
+                    preference_type: sKey,
+                    other_value: sKey === "altro" ? (oBuyerProfile.preference_other || "").trim() : null
+                };
+            });
+    }
 
     return BaseController.extend("crm.controller.contactTile.Contacts", {
         onInit: function () {
@@ -227,58 +285,173 @@ sap.ui.define([
             });
         },
 
-        _openContactDialog: function (sMode, oContact) {
+        _createDialogModelData: async function (bEdit, oContact) {
+            var oBuyerProfile = createEmptyBuyerProfile();
+
+            if (bEdit && oContact && oContact.id) {
+                var oExistingBuyerProfile = await ContactApi.getBuyerProfileByContactId(oContact.id);
+                if (oExistingBuyerProfile) {
+                    var aPreferences = await ContactApi.listBuyerPreferences(oExistingBuyerProfile.id);
+                    var oMappedPreferences = mapBuyerPreferences(aPreferences);
+
+                    oBuyerProfile = Object.assign(oBuyerProfile, oExistingBuyerProfile, oMappedPreferences);
+                }
+            }
+
+            return {
+                contact: {
+                    first_name: bEdit ? (oContact.first_name || "") : "",
+                    last_name: bEdit ? (oContact.last_name || "") : "",
+                    email: bEdit ? (oContact.email || "") : "",
+                    pec_email: bEdit ? (oContact.pec_email || "") : "",
+                    category: bEdit ? (oContact.category || "venditore") : "venditore",
+                    status: bEdit ? (oContact.status || "attivo") : "attivo",
+                    generic_info: bEdit ? (oContact.generic_info || "") : ""
+                },
+                buyerProfile: oBuyerProfile
+            };
+        },
+
+        _buildContactDialogContent: function () {
+            var sBuyerVisible = "{= ${contactDialog>/contact/category} === 'acquirente' }";
+            var sMortgageOtherVisible = "{= ${contactDialog>/contact/category} === 'acquirente' && ${contactDialog>/buyerProfile/mortgage_type} === 'altro' }";
+            var sPreferenceOtherVisible = "{= ${contactDialog>/contact/category} === 'acquirente' && ${contactDialog>/buyerProfile/preferences/altro} }";
+
+            return [
+                new Label({ text: "Nome", required: true }),
+                new Input({ value: "{contactDialog>/contact/first_name}" }),
+                new Label({ text: "Cognome", required: true }),
+                new Input({ value: "{contactDialog>/contact/last_name}" }),
+                new Label({ text: "Email" }),
+                new Input({ type: "Email", value: "{contactDialog>/contact/email}" }),
+                new Label({ text: "PEC" }),
+                new Input({ type: "Email", value: "{contactDialog>/contact/pec_email}" }),
+                new Label({ text: "Categoria" }),
+                new Select({
+                    selectedKey: "{contactDialog>/contact/category}",
+                    width: "100%",
+                    items: {
+                        path: "categoriesContact>/",
+                        templateShareable: false,
+                        template: new Item({ key: "{categoriesContact>key}", text: "{categoriesContact>value}" })
+                    }
+                }),
+                new Label({ text: "Stato" }),
+                new Select({
+                    selectedKey: "{contactDialog>/contact/status}",
+                    width: "100%",
+                    items: {
+                        path: "statesContact>/",
+                        templateShareable: false,
+                        template: new Item({ key: "{statesContact>key}", text: "{statesContact>value}" })
+                    }
+                }),
+                new Label({ text: "Informazioni generiche" }),
+                new TextArea({ width: "100%", rows: 4, value: "{contactDialog>/contact/generic_info}" }),
+                new Label({ text: "Zona richiesta", visible: sBuyerVisible }),
+                new Input({ value: "{contactDialog>/buyerProfile/requested_area}", visible: sBuyerVisible }),
+                new Label({ text: "Tipologia immobile", visible: sBuyerVisible }),
+                new Input({ value: "{contactDialog>/buyerProfile/property_type}", visible: sBuyerVisible }),
+                new Label({ text: "Piano preferito", visible: sBuyerVisible }),
+                new Select({
+                    selectedKey: "{contactDialog>/buyerProfile/floor_preference}",
+                    width: "100%",
+                    visible: sBuyerVisible,
+                    items: {
+                        path: "favoriteFloor>/",
+                        templateShareable: false,
+                        template: new Item({ key: "{favoriteFloor>key}", text: "{favoriteFloor>value}" })
+                    }
+                }),
+                new Label({ text: "Budget ristrutturato", visible: sBuyerVisible }),
+                new Input({ type: "Number", value: "{contactDialog>/buyerProfile/purchase_price_renovated}", visible: sBuyerVisible }),
+                new Label({ text: "Budget da ristrutturare", visible: sBuyerVisible }),
+                new Input({ type: "Number", value: "{contactDialog>/buyerProfile/purchase_price_to_renovate}", visible: sBuyerVisible }),
+                new Label({ text: "Mutuo", visible: sBuyerVisible }),
+                new Select({
+                    selectedKey: "{contactDialog>/buyerProfile/mortgage_type}",
+                    width: "100%",
+                    visible: sBuyerVisible,
+                    items: {
+                        path: "valueMutuo>/",
+                        templateShareable: false,
+                        template: new Item({ key: "{valueMutuo>key}", text: "{valueMutuo>value}" })
+                    }
+                }),
+                new Label({ text: "Dettaglio mutuo", visible: sMortgageOtherVisible }),
+                new TextArea({ rows: 3, value: "{contactDialog>/buyerProfile/mortgage_other}", visible: sMortgageOtherVisible }),
+                new Label({ text: "Preferenze", visible: sBuyerVisible }),
+                new CheckBox({ text: "Box", selected: "{contactDialog>/buyerProfile/preferences/box}", visible: sBuyerVisible }),
+                new Label({ text: "", visible: sBuyerVisible }),
+                new CheckBox({ text: "Posto auto", selected: "{contactDialog>/buyerProfile/preferences/posto_auto}", visible: sBuyerVisible }),
+                new Label({ text: "", visible: sBuyerVisible }),
+                new CheckBox({ text: "Cantina", selected: "{contactDialog>/buyerProfile/preferences/cantina}", visible: sBuyerVisible }),
+                new Label({ text: "", visible: sBuyerVisible }),
+                new CheckBox({ text: "Terrazzo", selected: "{contactDialog>/buyerProfile/preferences/terrazzo}", visible: sBuyerVisible }),
+                new Label({ text: "", visible: sBuyerVisible }),
+                new CheckBox({ text: "Altro", selected: "{contactDialog>/buyerProfile/preferences/altro}", visible: sBuyerVisible }),
+                new Label({ text: "Altro preferenze", visible: sPreferenceOtherVisible }),
+                new Input({ value: "{contactDialog>/buyerProfile/preference_other}", visible: sPreferenceOtherVisible })
+            ];
+        },
+
+        _saveBuyerProfileData: async function (iContactId, oDialogData) {
+            var oBuyerProfile = oDialogData.buyerProfile || createEmptyBuyerProfile();
+            var oContact = oDialogData.contact || {};
+            var oBuyerPayload = {
+                contact_id: iContactId,
+                requested_area: (oBuyerProfile.requested_area || "").trim(),
+                property_type: (oBuyerProfile.property_type || "").trim(),
+                floor_preference: oBuyerProfile.floor_preference || "indifferente",
+                purchase_price_renovated: oBuyerProfile.purchase_price_renovated || null,
+                purchase_price_to_renovate: oBuyerProfile.purchase_price_to_renovate || null,
+                mortgage_type: oBuyerProfile.mortgage_type || "no",
+                mortgage_other: oBuyerProfile.mortgage_type === "altro" ? (oBuyerProfile.mortgage_other || "").trim() : null
+            };
+
+            if (oContact.category !== "acquirente") {
+                if (oBuyerProfile.id) {
+                    await ContactApi.deleteBuyerProfile(oBuyerProfile.id);
+                }
+                return;
+            }
+
+            var oSavedBuyerProfile = await ContactApi.upsertBuyerProfileByContactId(iContactId, oBuyerPayload);
+            await ContactApi.replaceBuyerPreferences(oSavedBuyerProfile.id, buildBuyerPreferencesPayload(oBuyerProfile));
+        },
+
+        _openContactDialog: async function (sMode, oContact) {
             var bEdit = sMode === "edit";
+            var oDialogModelData;
+
+            try {
+                oDialogModelData = await this._createDialogModelData(bEdit, oContact);
+            } catch (oError) {
+                return;
+            }
+
             var oDialog = new Dialog({
                 title: bEdit ? "Modifica contatto" : "Nuovo contatto",
-                contentWidth: "32rem",
+                contentWidth: "42rem",
                 resizable: true,
                 type: "Message",
-                content: [
-                    new Label({ text: "Nome", required: true }),
-                    new Input("contactFirstName", { value: bEdit ? oContact.first_name : "" }),
-                    new Label({ text: "Cognome", required: true }),
-                    new Input("contactLastName", { value: bEdit ? oContact.last_name : "" }),
-                    new Label({ text: "Email" }),
-                    new Input("contactEmail", { type: "Email", value: bEdit ? oContact.email : "" }),
-                    new Label({ text: "PEC" }),
-                    new Input("contactPecEmail", { type: "Email", value: bEdit ? oContact.pec_email : "" }),
-                    new Label({ text: "Categoria" }),
-                    new Select("contactCategory", {
-                        selectedKey: bEdit ? (oContact.category || "Venditore") : "Venditore",
-                        width: "100%",
-                        items: {
-                            path: "categoriesContact>/",
-                            templateShareable: false,
-                            template: new Item({ key: "{categoriesContact>key}", text: "{categoriesContact>value}" })
-                        }
-                    }),
-                    new Label({ text: "Stato" }),
-                    new Select("contactStatus", {
-                        selectedKey: bEdit ? (oContact.status || "Attivo") : "Attivo",
-                        width: "100%",
-                        items: {
-                            path: "statesContact>/",
-                            templateShareable: false,
-                            template: new Item({ key: "{statesContact>key}", text: "{statesContact>value}" })
-                        }
-                    }),
-                    new Label({ text: "Informazioni generiche" }),
-                    new TextArea("contactInfo", { width: "100%", rows: 4, value: bEdit ? (oContact.generic_info || "") : "" })
-                ],
+                content: this._buildContactDialogContent(),
                 beginButton: new Button({
                     text: "Salva",
                     type: "Emphasized",
                     press: async function () {
+                        var oDialogData = oDialog.getModel("contactDialog").getData();
                         var oPayload = {
-                            first_name: sap.ui.getCore().byId("contactFirstName").getValue().trim(),
-                            last_name: sap.ui.getCore().byId("contactLastName").getValue().trim(),
-                            email: sap.ui.getCore().byId("contactEmail").getValue().trim(),
-                            pec_email: sap.ui.getCore().byId("contactPecEmail").getValue().trim(),
-                            category: sap.ui.getCore().byId("contactCategory").getSelectedKey(),
-                            status: sap.ui.getCore().byId("contactStatus").getSelectedKey(),
-                            generic_info: sap.ui.getCore().byId("contactInfo").getValue()
+                            first_name: (oDialogData.contact.first_name || "").trim(),
+                            last_name: (oDialogData.contact.last_name || "").trim(),
+                            email: (oDialogData.contact.email || "").trim(),
+                            pec_email: (oDialogData.contact.pec_email || "").trim(),
+                            category: oDialogData.contact.category,
+                            status: oDialogData.contact.status,
+                            generic_info: oDialogData.contact.generic_info || ""
                         };
+                        var iUserId = this.getModel("session").getProperty("/userId") || 1;
+                        var oSavedContact;
 
                         if (!oPayload.first_name || !oPayload.last_name) {
                             MessageToast.show("Nome e cognome sono obbligatori.");
@@ -287,13 +460,14 @@ sap.ui.define([
 
                         try {
                             if (bEdit) {
-                                await ContactApi.updateContact(oContact.id, oPayload);
+                                oSavedContact = await ContactApi.updateContact(oContact.id, oPayload);
                                 MessageToast.show("Contatto aggiornato correttamente.");
                             } else {
-                                await ContactApi.createContact(Object.assign({ user_id: 1 }, oPayload));
+                                oSavedContact = await ContactApi.createContact(Object.assign({ user_id: iUserId }, oPayload));
                                 MessageToast.show("Contatto creato correttamente.");
                             }
 
+                            await this._saveBuyerProfileData(oSavedContact.id, oDialogData);
                             oDialog.close();
                             await this._loadContacts();
                         } catch (oError) {
@@ -312,6 +486,7 @@ sap.ui.define([
                 }
             });
 
+            oDialog.setModel(new JSONModel(oDialogModelData), "contactDialog");
             this.getView().addDependent(oDialog);
             oDialog.open();
         }

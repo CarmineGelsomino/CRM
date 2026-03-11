@@ -20,7 +20,7 @@
                 <statuses>
                     <ObjectStatus
                         text="{contactDetail>/contact/status}"
-                        state="{= ${contactDetail>/contact/status} === 'Attivo' || ${contactDetail>/contact/status} === 'attivo' ? 'Success' : (${contactDetail>/contact/status} === 'Futuro' ? 'Warning' : 'None')}" />
+                        state="{= ${contactDetail>/contact/status} === 'Attivo' || ${contactDetail>/contact/status} === 'attivo' ? 'Success' : (${contactDetail>/contact/status} === 'Futuro' || ${contactDetail>/contact/status} === 'futuro' ? 'Warning' : 'None')}" />
                 </statuses>
             </ObjectHeader>
 

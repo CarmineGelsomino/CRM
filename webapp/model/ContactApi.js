@@ -5,6 +5,8 @@ sap.ui.define([
     "use strict";
 
     var ENTITY_CONTACTS = "contacts";
+    var ENTITY_BUYER_PROFILES = "buyer_profiles";
+    var ENTITY_BUYER_PREFERENCES = "buyer_preferences";
     var ENTITY_ACTIVITIES = "activities";
     var ENTITY_NOTES = "notes";
 
@@ -38,6 +40,23 @@ sap.ui.define([
         "user_id",
         "contact_id",
         "message"
+    ];
+
+    var BUYER_PROFILE_FIELDS = [
+        "contact_id",
+        "requested_area",
+        "property_type",
+        "floor_preference",
+        "purchase_price_renovated",
+        "purchase_price_to_renovate",
+        "mortgage_type",
+        "mortgage_other"
+    ];
+
+    var BUYER_PREFERENCE_FIELDS = [
+        "buyer_profile_id",
+        "preference_type",
+        "other_value"
     ];
 
     function buildUrl(sEntity, mQuery) {
@@ -145,6 +164,9 @@ sap.ui.define([
 
         try {
             var oResponse = await fetch(sUrl, oFetchOptions);
+            if (oOptions.allowNotFound && oResponse.status === 404) {
+                return null;
+            }
             var oResult = await parseResponse(oResponse);
             return oResult.data;
         } catch (oError) {
@@ -245,6 +267,111 @@ sap.ui.define([
         });
     }
 
+    function listBuyerProfiles(mFilters) {
+        return request({
+            entity: ENTITY_BUYER_PROFILES,
+            query: mFilters,
+            method: "GET",
+            errorMessage: "Impossibile caricare il profilo acquirente.",
+            useMessageBox: true
+        });
+    }
+
+    async function getBuyerProfileByContactId(iContactId) {
+        var aProfiles = await listBuyerProfiles({ contact_id: iContactId });
+        return aProfiles && aProfiles.length ? aProfiles[0] : null;
+    }
+
+    function createBuyerProfile(oPayload) {
+        return request({
+            entity: ENTITY_BUYER_PROFILES,
+            method: "POST",
+            payload: sanitizePayload(oPayload, BUYER_PROFILE_FIELDS),
+            errorMessage: "Impossibile creare il profilo acquirente.",
+            useMessageBox: true
+        });
+    }
+
+    function updateBuyerProfile(iId, oPayload) {
+        return request({
+            entity: ENTITY_BUYER_PROFILES,
+            query: { id: iId },
+            method: "PUT",
+            payload: sanitizePayload(oPayload, BUYER_PROFILE_FIELDS),
+            errorMessage: "Impossibile aggiornare il profilo acquirente.",
+            useMessageBox: true
+        });
+    }
+
+    function deleteBuyerProfile(iId) {
+        return request({
+            entity: ENTITY_BUYER_PROFILES,
+            query: { id: iId },
+            method: "DELETE",
+            payload: null,
+            errorMessage: "Impossibile eliminare il profilo acquirente.",
+            useMessageBox: true
+        });
+    }
+
+    function listBuyerPreferences(iBuyerProfileId) {
+        return request({
+            entity: ENTITY_BUYER_PREFERENCES,
+            query: { buyer_profile_id: iBuyerProfileId },
+            method: "GET",
+            errorMessage: "Impossibile caricare le preferenze acquirente.",
+            useMessageBox: true
+        });
+    }
+
+    function createBuyerPreference(oPayload) {
+        return request({
+            entity: ENTITY_BUYER_PREFERENCES,
+            method: "POST",
+            payload: sanitizePayload(oPayload, BUYER_PREFERENCE_FIELDS),
+            errorMessage: "Impossibile salvare una preferenza acquirente.",
+            useMessageBox: true
+        });
+    }
+
+    function deleteBuyerPreference(iId) {
+        return request({
+            entity: ENTITY_BUYER_PREFERENCES,
+            query: { id: iId },
+            method: "DELETE",
+            errorMessage: "Impossibile eliminare una preferenza acquirente.",
+            useMessageBox: true
+        });
+    }
+
+    async function upsertBuyerProfileByContactId(iContactId, oPayload) {
+        var oExistingProfile = await getBuyerProfileByContactId(iContactId);
+        var oSanitizedPayload = sanitizePayload(Object.assign({}, oPayload, { contact_id: iContactId }), BUYER_PROFILE_FIELDS);
+
+        if (oExistingProfile && oExistingProfile.id) {
+            return updateBuyerProfile(oExistingProfile.id, oSanitizedPayload);
+        }
+
+        return createBuyerProfile(oSanitizedPayload);
+    }
+
+    async function replaceBuyerPreferences(iBuyerProfileId, aPreferences) {
+        var aExistingPreferences = await listBuyerPreferences(iBuyerProfileId);
+        var aDeletePromises = (aExistingPreferences || []).map(function (oPreference) {
+            return deleteBuyerPreference(oPreference.id);
+        });
+
+        await Promise.all(aDeletePromises);
+
+        var aCreatePromises = (aPreferences || []).map(function (oPreference) {
+            return createBuyerPreference(Object.assign({}, oPreference, {
+                buyer_profile_id: iBuyerProfileId
+            }));
+        });
+
+        await Promise.all(aCreatePromises);
+    }
+
     function listActivities(iContactId, mFilters) {
         return request({
             entity: ENTITY_ACTIVITIES,
@@ -333,6 +460,13 @@ sap.ui.define([
         createContact: createContact,
         updateContact: updateContact,
         deleteContact: deleteContact,
+        getBuyerProfileByContactId: getBuyerProfileByContactId,
+        createBuyerProfile: createBuyerProfile,
+        updateBuyerProfile: updateBuyerProfile,
+        deleteBuyerProfile: deleteBuyerProfile,
+        listBuyerPreferences: listBuyerPreferences,
+        replaceBuyerPreferences: replaceBuyerPreferences,
+        upsertBuyerProfileByContactId: upsertBuyerProfileByContactId,
         listActivities: listActivities,
         createActivity: createActivity,
         updateActivity: updateActivity,

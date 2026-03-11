@@ -1,18 +1,18 @@
 [
     {
-        "key": "Indifferente",
+        "key": "indifferente",
         "value": "Indifferente"
     },
     {
-        "key": "Basso",
+        "key": "basso",
         "value": "Basso"
     },
     {
-        "key": "Intermedio",
+        "key": "intermedio",
         "value": "Intermedio"
     },
     {
-        "key": "Ultimo",
+        "key": "ultimo",
         "value": "Ultimo"
     }
 ]

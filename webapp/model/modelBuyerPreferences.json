@@ -1,0 +1,22 @@
+[
+    {
+        "key": "box",
+        "value": "Box"
+    },
+    {
+        "key": "posto_auto",
+        "value": "Posto auto"
+    },
+    {
+        "key": "cantina",
+        "value": "Cantina"
+    },
+    {
+        "key": "terrazzo",
+        "value": "Terrazzo"
+    },
+    {
+        "key": "altro",
+        "value": "Altro"
+    }
+]

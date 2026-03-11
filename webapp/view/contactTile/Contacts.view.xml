@@ -99,7 +99,7 @@
                             <ObjectStatus text="{contacts>category}" state="Information" />
                             <ObjectStatus
                                 text="{contacts>status}"
-                                state="{= ${contacts>status} === 'Attivo' || ${contacts>status} === 'attivo' ? 'Success' : (${contacts>status} === 'Futuro' ? 'Warning' : 'None')}" />
+                                state="{= ${contacts>status} === 'Attivo' || ${contacts>status} === 'attivo' ? 'Success' : (${contacts>status} === 'Futuro' || ${contacts>status} === 'futuro' ? 'Warning' : 'None')}" />
                             <HBox justifyContent="End">
                                 <Button icon="sap-icon://edit" type="Transparent" press="onRowEdit" />
                                 <Button icon="sap-icon://delete" type="Transparent" press="onRowDelete" />

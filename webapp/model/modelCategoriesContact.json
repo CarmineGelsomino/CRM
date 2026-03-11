@@ -1,18 +1,18 @@
 [
     {
-        "key": "Venditore",
+        "key": "venditore",
         "value": "Venditore"
     },
     {
-        "key": "Acquirente",
+        "key": "acquirente",
         "value": "Acquirente"
     },
     {
-        "key": "Segnalatore",
+        "key": "segnalatore",
         "value": "Segnalatore"
     },
     {
-        "key": "Cerchia-personale",
+        "key": "cerchia_personale",
         "value": "Cerchia personale"
     }
 ]

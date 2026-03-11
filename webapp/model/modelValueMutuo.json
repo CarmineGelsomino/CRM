@@ -1,18 +1,18 @@
 [
     {
-        "key": "No",
+        "key": "no",
         "value": "No"
     },
     {
-        "key": "50%",
+        "key": "50",
         "value": "50%"
     },
     {
-        "key": "100%",
+        "key": "100",
         "value": "100%"
     },
     {
-        "key": "Altro",
+        "key": "altro",
         "value": "Altro"
     }
 ]

@@ -49,6 +49,10 @@
         "type": "sap.ui.model.json.JSONModel",
         "uri": "model/modelFavoriteFloor.json"
       },
+      "buyerPreferences": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/modelBuyerPreferences.json"
+      },
       "characteristicsProperty": {
         "type": "sap.ui.model.json.JSONModel",
         "uri": "model/modelCharacteristicsProperty.json"
