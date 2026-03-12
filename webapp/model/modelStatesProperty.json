@@ -1,14 +1,14 @@
 [
     {
-        "key": "Da-ristrutturare",
+        "key": "da_ristrutturare",
         "value": "Da ristrutturare"
     },
     {
-        "key": "Ristrutturato",
+        "key": "ristrutturato",
         "value": "Ristrutturato"
     },
     {
-        "key": "Nuovo",
+        "key": "nuovo",
         "value": "Nuovo"
     }
 ]

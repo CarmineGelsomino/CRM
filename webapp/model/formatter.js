@@ -18,6 +18,11 @@ sap.ui.define([], function () {
         contactCategoryColorScheme: function (sCategoryKey, aCategories) {
             var oCategoryInfo = findCategoryInfo(sCategoryKey, aCategories);
             return (oCategoryInfo && oCategoryInfo.colorScheme) || 10;
+        },
+
+        lookupText: function (sKey, aItems) {
+            var oItem = findCategoryInfo(sKey, aItems);
+            return (oItem && oItem.value) || sKey || "";
         }
     };
 });

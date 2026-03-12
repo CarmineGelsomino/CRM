@@ -3,7 +3,8 @@
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
-    xmlns:f="sap.ui.layout.form">
+    xmlns:f="sap.ui.layout.form"
+    core:require="{ formatter: 'crm/model/formatter' }">
     <Page title="{i18n>propertiesPageTitle}" class="sapUiResponsiveContentPadding">
         <customHeader>
             <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
@@ -87,11 +88,11 @@
                 <items>
                     <ColumnListItem type="Navigation" press="onOpenDetail">
                         <cells>
-                            <Text text="{properties>property_type}" />
+                            <Text text="{ parts: [ { path: 'properties>property_type' }, { path: 'typeProperties>/' } ], formatter: 'formatter.lookupText' }" />
                             <ObjectIdentifier title="{properties>property_label}" text="{= 'ID: ' + ${properties>id}}" />
                             <Text text="{properties>city}" />
                             <Text text="{= ${properties>owner_names} || ${properties>owner_count} + ' proprietari'}" />
-                            <ObjectStatus text="{properties>property_condition}" state="Information" />
+                            <ObjectStatus text="{ parts: [ { path: 'properties>property_condition' }, { path: 'statesProperty>/' } ], formatter: 'formatter.lookupText' }" state="Information" />
                             <HBox justifyContent="End">
                                 <Button icon="sap-icon://edit" type="Transparent" press="onRowEdit" />
                                 <Button icon="sap-icon://delete" type="Transparent" press="onRowDelete" />

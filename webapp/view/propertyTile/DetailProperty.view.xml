@@ -3,7 +3,8 @@
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
-    xmlns:f="sap.ui.layout.form">
+    xmlns:f="sap.ui.layout.form"
+    core:require="{ formatter: 'crm/model/formatter' }">
     <Page title="{i18n>propertyDetailPageTitle}" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
         <customHeader>
             <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
@@ -12,13 +13,17 @@
             <Title class="sapUiSmallMargin" text="{i18n>propertyDetailPageTitle}" titleStyle="H2" />
             <ObjectHeader
                 title="{ parts: [ { path: 'propertyDetail>/property' } ], formatter: '.buildPropertyHeader' }"
-                intro="{= ${propertyDetail>/property/property_type} || ${propertyDetail>/property/property_condition} }"
+                intro="{ parts: [ { path: 'propertyDetail>/property/property_type' }, { path: 'typeProperties>/' } ], formatter: 'formatter.lookupText' }"
                 responsive="true">
                 <attributes>
-                    <ObjectAttribute text="{= ${i18n>propertyDetailTypePrefix} + ${propertyDetail>/property/property_type}}" />
+                    <ObjectAttribute
+                        title="{i18n>propertyDetailFieldType}"
+                        text="{ parts: [ { path: 'propertyDetail>/property/property_type' }, { path: 'typeProperties>/' } ], formatter: 'formatter.lookupText' }" />
                     <ObjectAttribute text="{= ${i18n>propertyDetailAddressPrefix} + ${propertyDetail>/property/address_line}}" />
                     <ObjectAttribute text="{= ${i18n>propertyDetailCityPrefix} + ${propertyDetail>/property/city}}" />
-                    <ObjectAttribute text="{= ${i18n>propertyDetailConditionPrefix} + ${propertyDetail>/property/property_condition}}" />
+                    <ObjectAttribute
+                        title="{i18n>propertyDetailFieldCondition}"
+                        text="{ parts: [ { path: 'propertyDetail>/property/property_condition' }, { path: 'statesProperty>/' } ], formatter: 'formatter.lookupText' }" />
                     <ObjectAttribute text="{propertyDetail>/property/listing_url}" active="{= !!${propertyDetail>/property/listing_url} }" press="onOpenListingUrl" />
                 </attributes>
             </ObjectHeader>

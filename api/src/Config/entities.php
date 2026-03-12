@@ -37,7 +37,7 @@ return [
     ],
     'properties' => [
         'table' => 'properties',
-        'fields' => ['user_id', 'address_line', 'city', 'postal_code', 'province', 'country', 'subalterno', 'apartment_floor', 'internal_sqm', 'external_sqm', 'other_info', 'description', 'property_condition', 'listing_url', 'owner_home_address', 'work_contact', 'first_av', 'administrator'],
+        'fields' => ['user_id', 'property_type', 'address_line', 'city', 'postal_code', 'province', 'country', 'subalterno', 'apartment_floor', 'internal_sqm', 'external_sqm', 'other_info', 'description', 'property_condition', 'listing_url', 'owner_home_address', 'work_contact', 'first_av', 'administrator'],
     ],
     'property_features' => [
         'table' => 'property_features',
