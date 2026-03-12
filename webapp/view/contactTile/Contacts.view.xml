@@ -6,8 +6,11 @@
     xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form"
     core:require="{ formatter: 'crm/model/formatter' }">
-    <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
+    
     <Page title="{i18n>contactsPageTitle}" class="sapUiResponsiveContentPadding">
+        <customHeader>
+        <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
+        </customHeader>
         <content>
             <Panel class="sapUiTinyMarginBottom" expandable="true">
                 <headerToolbar>

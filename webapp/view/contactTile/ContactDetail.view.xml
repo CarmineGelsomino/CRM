@@ -4,8 +4,11 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form">
-    <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
+    
     <Page title="{i18n>contactDetailPageTitle}" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
+        <customHeader>
+            <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
+        </customHeader>
         <content>
             <ObjectHeader
                 title="{= ${contactDetail>/contact/first_name} + ' ' + ${contactDetail>/contact/last_name}}"
