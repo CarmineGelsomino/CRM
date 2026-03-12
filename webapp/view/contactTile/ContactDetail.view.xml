@@ -3,7 +3,8 @@
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
-    xmlns:f="sap.ui.layout.form">
+    xmlns:f="sap.ui.layout.form"
+    core:require="{ formatter: 'crm/model/formatter' }">
     
     <Page title="{i18n>contactDetailPageTitle}" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
         <customHeader>
@@ -212,11 +213,8 @@
                         <Title text="{i18n>contactDetailActivitiesTitle}" level="H4" />
                         <ToolbarSpacer />
                         <SearchField id="activitySearchField" width="14rem" placeholder="{i18n>contactDetailActivitiesFilterPlaceholder}" liveChange="onFilterActivities" search="onFilterActivities" />
-                        <Select width="10rem" selectedKey="" change="onFilterActivities" id="activityStatusFilter">
-                            <core:Item key="" text="{i18n>contactDetailActivityStatusAll}" />
-                            <core:Item key="da_fare" text="{i18n>contactDetailActivityStatusTodo}" />
-                            <core:Item key="sospeso" text="{i18n>contactDetailActivityStatusInProgress}" />
-                            <core:Item key="completato" text="{i18n>contactDetailActivityStatusCompleted}" />
+                        <Select width="10rem" selectedKey="" change="onFilterActivities" id="activityStatusFilter" items="{activityStates>/}">
+                            <core:Item key="{activityStates>key}" text="{activityStates>value}" />
                         </Select>
                         <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddActivity" />
                     </OverflowToolbar>
@@ -228,7 +226,9 @@
                             <Text text="{contactDetail>description}" />
                             <HBox renderType="Bare" class="sapUiTinyMarginTop">
                                 <ObjectStatus text="{contactDetail>priority}" state="Information" class="sapUiTinyMarginEnd" />
-                                <ObjectStatus text="{contactDetail>status}" state="{= ${contactDetail>status} === 'completato' ? 'Success' : 'Warning'}" />
+                                <ObjectStatus
+                                    text="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
+                                    state="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }" />
                             </HBox>
                         </VBox>
                     </CustomListItem>

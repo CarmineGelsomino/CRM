@@ -118,11 +118,8 @@
                         <Title text="{i18n>propertyDetailAggregatedActivitiesTitle}" level="H4" />
                         <ToolbarSpacer />
                         <SearchField id="propertyActivitySearchField" width="14rem" placeholder="{i18n>contactDetailActivitiesFilterPlaceholder}" liveChange="onFilterActivities" search="onFilterActivities" />
-                        <Select id="propertyActivityStatusFilter" width="10rem" selectedKey="" change="onFilterActivities">
-                            <core:Item key="" text="{i18n>contactDetailActivityStatusAll}" />
-                            <core:Item key="da_fare" text="{i18n>contactDetailActivityStatusTodo}" />
-                            <core:Item key="sospeso" text="{i18n>contactDetailActivityStatusInProgress}" />
-                            <core:Item key="completato" text="{i18n>contactDetailActivityStatusCompleted}" />
+                        <Select id="propertyActivityStatusFilter" width="10rem" selectedKey="" change="onFilterActivities" items="{activityStates>/}">
+                            <core:Item key="{activityStates>key}" text="{activityStates>value}" />
                         </Select>
                         <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddActivity" />
                     </OverflowToolbar>
@@ -135,7 +132,9 @@
                             <Link text="{= ${i18n>propertyDetailLinkedContactPrefix} + ${propertyDetail>contact_name}}" press="onOpenActivityContact" />
                             <HBox renderType="Bare" class="sapUiTinyMarginTop">
                                 <ObjectStatus text="{propertyDetail>priority}" state="Information" class="sapUiTinyMarginEnd" />
-                                <ObjectStatus text="{propertyDetail>status}" state="{= ${propertyDetail>status} === 'completato' ? 'Success' : 'Warning'}" />
+                                <ObjectStatus
+                                    text="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
+                                    state="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }" />
                             </HBox>
                         </VBox>
                     </CustomListItem>

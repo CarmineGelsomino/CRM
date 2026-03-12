@@ -653,6 +653,15 @@ sap.ui.define([
             this.byId("notesList").getBinding("items").filter(aFilters, "Application");
         },
 
+        _getDefaultActivityStatusKey: function () {
+            var aActivityStates = this.getOwnerComponent().getModel("activityStates").getData() || [];
+            var oDefaultState = aActivityStates.find(function (oState) {
+                return oState.isDefault;
+            });
+
+            return (oDefaultState && oDefaultState.key) || "";
+        },
+
         onAddActivity: function () {
             var oBundle = this.getResourceBundle();
             var aActivityTypes = this.getOwnerComponent().getModel("activityTypes").getData() || [];
@@ -712,7 +721,7 @@ sap.ui.define([
                             description: sap.ui.getCore().byId("newActivityDescription").getValue(),
                             reminder_at: formatDateTimeForApi(oReminderDate),
                             priority: sap.ui.getCore().byId("newActivityPriority").getSelectedKey(),
-                            status: "da_fare"
+                            status: this._getDefaultActivityStatusKey()
                         };
 
                         try {

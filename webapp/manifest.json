@@ -63,6 +63,10 @@
         "type": "sap.ui.model.json.JSONModel",
         "uri": "model/modelTypesNote.json"
       },
+      "activityStates": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/modelActivityStates.json"
+      },
       "favoriteFloor": {
         "type": "sap.ui.model.json.JSONModel",
         "uri": "model/modelFavoriteFloor.json"

@@ -23,6 +23,11 @@ sap.ui.define([], function () {
         lookupText: function (sKey, aItems) {
             var oItem = findCategoryInfo(sKey, aItems);
             return (oItem && oItem.value) || sKey || "";
+        },
+
+        lookupState: function (sKey, aItems) {
+            var oItem = findCategoryInfo(sKey, aItems);
+            return (oItem && oItem.state) || "None";
         }
     };
 });

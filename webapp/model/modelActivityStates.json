@@ -1,0 +1,23 @@
+[
+    {
+        "key": "",
+        "value": "Tutti",
+        "isFilterOnly": true
+    },
+    {
+        "key": "da_fare",
+        "value": "Da fare",
+        "state": "Warning",
+        "isDefault": true
+    },
+    {
+        "key": "sospeso",
+        "value": "Sospeso",
+        "state": "Information"
+    },
+    {
+        "key": "completato",
+        "value": "Completato",
+        "state": "Success"
+    }
+]

@@ -433,6 +433,15 @@ sap.ui.define([
             });
         },
 
+        _getDefaultActivityStatusKey: function () {
+            var aActivityStates = this.getOwnerComponent().getModel("activityStates").getData() || [];
+            var oDefaultState = aActivityStates.find(function (oState) {
+                return oState.isDefault;
+            });
+
+            return (oDefaultState && oDefaultState.key) || "";
+        },
+
         onAddActivity: function () {
             this._openContactBoundDialog("activity");
         },
@@ -513,7 +522,7 @@ sap.ui.define([
                                     description: sap.ui.getCore().byId("newPropertyActivityDescription").getValue(),
                                     reminder_at: formatDateTimeForApi(oReminderDate),
                                     priority: sap.ui.getCore().byId("newPropertyActivityPriority").getSelectedKey(),
-                                    status: "da_fare"
+                                    status: this._getDefaultActivityStatusKey()
                                 });
                                 MessageToast.show(oBundle.getText("contactDetailActivityAdded"));
                                 oDialog.close();
