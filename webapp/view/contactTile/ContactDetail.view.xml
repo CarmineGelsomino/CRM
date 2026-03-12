@@ -1,6 +1,7 @@
 <mvc:View
     controllerName="crm.controller.contactTile.ContactDetail"
     xmlns="sap.m"
+    xmlns:tnt="sap.tnt"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form"
@@ -221,15 +222,35 @@
                 </headerToolbar>
                 <List id="activitiesList" items="{contactDetail>/activities}" noDataText="{i18n>contactDetailActivitiesNoData}">
                     <CustomListItem>
-                        <VBox>
-                            <Title text="{contactDetail>title}" level="H5" />
-                            <Text text="{contactDetail>description}" />
-                            <HBox renderType="Bare" class="sapUiTinyMarginTop">
-                                <ObjectStatus text="{contactDetail>priority}" state="Information" class="sapUiTinyMarginEnd" />
-                                <ObjectStatus
-                                    text="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
-                                    state="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }" />
+                        <VBox class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+                            <HBox justifyContent="SpaceBetween" alignItems="Start" wrap="Wrap">
+                                <Title text="{contactDetail>title}" level="H5" />
+                                <Text
+                                    text="{= ${contactDetail>reminder_at} ? ${i18n>contactDetailActivityFieldReminder} + ': ' + ${contactDetail>reminder_at} : '' }"
+                                    class="sapUiTinyMarginBegin sapUiTinyMarginTop" />
                             </HBox>
+                            <Text
+                                text="{contactDetail>description}"
+                                visible="{= !!${contactDetail>description} }"
+                                class="sapUiTinyMarginTop" />
+                            <FlexBox wrap="Wrap" class="sapUiSmallMarginTop">
+                                <items>
+                                    <tnt:InfoLabel
+                                        text="{ parts: [ { path: 'contactDetail>activity_type' }, { path: 'activityTypes>/' } ], formatter: 'formatter.lookupText' }"
+                                        colorScheme="{ path: 'contactDetail>activity_type', formatter: 'formatter.activityTypeColorScheme' }"
+                                        visible="{= !!${contactDetail>activity_type} }"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                    <tnt:InfoLabel
+                                        text="{ path: 'contactDetail>priority', formatter: 'formatter.activityPriorityText' }"
+                                        colorScheme="{ path: 'contactDetail>priority', formatter: 'formatter.activityPriorityColorScheme' }"
+                                        visible="{= !!${contactDetail>priority} }"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                    <ObjectStatus
+                                        text="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
+                                        state="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                </items>
+                            </FlexBox>
                         </VBox>
                     </CustomListItem>
                 </List>

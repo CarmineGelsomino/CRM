@@ -1,18 +1,22 @@
 [
   {
     "key": "chiamata",
-    "i18n": "contactDetailActivityTypeCall"
+    "i18n": "contactDetailActivityTypeCall",
+    "value": "Telefonata"
   },
   {
     "key": "evento",
-    "i18n": "contactDetailActivityTypeMeeting"
+    "i18n": "contactDetailActivityTypeMeeting",
+    "value": "Appuntamento"
   },
   {
     "key": "email",
-    "i18n": "contactDetailActivityTypeEmail"
+    "i18n": "contactDetailActivityTypeEmail",
+    "value": "Email"
   },
   {
     "key": "altro",
-    "i18n": "contactDetailActivityTypeTodo"
+    "i18n": "contactDetailActivityTypeTodo",
+    "value": "To-do"
   }
 ]

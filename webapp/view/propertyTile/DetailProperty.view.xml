@@ -1,6 +1,7 @@
 <mvc:View
     controllerName="crm.controller.propertyTile.DetailProperty"
     xmlns="sap.m"
+    xmlns:tnt="sap.tnt"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form"
@@ -126,16 +127,39 @@
                 </headerToolbar>
                 <List id="propertyActivitiesList" items="{propertyDetail>/activities}" noDataText="{i18n>contactDetailActivitiesNoData}">
                     <CustomListItem>
-                        <VBox>
-                            <Title text="{propertyDetail>title}" level="H5" />
-                            <Text text="{propertyDetail>description}" />
-                            <Link text="{= ${i18n>propertyDetailLinkedContactPrefix} + ${propertyDetail>contact_name}}" press="onOpenActivityContact" />
-                            <HBox renderType="Bare" class="sapUiTinyMarginTop">
-                                <ObjectStatus text="{propertyDetail>priority}" state="Information" class="sapUiTinyMarginEnd" />
-                                <ObjectStatus
-                                    text="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
-                                    state="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }" />
+                        <VBox class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+                            <HBox justifyContent="SpaceBetween" alignItems="Start" wrap="Wrap">
+                                <Title text="{propertyDetail>title}" level="H5" />
+                                <Text
+                                    text="{= ${propertyDetail>reminder_at} ? ${i18n>contactDetailActivityFieldReminder} + ': ' + ${propertyDetail>reminder_at} : '' }"
+                                    class="sapUiTinyMarginBegin sapUiTinyMarginTop" />
                             </HBox>
+                            <Text
+                                text="{propertyDetail>description}"
+                                visible="{= !!${propertyDetail>description} }"
+                                class="sapUiTinyMarginTop" />
+                            <Link
+                                text="{= ${i18n>propertyDetailLinkedContactPrefix} + ${propertyDetail>contact_name}}"
+                                press="onOpenActivityContact"
+                                class="sapUiSmallMarginTop" />
+                            <FlexBox wrap="Wrap" class="sapUiSmallMarginTop">
+                                <items>
+                                    <tnt:InfoLabel
+                                        text="{ parts: [ { path: 'propertyDetail>activity_type' }, { path: 'activityTypes>/' } ], formatter: 'formatter.lookupText' }"
+                                        colorScheme="{ path: 'propertyDetail>activity_type', formatter: 'formatter.activityTypeColorScheme' }"
+                                        visible="{= !!${propertyDetail>activity_type} }"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                    <tnt:InfoLabel
+                                        text="{ path: 'propertyDetail>priority', formatter: 'formatter.activityPriorityText' }"
+                                        colorScheme="{ path: 'propertyDetail>priority', formatter: 'formatter.activityPriorityColorScheme' }"
+                                        visible="{= !!${propertyDetail>priority} }"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                    <ObjectStatus
+                                        text="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
+                                        state="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                </items>
+                            </FlexBox>
                         </VBox>
                     </CustomListItem>
                 </List>
