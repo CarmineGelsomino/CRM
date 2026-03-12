@@ -19,5 +19,10 @@
         "key": "completato",
         "value": "Completato",
         "state": "Success"
+    },
+    {
+        "key": "annullato",
+        "value": "Annullato",
+        "state": "Error"
     }
 ]

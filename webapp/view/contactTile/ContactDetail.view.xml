@@ -280,9 +280,16 @@
                         <VBox class="sapUiSmallMarginTop sapUiSmallMarginBottom">
                             <HBox justifyContent="SpaceBetween" alignItems="Start" wrap="Wrap">
                                 <Title text="{contactDetail>title}" level="H5" />
-                                <Text
-                                    text="{= ${contactDetail>reminder_at} ? ${i18n>contactDetailActivityFieldReminder} + ': ' + ${contactDetail>reminder_at} : '' }"
-                                    class="sapUiTinyMarginBegin sapUiTinyMarginTop" />
+                                <HBox alignItems="Center" renderType="Bare">
+                                    <Text
+                                        text="{= ${contactDetail>reminder_at} ? ${i18n>contactDetailActivityFieldReminder} + ': ' + ${contactDetail>reminder_at} : '' }"
+                                        class="sapUiTinyMarginBegin sapUiTinyMarginTop" />
+                                    <Button
+                                        icon="sap-icon://edit"
+                                        type="Transparent"
+                                        tooltip="{i18n>contactDetailEditActivityTitle}"
+                                        press="onEditActivity" />
+                                </HBox>
                             </HBox>
                             <Text
                                 text="{contactDetail>description}"

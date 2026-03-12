@@ -215,6 +215,10 @@ sap.ui.define([
         }).format(oDate);
     }
 
+    function createDateFromApiValue(sValue) {
+        return parseActivityDate(sValue);
+    }
+
     function getActivityActualDate(oActivity) {
         return parseActivityDate(oActivity && (oActivity.completed_at || oActivity.created_at || oActivity.reminder_at));
     }
@@ -731,38 +735,53 @@ sap.ui.define([
             return (oDefaultState && oDefaultState.key) || "";
         },
 
-        onSectionTabSelect: function (oEvent) {
-            this._scrollToSection(oEvent.getParameter("key"));
+        _getEditableActivityStates: function () {
+            return (this.getOwnerComponent().getModel("activityStates").getData() || []).filter(function (oState) {
+                return !oState.isFilterOnly;
+            });
         },
 
-        _scrollToSection: function (sSectionId) {
-            var oSection = this.byId(sSectionId);
-            var oDomRef = oSection && oSection.getDomRef();
+        _buildActivityPayloadFromDialog: function (mIds, iContactId, bIsEdit) {
+            var sStatus = sap.ui.getCore().byId(mIds.status).getSelectedKey();
 
-            if (oDomRef) {
-                oDomRef.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start"
-                });
-            }
+            return {
+                user_id: this.getModel("session").getProperty("/userId") || 1,
+                contact_id: iContactId,
+                title: sap.ui.getCore().byId(mIds.title).getValue().trim(),
+                activity_type: sap.ui.getCore().byId(mIds.type).getSelectedKey(),
+                description: sap.ui.getCore().byId(mIds.description).getValue(),
+                reminder_at: formatDateTimeForApi(sap.ui.getCore().byId(mIds.reminder).getDateValue()),
+                priority: sap.ui.getCore().byId(mIds.priority).getSelectedKey(),
+                status: sStatus,
+                completed_at: sStatus === "completato" ? formatDateTimeForApi(new Date()) : (bIsEdit ? null : undefined)
+            };
         },
 
-        onAddActivity: function () {
+        _openActivityDialog: function (oOptions) {
             var oBundle = this.getResourceBundle();
             var aActivityTypes = this.getOwnerComponent().getModel("activityTypes").getData() || [];
-            var iContactId = this.getModel("contactDetail").getProperty("/contactId");
+            var aActivityStates = this._getEditableActivityStates();
+            var oActivity = oOptions.activity || {};
+            var mIds = {
+                title: oOptions.idPrefix + "Title",
+                type: oOptions.idPrefix + "Type",
+                description: oOptions.idPrefix + "Description",
+                reminder: oOptions.idPrefix + "Reminder",
+                priority: oOptions.idPrefix + "Priority",
+                status: oOptions.idPrefix + "Status"
+            };
             var oDialog = new Dialog({
-                title: oBundle.getText("contactDetailNewActivityTitle"),
+                title: oOptions.title,
                 contentWidth: "30rem",
                 state: "Information",
                 type: "Message",
                 content: [
                     new Label({ text: oBundle.getText("contactDetailActivityFieldTitle"), required: true }),
-                    new Input("newActivityTitle"),
+                    new Input(mIds.title, { value: oActivity.title || "" }),
                     new Label({ text: oBundle.getText("contactDetailActivityFieldType") }),
-                    new Select("newActivityType", {
+                    new Select(mIds.type, {
                         width: "100%",
-                        selectedKey: "chiamata",
+                        selectedKey: oActivity.activity_type || "chiamata",
                         forceSelection: false,
                         items: aActivityTypes.map(function (oType) {
                             return new Item({
@@ -772,48 +791,43 @@ sap.ui.define([
                         })
                     }),
                     new Label({ text: oBundle.getText("contactDetailActivityFieldDescription") }),
-                    new TextArea("newActivityDescription", { width: "100%", rows: 4 }),
+                    new TextArea(mIds.description, { width: "100%", rows: 4, value: oActivity.description || "" }),
                     new Label({ text: oBundle.getText("contactDetailActivityFieldReminder") }),
-                    new DateTimePicker("newActivityReminder"),
+                    new DateTimePicker(mIds.reminder, { dateValue: createDateFromApiValue(oActivity.reminder_at) }),
                     new Label({ text: oBundle.getText("contactDetailActivityFieldPriority") }),
-                    new Select("newActivityPriority", {
-                        selectedKey: "media",
+                    new Select(mIds.priority, {
+                        selectedKey: oActivity.priority || "media",
                         width: "100%",
                         items: [
                             new Item({ key: "bassa", text: oBundle.getText("contactDetailPriorityLow") }),
                             new Item({ key: "media", text: oBundle.getText("contactDetailPriorityMedium") }),
                             new Item({ key: "alta", text: oBundle.getText("contactDetailPriorityHigh") })
                         ]
+                    }),
+                    new Label({ text: oBundle.getText("contactDetailActivityFieldStatus") }),
+                    new Select(mIds.status, {
+                        selectedKey: oActivity.status || this._getDefaultActivityStatusKey(),
+                        width: "100%",
+                        items: aActivityStates.map(function (oState) {
+                            return new Item({ key: oState.key, text: oState.value });
+                        })
                     })
                 ],
                 beginButton: new Button({
-                    text: oBundle.getText("contactDetailAddButton"),
+                    text: oOptions.confirmText,
                     type: "Emphasized",
                     press: async function () {
-                        var sTitle = sap.ui.getCore().byId("newActivityTitle").getValue().trim();
-                        var oReminderDate = sap.ui.getCore().byId("newActivityReminder").getDateValue();
+                        var oPayload = this._buildActivityPayloadFromDialog(mIds, oOptions.contactId, !!oOptions.activity);
 
-                        if (!sTitle) {
+                        if (!oPayload.title) {
                             MessageToast.show(oBundle.getText("contactDetailActivityTitleRequired"));
                             return;
                         }
 
-                        var oPayload = {
-                            user_id: this.getModel("session").getProperty("/userId") || 1,
-                            contact_id: iContactId,
-                            title: sTitle,
-                            activity_type: sap.ui.getCore().byId("newActivityType").getSelectedKey(),
-                            description: sap.ui.getCore().byId("newActivityDescription").getValue(),
-                            reminder_at: formatDateTimeForApi(oReminderDate),
-                            priority: sap.ui.getCore().byId("newActivityPriority").getSelectedKey(),
-                            status: this._getDefaultActivityStatusKey()
-                        };
-
                         try {
-                            await ContactApi.createActivity(oPayload);
-                            MessageToast.show(oBundle.getText("contactDetailActivityAdded"));
+                            await oOptions.onConfirm(oPayload);
+                            MessageToast.show(oOptions.successMessage);
                             oDialog.close();
-                            await this._loadContact(iContactId);
                         } catch (oError) {
                             // Error feedback is already handled in ContactApi
                         }
@@ -832,6 +846,59 @@ sap.ui.define([
 
             this.getView().addDependent(oDialog);
             oDialog.open();
+        },
+
+        onSectionTabSelect: function (oEvent) {
+            this._scrollToSection(oEvent.getParameter("key"));
+        },
+
+        _scrollToSection: function (sSectionId) {
+            var oSection = this.byId(sSectionId);
+            var oDomRef = oSection && oSection.getDomRef();
+
+            if (oDomRef) {
+                oDomRef.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+        },
+
+        onAddActivity: function () {
+            var iContactId = this.getModel("contactDetail").getProperty("/contactId");
+            this._openActivityDialog({
+                idPrefix: "newActivity",
+                contactId: iContactId,
+                title: this.getResourceBundle().getText("contactDetailNewActivityTitle"),
+                confirmText: this.getResourceBundle().getText("contactDetailAddButton"),
+                successMessage: this.getResourceBundle().getText("contactDetailActivityAdded"),
+                onConfirm: async function (oPayload) {
+                    await ContactApi.createActivity(oPayload);
+                    await this._loadContact(iContactId);
+                }.bind(this)
+            });
+        },
+
+        onEditActivity: function (oEvent) {
+            var oActivity = oEvent.getSource().getBindingContext("contactDetail").getObject();
+            var iContactId = this.getModel("contactDetail").getProperty("/contactId");
+
+            if (!oActivity || !oActivity.id) {
+                return;
+            }
+
+            this._openActivityDialog({
+                idPrefix: "editActivity",
+                activity: oActivity,
+                contactId: iContactId,
+                title: this.getResourceBundle().getText("contactDetailEditActivityTitle"),
+                confirmText: this.getResourceBundle().getText("contactDetailSaveActivityButton"),
+                successMessage: this.getResourceBundle().getText("contactDetailActivityUpdated"),
+                onConfirm: async function (oPayload) {
+                    await ContactApi.updateActivity(oActivity.id, oPayload);
+                    await this._loadContact(iContactId);
+                }.bind(this)
+            });
         },
 
         onAddNote: function () {
