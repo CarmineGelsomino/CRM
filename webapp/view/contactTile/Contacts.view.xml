@@ -4,7 +4,8 @@
     xmlns:tnt="sap.tnt"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
-    xmlns:f="sap.ui.layout.form">
+    xmlns:f="sap.ui.layout.form"
+    core:require="{ formatter: 'crm/model/formatter' }">
     <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
     <Page title="{i18n>contactsPageTitle}" class="sapUiResponsiveContentPadding">
         <content>
@@ -97,7 +98,9 @@
                         <cells>
                             <ObjectIdentifier title="{= ${contacts>first_name} + ' ' + ${contacts>last_name}}" text="{= ${i18n>contactsTableIdPrefix} + ${contacts>id}}" />
                             <Text text="{contacts>email}" />
-                            <tnt:InfoLabel text="{contacts>_categoryInfoText}" colorScheme="{contacts>_categoryInfoColorScheme}" />
+                            <tnt:InfoLabel
+                                text="{ parts: [ { path: 'contacts>category' }, { path: 'categoriesContact>/' } ], formatter: 'formatter.contactCategoryText' }"
+                                colorScheme="{ parts: [ { path: 'contacts>category' }, { path: 'categoriesContact>/' } ], formatter: 'formatter.contactCategoryColorScheme' }" />
                             <ObjectStatus
                                 text="{contacts>status}"
                                 state="{= ${contacts>status} === 'Attivo' || ${contacts>status} === 'attivo' ? 'Success' : (${contacts>status} === 'Futuro' || ${contacts>status} === 'futuro' ? 'Warning' : 'None')}" />
