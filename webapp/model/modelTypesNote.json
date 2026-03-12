@@ -1,0 +1,18 @@
+[
+  {
+    "key": "call",
+    "i18n": "contactDetailActivityTypeCall"
+  },
+  {
+    "key": "meeting",
+    "i18n": "contactDetailActivityTypeMeeting"
+  },
+  {
+    "key": "email",
+    "i18n": "contactDetailActivityTypeEmail"
+  },
+  {
+    "key": "todo",
+    "i18n": "contactDetailActivityTypeTodo"
+  }
+]

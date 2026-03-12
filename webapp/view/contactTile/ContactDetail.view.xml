@@ -5,17 +5,17 @@
     xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form">
     <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
-    <Page title="Dettaglio contatto" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
+    <Page title="{i18n>contactDetailPageTitle}" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
         <content>
             <ObjectHeader
                 title="{= ${contactDetail>/contact/first_name} + ' ' + ${contactDetail>/contact/last_name}}"
                 number="{contactDetail>/contact/id}"
-                numberUnit="ID"
+                numberUnit="{i18n>contactDetailIdUnit}"
                 intro="{contactDetail>/contact/category}"
                 responsive="true">
                 <attributes>
-                    <ObjectAttribute text="Email: {contactDetail>/contact/email}" />
-                    <ObjectAttribute text="PEC: {contactDetail>/contact/pec_email}" />
+                    <ObjectAttribute text="{= ${i18n>contactDetailEmailPrefix} + ${contactDetail>/contact/email}}" />
+                    <ObjectAttribute text="{= ${i18n>contactDetailPecPrefix} + ${contactDetail>/contact/pec_email}}" />
                 </attributes>
                 <statuses>
                     <ObjectStatus
@@ -24,25 +24,25 @@
                 </statuses>
             </ObjectHeader>
 
-            <f:SimpleForm editable="true" layout="ResponsiveGridLayout" title="Dati contatto" class="sapUiSmallMarginTop">
+            <f:SimpleForm editable="true" layout="ResponsiveGridLayout" title="{i18n>contactDetailSectionContactData}" class="sapUiSmallMarginTop">
                 <f:content>
-                    <Label text="Nome" />
+                    <Label text="{i18n>contactsDialogFieldFirstName}" />
                     <Input value="{contactDetail>/contact/first_name}" />
-                    <Label text="Cognome" />
+                    <Label text="{i18n>contactsDialogFieldLastName}" />
                     <Input value="{contactDetail>/contact/last_name}" />
-                    <Label text="Email" />
+                    <Label text="{i18n>contactsDialogFieldEmail}" />
                     <Input value="{contactDetail>/contact/email}" type="Email" />
-                    <Label text="PEC" />
+                    <Label text="{i18n>contactsDialogFieldPec}" />
                     <Input value="{contactDetail>/contact/pec_email}" type="Email" />
-                    <Label text="Categoria" />
+                    <Label text="{i18n>contactsDialogFieldCategory}" />
                     <Select selectedKey="{contactDetail>/contact/category}" items="{categoriesContact>/}">
                         <core:Item key="{categoriesContact>key}" text="{categoriesContact>value}" />
                     </Select>
-                    <Label text="Stato" />
+                    <Label text="{i18n>contactsDialogFieldStatus}" />
                     <Select selectedKey="{contactDetail>/contact/status}" items="{statesContact>/}">
                         <core:Item key="{statesContact>key}" text="{statesContact>value}" />
                     </Select>
-                    <Label text="Informazioni" />
+                    <Label text="{i18n>contactDetailFieldInfo}" />
                     <TextArea rows="4" value="{contactDetail>/contact/generic_info}" />
                 </f:content>
             </f:SimpleForm>
@@ -50,65 +50,65 @@
             <f:SimpleForm
                 editable="true"
                 layout="ResponsiveGridLayout"
-                title="Profilo acquirente"
+                title="{i18n>contactDetailSectionBuyerProfile}"
                 class="sapUiSmallMarginTop"
                 visible="{= ${contactDetail>/contact/category} === 'acquirente' }">
                 <f:content>
-                    <Label text="Zona richiesta" />
+                    <Label text="{i18n>contactsDialogFieldRequestedArea}" />
                     <Input value="{contactDetail>/buyerProfile/requested_area}" />
-                    <Label text="Tipologia immobile" />
+                    <Label text="{i18n>contactsDialogFieldPropertyType}" />
                     <Input value="{contactDetail>/buyerProfile/property_type}" />
-                    <Label text="Piano preferito" />
+                    <Label text="{i18n>contactsDialogFieldFloorPreference}" />
                     <Select selectedKey="{contactDetail>/buyerProfile/floor_preference}" items="{favoriteFloor>/}">
                         <core:Item key="{favoriteFloor>key}" text="{favoriteFloor>value}" />
                     </Select>
-                    <Label text="Budget ristrutturato" />
+                    <Label text="{i18n>contactsDialogFieldBudgetRenovated}" />
                     <Input value="{contactDetail>/buyerProfile/purchase_price_renovated}" type="Number" />
-                    <Label text="Budget da ristrutturare" />
+                    <Label text="{i18n>contactsDialogFieldBudgetToRenovate}" />
                     <Input value="{contactDetail>/buyerProfile/purchase_price_to_renovate}" type="Number" />
-                    <Label text="Mutuo" />
+                    <Label text="{i18n>contactsDialogFieldMortgage}" />
                     <Select selectedKey="{contactDetail>/buyerProfile/mortgage_type}" items="{valueMutuo>/}">
                         <core:Item key="{valueMutuo>key}" text="{valueMutuo>value}" />
                     </Select>
-                    <Label text="Dettaglio mutuo" visible="{= ${contactDetail>/buyerProfile/mortgage_type} === 'altro' }" />
+                    <Label text="{i18n>contactsDialogFieldMortgageDetail}" visible="{= ${contactDetail>/buyerProfile/mortgage_type} === 'altro' }" />
                     <TextArea
                         rows="3"
                         value="{contactDetail>/buyerProfile/mortgage_other}"
                         visible="{= ${contactDetail>/buyerProfile/mortgage_type} === 'altro' }" />
-                    <Label text="Preferenze" />
+                    <Label text="{i18n>contactsDialogFieldPreferences}" />
                     <VBox>
-                        <CheckBox text="Box" selected="{contactDetail>/buyerProfile/preferences/box}" />
-                        <CheckBox text="Posto auto" selected="{contactDetail>/buyerProfile/preferences/posto_auto}" />
-                        <CheckBox text="Cantina" selected="{contactDetail>/buyerProfile/preferences/cantina}" />
-                        <CheckBox text="Terrazzo" selected="{contactDetail>/buyerProfile/preferences/terrazzo}" />
-                        <CheckBox text="Altro" selected="{contactDetail>/buyerProfile/preferences/altro}" />
+                        <CheckBox text="{i18n>contactsDialogPreferenceBox}" selected="{contactDetail>/buyerProfile/preferences/box}" />
+                        <CheckBox text="{i18n>contactsDialogPreferenceParking}" selected="{contactDetail>/buyerProfile/preferences/posto_auto}" />
+                        <CheckBox text="{i18n>contactsDialogPreferenceCellar}" selected="{contactDetail>/buyerProfile/preferences/cantina}" />
+                        <CheckBox text="{i18n>contactsDialogPreferenceTerrace}" selected="{contactDetail>/buyerProfile/preferences/terrazzo}" />
+                        <CheckBox text="{i18n>contactsDialogPreferenceOther}" selected="{contactDetail>/buyerProfile/preferences/altro}" />
                     </VBox>
-                    <Label text="Altro preferenze" visible="{= ${contactDetail>/buyerProfile/preferences/altro} }" />
+                    <Label text="{i18n>contactsDialogFieldPreferenceOther}" visible="{= ${contactDetail>/buyerProfile/preferences/altro} }" />
                     <Input value="{contactDetail>/buyerProfile/preference_other}" visible="{= ${contactDetail>/buyerProfile/preferences/altro} }" />
                 </f:content>
             </f:SimpleForm>
 
             <Toolbar class="sapUiSmallMarginTop sapUiTinyMarginBottom">
                 <ToolbarSpacer />
-                <Button text="Salva contatto" type="Emphasized" icon="sap-icon://save" press="onSaveContact" />
+                <Button text="{i18n>contactDetailSaveButton}" type="Emphasized" icon="sap-icon://save" press="onSaveContact" />
             </Toolbar>
 
-            <Panel headerText="Attività" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+            <Panel headerText="{i18n>contactDetailActivitiesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
                 <headerToolbar>
                     <OverflowToolbar>
-                        <Title text="Attività" level="H4" />
+                        <Title text="{i18n>contactDetailActivitiesTitle}" level="H4" />
                         <ToolbarSpacer />
-                        <SearchField id="activitySearchField" width="14rem" placeholder="Filtra attività" liveChange="onFilterActivities" search="onFilterActivities" />
+                        <SearchField id="activitySearchField" width="14rem" placeholder="{i18n>contactDetailActivitiesFilterPlaceholder}" liveChange="onFilterActivities" search="onFilterActivities" />
                         <Select width="10rem" selectedKey="" change="onFilterActivities" id="activityStatusFilter">
-                            <core:Item key="" text="Tutti" />
-                            <core:Item key="todo" text="To do" />
-                            <core:Item key="in_corso" text="In corso" />
-                            <core:Item key="completata" text="Completata" />
+                            <core:Item key="" text="{i18n>contactDetailActivityStatusAll}" />
+                            <core:Item key="todo" text="{i18n>contactDetailActivityStatusTodo}" />
+                            <core:Item key="in_corso" text="{i18n>contactDetailActivityStatusInProgress}" />
+                            <core:Item key="completata" text="{i18n>contactDetailActivityStatusCompleted}" />
                         </Select>
-                        <Button text="Aggiungi" icon="sap-icon://add" press="onAddActivity" />
+                        <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddActivity" />
                     </OverflowToolbar>
                 </headerToolbar>
-                <List id="activitiesList" items="{contactDetail>/activities}" noDataText="Nessuna attività registrata">
+                <List id="activitiesList" items="{contactDetail>/activities}" noDataText="{i18n>contactDetailActivitiesNoData}">
                     <CustomListItem>
                         <VBox>
                             <Title text="{contactDetail>title}" level="H5" />
@@ -122,17 +122,17 @@
                 </List>
             </Panel>
 
-            <Panel headerText="Note" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+            <Panel headerText="{i18n>contactDetailNotesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
                 <headerToolbar>
                     <OverflowToolbar>
-                        <Title text="Note" level="H4" />
+                        <Title text="{i18n>contactDetailNotesTitle}" level="H4" />
                         <ToolbarSpacer />
-                        <SearchField width="14rem" placeholder="Filtra note" liveChange="onFilterNotes" search="onFilterNotes" />
-                        <Button text="Aggiungi" icon="sap-icon://add" press="onAddNote" />
+                        <SearchField width="14rem" placeholder="{i18n>contactDetailNotesFilterPlaceholder}" liveChange="onFilterNotes" search="onFilterNotes" />
+                        <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddNote" />
                     </OverflowToolbar>
                 </headerToolbar>
-                <List id="notesList" items="{contactDetail>/notes}" noDataText="Nessuna nota registrata">
-                    <StandardListItem title="{contactDetail>message}" description="Creata il: {contactDetail>created_at}" />
+                <List id="notesList" items="{contactDetail>/notes}" noDataText="{i18n>contactDetailNotesNoData}">
+                    <StandardListItem title="{contactDetail>message}" description="{= ${i18n>contactDetailNoteCreatedAtPrefix} + ${contactDetail>created_at}}" />
                 </List>
             </Panel>
         </content>

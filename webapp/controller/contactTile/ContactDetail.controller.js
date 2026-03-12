@@ -115,10 +115,12 @@ sap.ui.define([
                 var oContact = await ContactApi.getContact(iContactId);
                 var oBuyerProfile = createEmptyBuyerProfile();
                 var oExistingBuyerProfile = await ContactApi.getBuyerProfileByContactId(iContactId);
+
                 if (oExistingBuyerProfile) {
                     var aPreferences = await ContactApi.listBuyerPreferences(oExistingBuyerProfile.id);
                     oBuyerProfile = Object.assign(oBuyerProfile, oExistingBuyerProfile, mapBuyerPreferences(aPreferences));
                 }
+
                 var aActivities = await ContactApi.listActivities(iContactId);
                 var aNotes = await ContactApi.listNotes(iContactId);
                 var oModel = this.getModel("contactDetail");
@@ -152,20 +154,21 @@ sap.ui.define([
         },
 
         onSaveContact: async function () {
+            var oBundle = this.getResourceBundle();
             var oModel = this.getModel("contactDetail");
             var iContactId = oModel.getProperty("/contactId");
             var oContact = oModel.getProperty("/contact");
             var oBuyerProfile = oModel.getProperty("/buyerProfile") || createEmptyBuyerProfile();
 
             if (!oContact.first_name || !oContact.last_name) {
-                MessageToast.show("Nome e cognome sono obbligatori.");
+                MessageToast.show(oBundle.getText("contactsValidationNameRequired"));
                 return;
             }
 
             try {
                 await ContactApi.updateContact(iContactId, oContact);
                 await this._saveBuyerProfileData(iContactId, oContact, oBuyerProfile);
-                MessageToast.show("Contatto aggiornato.");
+                MessageToast.show(oBundle.getText("contactDetailUpdateSuccess"));
                 await this._loadContact(iContactId);
             } catch (oError) {
                 // Error feedback is already handled in ContactApi
@@ -232,44 +235,52 @@ sap.ui.define([
         },
 
         onAddActivity: function () {
+            var oBundle = this.getResourceBundle();
+            var aActivityTypes = this.getOwnerComponent().getModel("activityTypes").getData() || [];
             var iContactId = this.getModel("contactDetail").getProperty("/contactId");
             var oDialog = new Dialog({
-                title: "Nuova attività",
+                title: oBundle.getText("contactDetailNewActivityTitle"),
                 contentWidth: "30rem",
+                state: "Information",
+                type: "Message",
                 content: [
-                    new Label({ text: "Titolo", required: true }),
+                    new Label({ text: oBundle.getText("contactDetailActivityFieldTitle"), required: true }),
                     new Input("newActivityTitle"),
-                    new Label({ text: "Tipo attività" }),
+                    new Label({ text: oBundle.getText("contactDetailActivityFieldType") }),
                     new Select("newActivityType", {
+                        width: "100%",
                         selectedKey: "call",
-                        items: [
-                            new Item({ key: "call", text: "Telefonata" }),
-                            new Item({ key: "meeting", text: "Appuntamento" }),
-                            new Item({ key: "email", text: "Email" }),
-                            new Item({ key: "todo", text: "To-do" })
-                        ]
+                        forceSelection: false,
+                        items: aActivityTypes.map(function (oType) {
+                            return new Item({
+                                key: oType.key,
+                                text: oBundle.getText(oType.i18n)
+                            });
+                        })
                     }),
-                    new Label({ text: "Descrizione" }),
-                    new TextArea("newActivityDescription", { rows: 4 }),
-                    new Label({ text: "Promemoria" }),
+                    new Label({ text: oBundle.getText("contactDetailActivityFieldDescription") }),
+                    new TextArea("newActivityDescription", { width: "100%", rows: 4 }),
+                    new Label({ text: oBundle.getText("contactDetailActivityFieldReminder") }),
                     new DateTimePicker("newActivityReminder"),
-                    new Label({ text: "Priorità" }),
+                    new Label({ text: oBundle.getText("contactDetailActivityFieldPriority") }),
                     new Select("newActivityPriority", {
                         selectedKey: "media",
+                        width: "100%",
                         items: [
-                            new Item({ key: "bassa", text: "Bassa" }),
-                            new Item({ key: "media", text: "Media" }),
-                            new Item({ key: "alta", text: "Alta" })
+                            new Item({ key: "bassa", text: oBundle.getText("contactDetailPriorityLow") }),
+                            new Item({ key: "media", text: oBundle.getText("contactDetailPriorityMedium") }),
+                            new Item({ key: "alta", text: oBundle.getText("contactDetailPriorityHigh") })
                         ]
                     })
                 ],
                 beginButton: new Button({
-                    text: "Aggiungi",
+                    text: oBundle.getText("contactDetailAddButton"),
                     type: "Emphasized",
                     press: async function () {
                         var sTitle = sap.ui.getCore().byId("newActivityTitle").getValue().trim();
+
                         if (!sTitle) {
-                            MessageToast.show("Il titolo attività è obbligatorio.");
+                            MessageToast.show(oBundle.getText("contactDetailActivityTitleRequired"));
                             return;
                         }
 
@@ -286,7 +297,7 @@ sap.ui.define([
 
                         try {
                             await ContactApi.createActivity(oPayload);
-                            MessageToast.show("Attività aggiunta.");
+                            MessageToast.show(oBundle.getText("contactDetailActivityAdded"));
                             oDialog.close();
                             await this._loadContact(iContactId);
                         } catch (oError) {
@@ -295,7 +306,7 @@ sap.ui.define([
                     }.bind(this)
                 }),
                 endButton: new Button({
-                    text: "Annulla",
+                    text: oBundle.getText("contactsDialogCancelButton"),
                     press: function () {
                         oDialog.close();
                     }
@@ -310,27 +321,31 @@ sap.ui.define([
         },
 
         onAddNote: function () {
+            var oBundle = this.getResourceBundle();
             var iContactId = this.getModel("contactDetail").getProperty("/contactId");
             var oDialog = new Dialog({
-                title: "Nuova nota",
+                title: oBundle.getText("contactDetailNewNoteTitle"),
                 contentWidth: "28rem",
+                state: "Information",
+                type: "Message",
                 content: [
-                    new Label({ text: "Testo nota", required: true }),
-                    new TextArea("newNoteMessage", { rows: 6 })
+                    new Label({ text: oBundle.getText("contactDetailNoteFieldText"), required: true }),
+                    new TextArea("newNoteMessage", { width: "100%", rows: 6 })
                 ],
                 beginButton: new Button({
-                    text: "Aggiungi",
+                    text: oBundle.getText("contactDetailAddButton"),
                     type: "Emphasized",
                     press: async function () {
                         var sMessage = sap.ui.getCore().byId("newNoteMessage").getValue().trim();
+
                         if (!sMessage) {
-                            MessageToast.show("Inserisci il testo della nota.");
+                            MessageToast.show(oBundle.getText("contactDetailNoteTextRequired"));
                             return;
                         }
 
                         try {
                             await ContactApi.createNote({ user_id: 1, contact_id: iContactId, message: sMessage });
-                            MessageToast.show("Nota aggiunta.");
+                            MessageToast.show(oBundle.getText("contactDetailNoteAdded"));
                             oDialog.close();
                             await this._loadContact(iContactId);
                         } catch (oError) {
@@ -339,7 +354,7 @@ sap.ui.define([
                     }.bind(this)
                 }),
                 endButton: new Button({
-                    text: "Annulla",
+                    text: oBundle.getText("contactsDialogCancelButton"),
                     press: function () {
                         oDialog.close();
                     }

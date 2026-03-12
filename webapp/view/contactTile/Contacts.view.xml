@@ -5,12 +5,12 @@
     xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form">
     <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
-    <Page title="Contatti" class="sapUiResponsiveContentPadding">
+    <Page title="{i18n>contactsPageTitle}" class="sapUiResponsiveContentPadding">
         <content>
             <Panel class="sapUiTinyMarginBottom" expandable="true">
                 <headerToolbar>
                     <Toolbar>
-                        <Title text="Filtri" level="H5" />
+                        <Title text="{i18n>contactsFiltersTitle}" level="H5" />
                     </Toolbar>
                 </headerToolbar>
                 <content>
@@ -29,15 +29,15 @@
                         columnsL="3"
                         columnsM="2"
                         singleContainerFullSize="false">
-                        <Label text="Ricerca" labelFor="contactSearchField" />
+                        <Label text="{i18n>contactsFilterSearchLabel}" labelFor="contactSearchField" />
                         <SearchField
                             id="contactSearchField"
                             width="100%"
                             value="{contactFilters>/searchQuery}"
-                            placeholder="Cerca per nome o email"
+                            placeholder="{i18n>contactsFilterSearchPlaceholder}"
                             liveChange="onFilterChange"
                             search="onFilterChange" />
-                        <Label text="Categoria" labelFor="categorySelect" />
+                        <Label text="{i18n>contactsFilterCategoryLabel}" labelFor="categorySelect" />
                         <Select
                             id="categorySelect"
                             width="100%"
@@ -45,10 +45,10 @@
                             selectedKey="{contactFilters>/categoryKey}"
                             change="onFilterChange"
                             items="{categoriesContact>/}">
-                            <core:Item key="" text="Tutte le categorie" />
+                            <core:Item key="" text="{i18n>contactsFilterCategoryAll}" />
                             <core:Item key="{categoriesContact>key}" text="{categoriesContact>value}" />
                         </Select>
-                        <Label text="Stato" labelFor="statusSelect" />
+                        <Label text="{i18n>contactsFilterStatusLabel}" labelFor="statusSelect" />
                         <Select
                             id="statusSelect"
                             width="100%"
@@ -56,11 +56,11 @@
                             selectedKey="{contactFilters>/statusKey}"
                             change="onFilterChange"
                             items="{statesContact>/}">
-                            <core:Item key="" text="Tutti gli stati" />
+                            <core:Item key="" text="{i18n>contactsFilterStatusAll}" />
                             <core:Item key="{statesContact>key}" text="{statesContact>value}" />
                         </Select>
                     </f:SimpleForm>
-                    <Button text="Azzera filtri" icon="sap-icon://clear-filter" type="Transparent" press="onClearFilters" />
+                    <Button text="{i18n>contactsFilterClearButton}" icon="sap-icon://clear-filter" type="Transparent" press="onClearFilters" />
                 </content>
             </Panel>
 
@@ -72,29 +72,29 @@
                 busy="{contacts>/busy}"
                 items="{contacts>/contacts}"
                 selectionChange="onSelectionChange"
-                noDataText="Nessun contatto disponibile">
+                noDataText="{i18n>contactsTableNoData}">
                 <headerToolbar>
                     <OverflowToolbar>
-                        <Title text="{= 'Lista contatti (' + ${contacts>/contacts}.length + ')'}" level="H3" />
+                        <Title text="{= ${i18n>contactsTableTitlePrefix} + ${contacts>/contacts}.length + ')' }" level="H3" />
                         <ToolbarSpacer />
-                        <Button icon="sap-icon://refresh" tooltip="Aggiorna tabella" press="onRefreshContacts" />
-                        <Button text="Ordina" icon="sap-icon://sort" press="onOpenSortDialog" />
-                        <Button text="Nuovo" type="Emphasized" icon="sap-icon://add" press="onCreateContact" />
-                        <Button text="Modifica" icon="sap-icon://edit" enabled="{= !!${contacts>/selectedContactId}}" press="onEditContact" />
-                        <Button text="Elimina" type="Negative" icon="sap-icon://delete" enabled="{= !!${contacts>/selectedContactId}}" press="onDeleteContact" />
+                        <Button icon="sap-icon://refresh" tooltip="{i18n>contactsTableRefreshTooltip}" press="onRefreshContacts" />
+                        <Button text="{i18n>contactsTableSortButton}" icon="sap-icon://sort" press="onOpenSortDialog" />
+                        <Button text="{i18n>contactsTableNewButton}" type="Emphasized" icon="sap-icon://add" press="onCreateContact" />
+                        <Button text="{i18n>contactsTableEditButton}" icon="sap-icon://edit" enabled="{= !!${contacts>/selectedContactId}}" press="onEditContact" />
+                        <Button text="{i18n>contactsTableDeleteButton}" type="Negative" icon="sap-icon://delete" enabled="{= !!${contacts>/selectedContactId}}" press="onDeleteContact" />
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>
-                    <Column width="13rem"><Text text="Nome" /></Column>
-                    <Column width="15rem"><Text text="Email" /></Column>
-                    <Column width="10rem"><Text text="Categoria" /></Column>
-                    <Column width="8rem"><Text text="Stato" /></Column>
-                    <Column width="8rem" hAlign="End"><Text text="Azioni" /></Column>
+                    <Column width="13rem"><Text text="{i18n>contactsTableColumnName}" /></Column>
+                    <Column width="15rem"><Text text="{i18n>contactsTableColumnEmail}" /></Column>
+                    <Column width="10rem"><Text text="{i18n>contactsTableColumnCategory}" /></Column>
+                    <Column width="8rem"><Text text="{i18n>contactsTableColumnStatus}" /></Column>
+                    <Column width="8rem" hAlign="End"><Text text="{i18n>contactsTableColumnActions}" /></Column>
                 </columns>
                 <items>
                     <ColumnListItem type="Navigation" press="onOpenDetail">
                         <cells>
-                            <ObjectIdentifier title="{= ${contacts>first_name} + ' ' + ${contacts>last_name}}" text="ID: {contacts>id}" />
+                            <ObjectIdentifier title="{= ${contacts>first_name} + ' ' + ${contacts>last_name}}" text="{= ${i18n>contactsTableIdPrefix} + ${contacts>id}}" />
                             <Text text="{contacts>email}" />
                             <ObjectStatus text="{contacts>category}" state="Information" />
                             <ObjectStatus

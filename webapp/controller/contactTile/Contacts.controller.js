@@ -192,15 +192,17 @@ sap.ui.define([
         },
 
         onOpenSortDialog: function () {
+            var oBundle = this.getResourceBundle();
+
             if (!this._oSortDialog) {
                 this._oSortDialog = new ViewSettingsDialog({
                     confirm: this.onSortConfirm.bind(this),
                     sortItems: [
-                        new ViewSettingsItem({ key: "last_name", text: "Cognome" }),
-                        new ViewSettingsItem({ key: "first_name", text: "Nome" }),
-                        new ViewSettingsItem({ key: "email", text: "Email" }),
-                        new ViewSettingsItem({ key: "category", text: "Categoria" }),
-                        new ViewSettingsItem({ key: "status", text: "Stato" })
+                        new ViewSettingsItem({ key: "last_name", text: oBundle.getText("contactsSortLastName") }),
+                        new ViewSettingsItem({ key: "first_name", text: oBundle.getText("contactsSortFirstName") }),
+                        new ViewSettingsItem({ key: "email", text: oBundle.getText("contactsSortEmail") }),
+                        new ViewSettingsItem({ key: "category", text: oBundle.getText("contactsSortCategory") }),
+                        new ViewSettingsItem({ key: "status", text: oBundle.getText("contactsSortStatus") })
                     ]
                 });
                 this.getView().addDependent(this._oSortDialog);
@@ -242,7 +244,7 @@ sap.ui.define([
         onEditContact: function () {
             var oContact = this.getModel("contacts").getProperty("/selectedContact");
             if (!oContact) {
-                MessageToast.show("Seleziona un contatto da modificare.");
+                MessageToast.show(this.getResourceBundle().getText("contactsSelectToEdit"));
                 return;
             }
 
@@ -258,7 +260,7 @@ sap.ui.define([
         onDeleteContact: function () {
             var oContact = this.getModel("contacts").getProperty("/selectedContact");
             if (!oContact) {
-                MessageToast.show("Seleziona un contatto da eliminare.");
+                MessageToast.show(this.getResourceBundle().getText("contactsSelectToDelete"));
                 return;
             }
 
@@ -272,7 +274,9 @@ sap.ui.define([
         },
 
         _confirmDeleteContact: function (oContact) {
-            MessageBox.confirm("Eliminare il contatto " + oContact.first_name + " " + oContact.last_name + "?", {
+            var oBundle = this.getResourceBundle();
+
+            MessageBox.confirm(oBundle.getText("contactsDeleteConfirm", [oContact.first_name + " " + oContact.last_name]), {
                 actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
                 emphasizedAction: MessageBox.Action.DELETE,
                 onClose: async function (sAction) {
@@ -282,7 +286,7 @@ sap.ui.define([
 
                     try {
                         await ContactApi.deleteContact(oContact.id);
-                        MessageToast.show("Contatto eliminato correttamente.");
+                        MessageToast.show(oBundle.getText("contactsDeleteSuccess"));
                         await this._loadContacts();
                     } catch (oError) {
                         // Error feedback is already handled in ContactApi
@@ -319,20 +323,21 @@ sap.ui.define([
         },
 
         _buildContactDialogContent: function () {
+            var oBundle = this.getResourceBundle();
             var sBuyerVisible = "{= ${contactDialog>/contact/category} === 'acquirente' }";
             var sMortgageOtherVisible = "{= ${contactDialog>/contact/category} === 'acquirente' && ${contactDialog>/buyerProfile/mortgage_type} === 'altro' }";
             var sPreferenceOtherVisible = "{= ${contactDialog>/contact/category} === 'acquirente' && ${contactDialog>/buyerProfile/preferences/altro} }";
 
             return [
-                new Label({ text: "Nome", required: true }),
+                new Label({ text: oBundle.getText("contactsDialogFieldFirstName"), required: true }),
                 new Input({ value: "{contactDialog>/contact/first_name}" }),
-                new Label({ text: "Cognome", required: true }),
+                new Label({ text: oBundle.getText("contactsDialogFieldLastName"), required: true }),
                 new Input({ value: "{contactDialog>/contact/last_name}" }),
-                new Label({ text: "Email" }),
+                new Label({ text: oBundle.getText("contactsDialogFieldEmail") }),
                 new Input({ type: "Email", value: "{contactDialog>/contact/email}" }),
-                new Label({ text: "PEC" }),
+                new Label({ text: oBundle.getText("contactsDialogFieldPec") }),
                 new Input({ type: "Email", value: "{contactDialog>/contact/pec_email}" }),
-                new Label({ text: "Categoria" }),
+                new Label({ text: oBundle.getText("contactsDialogFieldCategory") }),
                 new Select({
                     selectedKey: "{contactDialog>/contact/category}",
                     width: "100%",
@@ -342,7 +347,7 @@ sap.ui.define([
                         template: new Item({ key: "{categoriesContact>key}", text: "{categoriesContact>value}" })
                     }
                 }),
-                new Label({ text: "Stato" }),
+                new Label({ text: oBundle.getText("contactsDialogFieldStatus") }),
                 new Select({
                     selectedKey: "{contactDialog>/contact/status}",
                     width: "100%",
@@ -352,13 +357,13 @@ sap.ui.define([
                         template: new Item({ key: "{statesContact>key}", text: "{statesContact>value}" })
                     }
                 }),
-                new Label({ text: "Informazioni generiche" }),
+                new Label({ text: oBundle.getText("contactsDialogFieldGenericInfo") }),
                 new TextArea({ width: "100%", rows: 4, value: "{contactDialog>/contact/generic_info}" }),
-                new Label({ text: "Zona richiesta", visible: sBuyerVisible }),
+                new Label({ text: oBundle.getText("contactsDialogFieldRequestedArea"), visible: sBuyerVisible }),
                 new Input({ value: "{contactDialog>/buyerProfile/requested_area}", visible: sBuyerVisible }),
-                new Label({ text: "Tipologia immobile", visible: sBuyerVisible }),
+                new Label({ text: oBundle.getText("contactsDialogFieldPropertyType"), visible: sBuyerVisible }),
                 new Input({ value: "{contactDialog>/buyerProfile/property_type}", visible: sBuyerVisible }),
-                new Label({ text: "Piano preferito", visible: sBuyerVisible }),
+                new Label({ text: oBundle.getText("contactsDialogFieldFloorPreference"), visible: sBuyerVisible }),
                 new Select({
                     selectedKey: "{contactDialog>/buyerProfile/floor_preference}",
                     width: "100%",
@@ -369,11 +374,11 @@ sap.ui.define([
                         template: new Item({ key: "{favoriteFloor>key}", text: "{favoriteFloor>value}" })
                     }
                 }),
-                new Label({ text: "Budget ristrutturato", visible: sBuyerVisible }),
+                new Label({ text: oBundle.getText("contactsDialogFieldBudgetRenovated"), visible: sBuyerVisible }),
                 new Input({ type: "Number", value: "{contactDialog>/buyerProfile/purchase_price_renovated}", visible: sBuyerVisible }),
-                new Label({ text: "Budget da ristrutturare", visible: sBuyerVisible }),
+                new Label({ text: oBundle.getText("contactsDialogFieldBudgetToRenovate"), visible: sBuyerVisible }),
                 new Input({ type: "Number", value: "{contactDialog>/buyerProfile/purchase_price_to_renovate}", visible: sBuyerVisible }),
-                new Label({ text: "Mutuo", visible: sBuyerVisible }),
+                new Label({ text: oBundle.getText("contactsDialogFieldMortgage"), visible: sBuyerVisible }),
                 new Select({
                     selectedKey: "{contactDialog>/buyerProfile/mortgage_type}",
                     width: "100%",
@@ -384,19 +389,19 @@ sap.ui.define([
                         template: new Item({ key: "{valueMutuo>key}", text: "{valueMutuo>value}" })
                     }
                 }),
-                new Label({ text: "Dettaglio mutuo", visible: sMortgageOtherVisible }),
+                new Label({ text: oBundle.getText("contactsDialogFieldMortgageDetail"), visible: sMortgageOtherVisible }),
                 new TextArea({ rows: 3, value: "{contactDialog>/buyerProfile/mortgage_other}", visible: sMortgageOtherVisible }),
-                new Label({ text: "Preferenze", visible: sBuyerVisible }),
-                new CheckBox({ text: "Box", selected: "{contactDialog>/buyerProfile/preferences/box}", visible: sBuyerVisible }),
+                new Label({ text: oBundle.getText("contactsDialogFieldPreferences"), visible: sBuyerVisible }),
+                new CheckBox({ text: oBundle.getText("contactsDialogPreferenceBox"), selected: "{contactDialog>/buyerProfile/preferences/box}", visible: sBuyerVisible }),
                 new Label({ text: "", visible: sBuyerVisible }),
-                new CheckBox({ text: "Posto auto", selected: "{contactDialog>/buyerProfile/preferences/posto_auto}", visible: sBuyerVisible }),
+                new CheckBox({ text: oBundle.getText("contactsDialogPreferenceParking"), selected: "{contactDialog>/buyerProfile/preferences/posto_auto}", visible: sBuyerVisible }),
                 new Label({ text: "", visible: sBuyerVisible }),
-                new CheckBox({ text: "Cantina", selected: "{contactDialog>/buyerProfile/preferences/cantina}", visible: sBuyerVisible }),
+                new CheckBox({ text: oBundle.getText("contactsDialogPreferenceCellar"), selected: "{contactDialog>/buyerProfile/preferences/cantina}", visible: sBuyerVisible }),
                 new Label({ text: "", visible: sBuyerVisible }),
-                new CheckBox({ text: "Terrazzo", selected: "{contactDialog>/buyerProfile/preferences/terrazzo}", visible: sBuyerVisible }),
+                new CheckBox({ text: oBundle.getText("contactsDialogPreferenceTerrace"), selected: "{contactDialog>/buyerProfile/preferences/terrazzo}", visible: sBuyerVisible }),
                 new Label({ text: "", visible: sBuyerVisible }),
-                new CheckBox({ text: "Altro", selected: "{contactDialog>/buyerProfile/preferences/altro}", visible: sBuyerVisible }),
-                new Label({ text: "Altro preferenze", visible: sPreferenceOtherVisible }),
+                new CheckBox({ text: oBundle.getText("contactsDialogPreferenceOther"), selected: "{contactDialog>/buyerProfile/preferences/altro}", visible: sBuyerVisible }),
+                new Label({ text: oBundle.getText("contactsDialogFieldPreferenceOther"), visible: sPreferenceOtherVisible }),
                 new Input({ value: "{contactDialog>/buyerProfile/preference_other}", visible: sPreferenceOtherVisible })
             ];
         },
