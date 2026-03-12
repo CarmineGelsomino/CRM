@@ -96,6 +96,12 @@ sap.ui.define([
         };
     }
 
+    function createEmptyAdditionalAddress() {
+        return {
+            address_line: ""
+        };
+    }
+
     function normalizePhoneList(sPrimaryPhone, aAdditionalPhones) {
         var aPhones = [];
         var sCleanPrimaryPhone = (sPrimaryPhone || "").trim();
@@ -121,6 +127,33 @@ sap.ui.define([
         return aPhones;
     }
 
+    function normalizeAddressList(sPrimaryAddress, aAdditionalAddresses) {
+        var aAddresses = [];
+        var sCleanPrimaryAddress = (sPrimaryAddress || "").trim();
+
+        if (sCleanPrimaryAddress) {
+            aAddresses.push({
+                address_line: sCleanPrimaryAddress,
+                country: "Italia",
+                is_primary: 1
+            });
+        }
+
+        (aAdditionalAddresses || []).forEach(function (oAddress) {
+            var sAddress = (oAddress && oAddress.address_line || "").trim();
+
+            if (sAddress) {
+                aAddresses.push({
+                    address_line: sAddress,
+                    country: "Italia",
+                    is_primary: 0
+                });
+            }
+        });
+
+        return aAddresses;
+    }
+
     return BaseController.extend("crm.controller.contactTile.ContactDetail", {
         onInit: function () {
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
@@ -129,6 +162,7 @@ sap.ui.define([
                 contactId: null,
                 contact: {},
                 phones: [],
+                addresses: [],
                 buyerProfile: createEmptyBuyerProfile(),
                 activities: [],
                 notes: []
@@ -149,6 +183,7 @@ sap.ui.define([
             try {
                 var oContact = await ContactApi.getContact(iContactId);
                 var aContactPhones = await ContactApi.listContactPhones(iContactId);
+                var aContactAddresses = await ContactApi.listContactAddresses({ contact_id: iContactId });
                 var oBuyerProfile = createEmptyBuyerProfile();
                 var oExistingBuyerProfile = await ContactApi.getBuyerProfileByContactId(iContactId);
 
@@ -163,14 +198,23 @@ sap.ui.define([
                 var oPrimaryPhone = (aContactPhones || []).find(function (oPhone) {
                     return Number(oPhone.is_primary) === 1;
                 });
+                var oPrimaryAddress = (aContactAddresses || []).find(function (oAddress) {
+                    return Number(oAddress.is_primary) === 1;
+                });
 
                 oModel.setProperty("/contact", Object.assign({}, oContact || {}, {
-                    primary_phone: (oPrimaryPhone && oPrimaryPhone.phone) || (oContact && oContact.primary_phone) || ""
+                    primary_phone: (oPrimaryPhone && oPrimaryPhone.phone) || (oContact && oContact.primary_phone) || "",
+                    primary_address: (oPrimaryAddress && oPrimaryAddress.address_line) || (oContact && oContact.primary_address) || ""
                 }));
                 oModel.setProperty("/phones", (aContactPhones || []).filter(function (oPhone) {
                     return Number(oPhone.is_primary) !== 1;
                 }).map(function (oPhone) {
                     return { phone: oPhone.phone || "" };
+                }));
+                oModel.setProperty("/addresses", (aContactAddresses || []).filter(function (oAddress) {
+                    return Number(oAddress.is_primary) !== 1;
+                }).map(function (oAddress) {
+                    return { address_line: oAddress.address_line || "" };
                 }));
                 oModel.setProperty("/buyerProfile", oBuyerProfile);
                 oModel.setProperty("/activities", aActivities || []);
@@ -214,6 +258,7 @@ sap.ui.define([
             try {
                 await ContactApi.updateContact(iContactId, oContact);
                 await this._saveContactPhones(iContactId, oContact, oModel.getProperty("/phones"));
+                await this._saveContactAddresses(iContactId, oContact, oModel.getProperty("/addresses"));
                 await this._saveBuyerProfileData(iContactId, oContact, oBuyerProfile);
                 MessageToast.show(oBundle.getText("contactDetailUpdateSuccess"));
                 await this._loadContact(iContactId);
@@ -249,6 +294,10 @@ sap.ui.define([
             await ContactApi.replaceContactPhones(iContactId, normalizePhoneList(oContact.primary_phone, aAdditionalPhones));
         },
 
+        _saveContactAddresses: async function (iContactId, oContact, aAdditionalAddresses) {
+            await ContactApi.replaceContactAddresses(iContactId, normalizeAddressList(oContact.primary_address, aAdditionalAddresses));
+        },
+
         onAddPhone: function () {
             var oModel = this.getModel("contactDetail");
             var aPhones = oModel.getProperty("/phones") || [];
@@ -276,6 +325,35 @@ sap.ui.define([
 
             aPhones.splice(iIndex, 1);
             oModel.setProperty("/phones", aPhones);
+        },
+
+        onAddAddress: function () {
+            var oModel = this.getModel("contactDetail");
+            var aAddresses = oModel.getProperty("/addresses") || [];
+
+            aAddresses.push(createEmptyAdditionalAddress());
+            oModel.setProperty("/addresses", aAddresses);
+        },
+
+        onRemoveAddress: function (oEvent) {
+            var oModel = this.getModel("contactDetail");
+            var oContext = oEvent.getSource().getBindingContext("contactDetail");
+            var sPath = oContext && oContext.getPath();
+            var aAddresses = oModel.getProperty("/addresses") || [];
+            var iIndex;
+
+            if (!sPath) {
+                return;
+            }
+
+            iIndex = Number(sPath.split("/").pop());
+
+            if (Number.isNaN(iIndex)) {
+                return;
+            }
+
+            aAddresses.splice(iIndex, 1);
+            oModel.setProperty("/addresses", aAddresses);
         },
 
         onCallPrimaryPhone: function () {

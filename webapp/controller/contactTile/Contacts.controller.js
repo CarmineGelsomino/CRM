@@ -114,6 +114,12 @@ sap.ui.define([
         };
     }
 
+    function createEmptyAdditionalAddress() {
+        return {
+            address_line: ""
+        };
+    }
+
     function normalizePhoneList(sPrimaryPhone, aAdditionalPhones) {
         var aPhones = [];
         var sCleanPrimaryPhone = (sPrimaryPhone || "").trim();
@@ -137,6 +143,33 @@ sap.ui.define([
         });
 
         return aPhones;
+    }
+
+    function normalizeAddressList(sPrimaryAddress, aAdditionalAddresses) {
+        var aAddresses = [];
+        var sCleanPrimaryAddress = (sPrimaryAddress || "").trim();
+
+        if (sCleanPrimaryAddress) {
+            aAddresses.push({
+                address_line: sCleanPrimaryAddress,
+                country: "Italia",
+                is_primary: 1
+            });
+        }
+
+        (aAdditionalAddresses || []).forEach(function (oAddress) {
+            var sAddress = (oAddress && oAddress.address_line || "").trim();
+
+            if (sAddress) {
+                aAddresses.push({
+                    address_line: sAddress,
+                    country: "Italia",
+                    is_primary: 0
+                });
+            }
+        });
+
+        return aAddresses;
     }
 
     return BaseController.extend("crm.controller.contactTile.Contacts", {
@@ -165,7 +198,20 @@ sap.ui.define([
 
             try {
                 var aContacts = await ContactApi.listContacts();
-                oModel.setProperty("/contacts", aContacts || []);
+                var aAddresses = await ContactApi.listContactAddresses();
+                var mPrimaryAddressByContactId = (aAddresses || []).reduce(function (mMap, oAddress) {
+                    if (Number(oAddress.is_primary) === 1 && !mMap[oAddress.contact_id]) {
+                        mMap[oAddress.contact_id] = oAddress.address_line || "";
+                    }
+
+                    return mMap;
+                }, {});
+
+                oModel.setProperty("/contacts", (aContacts || []).map(function (oContact) {
+                    return Object.assign({}, oContact, {
+                        primary_address: mPrimaryAddressByContactId[oContact.id] || ""
+                    });
+                }));
                 oModel.setProperty("/selectedContactId", null);
                 oModel.setProperty("/selectedContact", null);
                 this.byId("contactsTable").removeSelections(true);
@@ -352,9 +398,11 @@ sap.ui.define([
         _createDialogModelData: async function (bEdit, oContact) {
             var oBuyerProfile = createEmptyBuyerProfile();
             var aContactPhones = [];
+            var aContactAddresses = [];
 
             if (bEdit && oContact && oContact.id) {
                 aContactPhones = await ContactApi.listContactPhones(oContact.id);
+                aContactAddresses = await ContactApi.listContactAddresses({ contact_id: oContact.id });
                 var oExistingBuyerProfile = await ContactApi.getBuyerProfileByContactId(oContact.id);
                 if (oExistingBuyerProfile) {
                     var aPreferences = await ContactApi.listBuyerPreferences(oExistingBuyerProfile.id);
@@ -373,6 +421,9 @@ sap.ui.define([
                     primary_phone: bEdit ? (((aContactPhones || []).find(function (oPhone) {
                         return Number(oPhone.is_primary) === 1;
                     }) || {}).phone || oContact.primary_phone || "") : "",
+                    primary_address: bEdit ? (((aContactAddresses || []).find(function (oAddress) {
+                        return Number(oAddress.is_primary) === 1;
+                    }) || {}).address_line || oContact.primary_address || "") : "",
                     category: bEdit ? (oContact.category || "venditore") : "venditore",
                     status: bEdit ? (oContact.status || "attivo") : "attivo",
                     generic_info: bEdit ? (oContact.generic_info || "") : ""
@@ -381,6 +432,11 @@ sap.ui.define([
                     return Number(oPhone.is_primary) !== 1;
                 }).map(function (oPhone) {
                     return { phone: oPhone.phone || "" };
+                }) : [],
+                addresses: bEdit ? (aContactAddresses || []).filter(function (oAddress) {
+                    return Number(oAddress.is_primary) !== 1;
+                }).map(function (oAddress) {
+                    return { address_line: oAddress.address_line || "" };
                 }) : [],
                 buyerProfile: oBuyerProfile
             };
@@ -427,6 +483,46 @@ sap.ui.define([
             });
         },
 
+        _createAdditionalAddressesBox: function () {
+            var oBundle = this.getResourceBundle();
+
+            return new VBox({
+                width: "100%",
+                items: [
+                    new VBox({
+                        width: "100%",
+                        items: {
+                            path: "contactDialog>/addresses",
+                            templateShareable: false,
+                            template: new HBox({
+                                width: "100%",
+                                alignItems: "Center",
+                                items: [
+                                    new Input({
+                                        width: "100%",
+                                        value: "{contactDialog>address_line}",
+                                        placeholder: oBundle.getText("contactsDialogAddressAdditionalPlaceholder")
+                                    }),
+                                    new Button({
+                                        icon: "sap-icon://less",
+                                        type: "Transparent",
+                                        tooltip: oBundle.getText("contactsDialogRemoveAddressButton"),
+                                        press: this._onRemoveAddressPress.bind(this)
+                                    })
+                                ]
+                            }).addStyleClass("sapUiTinyMarginBottom")
+                        }
+                    }),
+                    new Button({
+                        text: oBundle.getText("contactsDialogAddAddressButton"),
+                        icon: "sap-icon://add",
+                        type: "Transparent",
+                        press: this._onAddAddressPress.bind(this)
+                    })
+                ]
+            });
+        },
+
         _buildContactDialogContent: function () {
             var oBundle = this.getResourceBundle();
             var sBuyerVisible = "{= ${contactDialog>/contact/category} === 'acquirente' }";
@@ -450,6 +546,13 @@ sap.ui.define([
                 }),
                 new Label({ text: oBundle.getText("contactsDialogFieldAdditionalPhones") }),
                 this._createAdditionalPhonesBox(),
+                new Label({ text: oBundle.getText("contactsDialogFieldPrimaryAddress") }),
+                new Input({
+                    value: "{contactDialog>/contact/primary_address}",
+                    placeholder: oBundle.getText("contactsDialogAddressPrimaryPlaceholder")
+                }),
+                new Label({ text: oBundle.getText("contactsDialogFieldAdditionalAddresses") }),
+                this._createAdditionalAddressesBox(),
                 new Label({ text: oBundle.getText("contactsDialogFieldCategory") }),
                 new Select({
                     selectedKey: "{contactDialog>/contact/category}",
@@ -548,6 +651,35 @@ sap.ui.define([
             oModel.setProperty("/phones", aPhones);
         },
 
+        _onAddAddressPress: function (oEvent) {
+            var oModel = oEvent.getSource().getModel("contactDialog");
+            var aAddresses = oModel.getProperty("/addresses") || [];
+
+            aAddresses.push(createEmptyAdditionalAddress());
+            oModel.setProperty("/addresses", aAddresses);
+        },
+
+        _onRemoveAddressPress: function (oEvent) {
+            var oModel = oEvent.getSource().getModel("contactDialog");
+            var oContext = oEvent.getSource().getBindingContext("contactDialog");
+            var sPath = oContext && oContext.getPath();
+            var aAddresses = oModel.getProperty("/addresses") || [];
+            var iIndex;
+
+            if (!sPath) {
+                return;
+            }
+
+            iIndex = Number(sPath.split("/").pop());
+
+            if (Number.isNaN(iIndex)) {
+                return;
+            }
+
+            aAddresses.splice(iIndex, 1);
+            oModel.setProperty("/addresses", aAddresses);
+        },
+
         _saveContactPhones: async function (iContactId, oDialogData) {
             var aPhones = normalizePhoneList(
                 oDialogData.contact && oDialogData.contact.primary_phone,
@@ -555,6 +687,15 @@ sap.ui.define([
             );
 
             await ContactApi.replaceContactPhones(iContactId, aPhones);
+        },
+
+        _saveContactAddresses: async function (iContactId, oDialogData) {
+            var aAddresses = normalizeAddressList(
+                oDialogData.contact && oDialogData.contact.primary_address,
+                oDialogData.addresses
+            );
+
+            await ContactApi.replaceContactAddresses(iContactId, aAddresses);
         },
 
         _saveBuyerProfileData: async function (iContactId, oDialogData) {
@@ -766,6 +907,7 @@ sap.ui.define([
                             }
 
                             await this._saveContactPhones(oSavedContact.id, oDialogData);
+                            await this._saveContactAddresses(oSavedContact.id, oDialogData);
                             await this._saveBuyerProfileData(oSavedContact.id, oDialogData);
 
                             MessageToast.show(oBundle.getText(bEdit ? "contactsUpdateSuccess" : "contactsCreateSuccess"));

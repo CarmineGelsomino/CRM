@@ -6,6 +6,7 @@ sap.ui.define([
 
     var ENTITY_CONTACTS = "contacts";
     var ENTITY_CONTACT_PHONES = "contact_phones";
+    var ENTITY_CONTACT_ADDRESSES = "contact_addresses";
     var ENTITY_BUYER_PROFILES = "buyer_profiles";
     var ENTITY_BUYER_PREFERENCES = "buyer_preferences";
     var ENTITY_ACTIVITIES = "activities";
@@ -57,6 +58,17 @@ sap.ui.define([
     var CONTACT_PHONE_FIELDS = [
         "contact_id",
         "phone",
+        "is_primary",
+        "note"
+    ];
+
+    var CONTACT_ADDRESS_FIELDS = [
+        "contact_id",
+        "address_line",
+        "city",
+        "postal_code",
+        "province",
+        "country",
         "is_primary",
         "note"
     ];
@@ -295,6 +307,53 @@ sap.ui.define([
         });
     }
 
+    function listContactAddresses(mFilters) {
+        return request({
+            entity: ENTITY_CONTACT_ADDRESSES,
+            query: mFilters,
+            method: "GET",
+            errorMessage: "Impossibile caricare gli indirizzi del contatto.",
+            useMessageBox: true
+        });
+    }
+
+    function createContactAddress(oPayload) {
+        return request({
+            entity: ENTITY_CONTACT_ADDRESSES,
+            method: "POST",
+            payload: sanitizePayload(oPayload, CONTACT_ADDRESS_FIELDS),
+            errorMessage: "Impossibile salvare l'indirizzo del contatto.",
+            useMessageBox: true
+        });
+    }
+
+    function deleteContactAddress(iId) {
+        return request({
+            entity: ENTITY_CONTACT_ADDRESSES,
+            query: { id: iId },
+            method: "DELETE",
+            errorMessage: "Impossibile eliminare l'indirizzo del contatto.",
+            useMessageBox: true
+        });
+    }
+
+    async function replaceContactAddresses(iContactId, aAddresses) {
+        var aExistingAddresses = await listContactAddresses({ contact_id: iContactId });
+        var aDeletePromises = (aExistingAddresses || []).map(function (oAddress) {
+            return deleteContactAddress(oAddress.id);
+        });
+
+        await Promise.all(aDeletePromises);
+
+        var aCreatePromises = (aAddresses || []).map(function (oAddress) {
+            return createContactAddress(Object.assign({}, oAddress, {
+                contact_id: iContactId
+            }));
+        });
+
+        await Promise.all(aCreatePromises);
+    }
+
     function deleteContactPhone(iId) {
         return request({
             entity: ENTITY_CONTACT_PHONES,
@@ -517,6 +576,8 @@ sap.ui.define([
         deleteContact: deleteContact,
         listContactPhones: listContactPhones,
         replaceContactPhones: replaceContactPhones,
+        listContactAddresses: listContactAddresses,
+        replaceContactAddresses: replaceContactAddresses,
         getBuyerProfileByContactId: getBuyerProfileByContactId,
         createBuyerProfile: createBuyerProfile,
         updateBuyerProfile: updateBuyerProfile,

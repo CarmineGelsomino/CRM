@@ -19,6 +19,7 @@
                     <ObjectAttribute text="{= ${i18n>contactDetailEmailPrefix} + ${contactDetail>/contact/email}}" />
                     <ObjectAttribute text="{= ${i18n>contactDetailPecPrefix} + ${contactDetail>/contact/pec_email}}" />
                     <ObjectAttribute text="{= ${i18n>contactDetailPhonePrefix} + ${contactDetail>/contact/primary_phone}}" active="{= !!${contactDetail>/contact/primary_phone} }" press="onCallPrimaryPhone" />
+                    <ObjectAttribute text="{= ${i18n>contactDetailAddressPrefix} + ${contactDetail>/contact/primary_address}}" />
                 </attributes>
                 <statuses>
                     <ObjectStatus
@@ -69,6 +70,39 @@
                                 icon="sap-icon://add"
                                 type="Transparent"
                                 press="onAddPhone" />
+                        </items>
+                    </VBox>
+                    <Label text="{i18n>contactsDialogFieldPrimaryAddress}" />
+                    <Input value="{contactDetail>/contact/primary_address}" placeholder="{i18n>contactsDialogAddressPrimaryPlaceholder}" />
+                    <Label text="{i18n>contactsDialogFieldAdditionalAddresses}" />
+                    <VBox width="100%">
+                        <items>
+                            <VBox
+                                width="100%"
+                                items="{
+                                    path: 'contactDetail>/addresses'
+                                }">
+                                <items>
+                                    <HBox width="100%" alignItems="Center" class="sapUiTinyMarginBottom">
+                                        <items>
+                                            <Input
+                                                value="{contactDetail>address_line}"
+                                                width="100%"
+                                                placeholder="{i18n>contactsDialogAddressAdditionalPlaceholder}" />
+                                            <Button
+                                                icon="sap-icon://less"
+                                                type="Transparent"
+                                                tooltip="{i18n>contactsDialogRemoveAddressButton}"
+                                                press="onRemoveAddress" />
+                                        </items>
+                                    </HBox>
+                                </items>
+                            </VBox>
+                            <Button
+                                text="{i18n>contactsDialogAddAddressButton}"
+                                icon="sap-icon://add"
+                                type="Transparent"
+                                press="onAddAddress" />
                         </items>
                     </VBox>
                     <Label text="{i18n>contactsDialogFieldCategory}" />
