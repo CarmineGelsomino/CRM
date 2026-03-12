@@ -11,7 +11,15 @@ $email = isset($_SESSION['crm_user']['email']) ? (string) $_SESSION['crm_user'][
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#b68b60">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Trade CRM">
     <title>Trade Immobiliare CRM</title>
+    <link rel="manifest" href="./app-manifest.php">
+    <link rel="icon" href="./img/logo.webp" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./img/logo-crm.svg">
     <script>
         window.CRM_CONFIG = {
             authorized: <?php echo $isAuthorized ? 'true' : 'false'; ?>,
@@ -31,6 +39,15 @@ $email = isset($_SESSION['crm_user']['email']) ? (string) $_SESSION['crm_user'][
         data-sap-ui-async="true"
         data-sap-ui-oninit="module:crm/bootstrap"
         data-sap-ui-resourceroots='{"crm": "./"}'>
+    </script>
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", function () {
+                navigator.serviceWorker.register("./service-worker.js").catch(function () {
+                    // Ignore service worker registration failures to avoid blocking app bootstrap.
+                });
+            });
+        }
     </script>
 </head>
 <body class="sapUiBody sapUiSizeCompact" id="content"></body>
