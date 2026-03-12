@@ -90,6 +90,27 @@ function removeInvalidEnumFields(array $payload): array
 }
 
 try {
+    if ($entity === 'contacts' && $method === 'GET' && $id === null) {
+        $filters = $_GET;
+        unset($filters['entity'], $filters['id'], $filters['action']);
+
+        $service = new ContactService($pdo);
+        JsonResponse::send(['ok' => true, 'data' => $service->listContactsWithPrimaryPhone($filters)]);
+        exit;
+    }
+
+    if ($entity === 'contacts' && $method === 'GET' && $id !== null) {
+        $service = new ContactService($pdo);
+        $item = $service->getContactWithPrimaryPhone($id);
+
+        JsonResponse::send([
+            'ok' => $item !== null,
+            'data' => $item,
+            'message' => $item ? null : 'Record non trovato.',
+        ], $item ? 200 : 404);
+        exit;
+    }
+
     if ($method === 'GET' && $id === null) {
         $filters = $_GET;
         unset($filters['entity'], $filters['id'], $filters['action']);

@@ -92,7 +92,7 @@
                 </headerToolbar>
                 <columns>
                     <Column width="13rem"><Text text="{i18n>contactsTableColumnName}" /></Column>
-                    <Column width="15rem"><Text text="{i18n>contactsTableColumnEmail}" /></Column>
+                    <Column width="15rem"><Text text="{i18n>contactsTableColumnPrimaryPhone}" /></Column>
                     <Column width="10rem"><Text text="{i18n>contactsTableColumnCategory}" /></Column>
                     <Column width="8rem"><Text text="{i18n>contactsTableColumnStatus}" /></Column>
                     <Column width="8rem" hAlign="End"><Text text="{i18n>contactsTableColumnActions}" /></Column>
@@ -101,7 +101,7 @@
                     <ColumnListItem type="Navigation" press="onOpenDetail">
                         <cells>
                             <ObjectIdentifier title="{= ${contacts>first_name} + ' ' + ${contacts>last_name}}" />
-                            <Text text="{contacts>email}" />
+                            <Link text="{contacts>primary_phone}" press="onCallPrimaryPhone" enabled="{= !!${contacts>primary_phone} }" />
                             <tnt:InfoLabel
                                 text="{ parts: [ { path: 'contacts>category' }, { path: 'categoriesContact>/' } ], formatter: 'formatter.contactCategoryText' }"
                                 colorScheme="{ parts: [ { path: 'contacts>category' }, { path: 'categoriesContact>/' } ], formatter: 'formatter.contactCategoryColorScheme' }" />

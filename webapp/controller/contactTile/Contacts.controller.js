@@ -17,6 +17,7 @@ sap.ui.define([
     "sap/m/Text",
     "sap/m/Bar",
     "sap/m/Title",
+    "sap/m/library",
     "sap/ui/core/Item",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem"
@@ -39,6 +40,7 @@ sap.ui.define([
     Text,
     Bar,
     Title,
+    mobileLibrary,
     Item,
     ViewSettingsDialog,
     ViewSettingsItem
@@ -46,6 +48,7 @@ sap.ui.define([
     "use strict";
 
     var BUYER_PREFERENCE_KEYS = ["box", "posto_auto", "cantina", "terrazzo", "altro"];
+    var URLHelper = mobileLibrary.URLHelper;
 
     function createEmptyBuyerProfile() {
         return {
@@ -271,6 +274,22 @@ sap.ui.define([
             var oContact = oEvent.getSource().getBindingContext("contacts").getObject();
             this._confirmDeleteContact(oContact);
             oEvent.cancelBubble();
+        },
+
+        onCallPrimaryPhone: function (oEvent) {
+            var sValue = this._getVal(oEvent);
+
+            if (!sValue) {
+                oEvent.cancelBubble();
+                return;
+            }
+
+            URLHelper.triggerTel(sValue);
+            oEvent.cancelBubble();
+        },
+
+        _getVal: function (oEvent) {
+            return oEvent.getSource().getBindingContext("contacts").getProperty("primary_phone");
         },
 
         _confirmDeleteContact: function (oContact) {

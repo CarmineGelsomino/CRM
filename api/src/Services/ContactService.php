@@ -12,6 +12,67 @@ final class ContactService
     {
     }
 
+    public function listContactsWithPrimaryPhone(array $filters = []): array
+    {
+        $where = [];
+        $params = [];
+
+        foreach ($filters as $field => $value) {
+            if (in_array($field, ['id', 'user_id', 'first_name', 'last_name', 'email', 'pec_email', 'category', 'status', 'generic_info'], true)) {
+                $where[] = "c.`{$field}` = :{$field}";
+                $params[$field] = $value;
+            }
+        }
+
+        $sql = <<<'SQL'
+SELECT
+    c.*,
+    (
+        SELECT cp.phone
+        FROM contact_phones cp
+        WHERE cp.contact_id = c.id
+        ORDER BY cp.is_primary DESC, cp.id ASC
+        LIMIT 1
+    ) AS primary_phone
+FROM contacts c
+SQL;
+
+        if ($where !== []) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
+        }
+
+        $sql .= ' ORDER BY c.id DESC';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($params);
+
+        return $statement->fetchAll() ?: [];
+    }
+
+    public function getContactWithPrimaryPhone(int $id): ?array
+    {
+        $sql = <<<'SQL'
+SELECT
+    c.*,
+    (
+        SELECT cp.phone
+        FROM contact_phones cp
+        WHERE cp.contact_id = c.id
+        ORDER BY cp.is_primary DESC, cp.id ASC
+        LIMIT 1
+    ) AS primary_phone
+FROM contacts c
+WHERE c.id = :id
+LIMIT 1
+SQL;
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute(['id' => $id]);
+        $row = $statement->fetch();
+
+        return $row ?: null;
+    }
+
     public function findInactiveContacts(int $days, ?int $userId = null): array
     {
         $sql = <<<'SQL'
