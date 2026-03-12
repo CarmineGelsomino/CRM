@@ -101,6 +101,13 @@ sap.ui.define([
             });
     }
 
+    function buildCategoryInfoMap(aItems) {
+        return (aItems || []).reduce(function (oMap, oItem) {
+            oMap[oItem.key] = oItem;
+            return oMap;
+        }, {});
+    }
+
     return BaseController.extend("crm.controller.contactTile.Contacts", {
         onInit: function () {
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
@@ -127,7 +134,16 @@ sap.ui.define([
 
             try {
                 var aContacts = await ContactApi.listContacts();
-                oModel.setProperty("/contacts", aContacts || []);
+                var oCategoryInfoMap = buildCategoryInfoMap(this.getOwnerComponent().getModel("categoriesContact").getData());
+                var aDecoratedContacts = (aContacts || []).map(function (oContact) {
+                    var oCategoryInfo = oCategoryInfoMap[oContact.category] || {};
+
+                    return Object.assign({}, oContact, {
+                        _categoryInfoText: oCategoryInfo.value || oContact.category || "",
+                        _categoryInfoColorScheme: oCategoryInfo.colorScheme || 10
+                    });
+                });
+                oModel.setProperty("/contacts", aDecoratedContacts);
                 oModel.setProperty("/selectedContactId", null);
                 oModel.setProperty("/selectedContact", null);
                 this.byId("contactsTable").removeSelections(true);

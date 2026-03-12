@@ -1,18 +1,22 @@
 [
     {
         "key": "venditore",
-        "value": "Venditore"
+        "value": "Venditore",
+        "colorScheme": 8
     },
     {
         "key": "acquirente",
-        "value": "Acquirente"
+        "value": "Acquirente",
+        "colorScheme": 7
     },
     {
         "key": "segnalatore",
-        "value": "Segnalatore"
+        "value": "Segnalatore",
+        "colorScheme": 9
     },
     {
         "key": "cerchia_personale",
-        "value": "Cerchia personale"
+        "value": "Cerchia personale",
+        "colorScheme": 5
     }
 ]

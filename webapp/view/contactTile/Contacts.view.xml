@@ -1,6 +1,7 @@
 <mvc:View
     controllerName="crm.controller.contactTile.Contacts"
     xmlns="sap.m"
+    xmlns:tnt="sap.tnt"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form">
@@ -96,7 +97,7 @@
                         <cells>
                             <ObjectIdentifier title="{= ${contacts>first_name} + ' ' + ${contacts>last_name}}" text="{= ${i18n>contactsTableIdPrefix} + ${contacts>id}}" />
                             <Text text="{contacts>email}" />
-                            <ObjectStatus text="{contacts>category}" state="Information" />
+                            <tnt:InfoLabel text="{contacts>_categoryInfoText}" colorScheme="{contacts>_categoryInfoColorScheme}" />
                             <ObjectStatus
                                 text="{contacts>status}"
                                 state="{= ${contacts>status} === 'Attivo' || ${contacts>status} === 'attivo' ? 'Success' : (${contacts>status} === 'Futuro' || ${contacts>status} === 'futuro' ? 'Warning' : 'None')}" />
