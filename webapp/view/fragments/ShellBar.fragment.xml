@@ -1,13 +1,18 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
-    xmlns:tnt="sap.tnt">
+    xmlns:tnt="sap.tnt"
+    xmlns:f="sap.f">
     <tnt:ToolHeader>
         <Button icon="sap-icon://nav-back" type="Transparent" press="onShellNavHome" tooltip="{i18n>shellMenuHome}" />
+        <Image src="img/logo.webp" decorative="true" tooltip="{i18n>shellBarTitle}">
+			<layoutData>
+				<OverflowToolbarLayoutData priority="NeverOverflow"/>
+			</layoutData>
+		</Image>
         <Title text="{i18n>shellBarTitle}" level="H5" />
         <ToolbarSpacer />
-        <SearchField width="16rem" search="onShellSearch" />
-        <MenuButton icon="sap-icon://menu2" type="Transparent" tooltip="Menu">
+        <MenuButton icon="sap-icon://menu2" type="Neutral" tooltip="Menu">
             <menu>
                 <Menu itemSelected="onShellMainMenuSelect">
                     <items>
@@ -21,6 +26,11 @@
             </menu>
         </MenuButton>
         <Button icon="sap-icon://bell" type="Transparent" press="onShellNotificationsPress" tooltip="Notifiche" />
-        <Button icon="sap-icon://employee" type="Transparent" press="onShellProfilePress" tooltip="Profilo" />
+        <f:Avatar
+            displaySize="XS"
+            displayShape="Circle"
+            initials="{ parts: [ { path: 'session>/firstName' }, { path: 'session>/lastName' }, { path: 'session>/email' } ], formatter: '.formatUserInitials' }"
+            tooltip="Profilo"
+            press="onShellProfilePress" />
     </tnt:ToolHeader>
 </core:FragmentDefinition>

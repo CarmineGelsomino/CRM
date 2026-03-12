@@ -76,6 +76,9 @@ sap.ui.define([
                     email: (oPayload.email || "").trim(),
                     is_active: Number(oPayload.is_active) ? 1 : 0
                 });
+                this.getModel("session").setProperty("/firstName", (oPayload.first_name || "").trim());
+                this.getModel("session").setProperty("/lastName", (oPayload.last_name || "").trim());
+                this.getModel("session").setProperty("/email", (oPayload.email || "").trim());
             } finally {
                 oProfileModel.setProperty("/busy", false);
             }

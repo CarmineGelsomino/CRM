@@ -12,7 +12,7 @@
                             <content>
                                 <VBox class="sapUiMediumMargin" alignItems="Center" renderType="Bare">
                                     <Image
-                                        src="img/logo-crm.svg"
+                                        src="img/logo.webp"
                                         alt="{i18n>loginLogoAlt}"
                                         decorative="false"
                                         width="72px"

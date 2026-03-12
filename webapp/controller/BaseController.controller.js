@@ -87,6 +87,17 @@ sap.ui.define([
             MessageToast.show(this.getResourceBundle().getText("shellSearchFeedback", [sQuery]));
         },
 
+        formatUserInitials: function (sFirstName, sLastName, sEmail) {
+            var sLeft = (sFirstName || "").trim().charAt(0);
+            var sRight = (sLastName || "").trim().charAt(0);
+
+            if (sLeft || sRight) {
+                return (sLeft + sRight).toUpperCase();
+            }
+
+            return (sEmail || "").trim().charAt(0).toUpperCase();
+        },
+
         onShellProfilePress: function (oEvent) {
             if (!this._oProfileActionSheet) {
                 this._oProfileActionSheet = new ActionSheet({
@@ -126,6 +137,9 @@ sap.ui.define([
                         oSessionModel.setProperty("/username", "");
                         oSessionModel.setProperty("/userId", null);
                         oSessionModel.setProperty("/password", "");
+                        oSessionModel.setProperty("/firstName", "");
+                        oSessionModel.setProperty("/lastName", "");
+                        oSessionModel.setProperty("/email", "");
                     }
                     window.location.reload();
                 }.bind(this))

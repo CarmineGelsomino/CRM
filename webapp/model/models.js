@@ -18,7 +18,7 @@ sap.ui.define([
             return oModel;
         },
 
-        createSessionModel: function (isAuthorized, userId) {
+        createSessionModel: function (isAuthorized, userId, sFirstName, sLastName, sEmail) {
             return new JSONModel({
                 isAuthorized: !!isAuthorized,
                 username: "",
@@ -26,7 +26,10 @@ sap.ui.define([
                 usernameState: "None",
                 passwordState: "None",
                 loginMessage: "",
-                userId: userId || null
+                userId: userId || null,
+                firstName: sFirstName || "",
+                lastName: sLastName || "",
+                email: sEmail || ""
             });
         }
     };

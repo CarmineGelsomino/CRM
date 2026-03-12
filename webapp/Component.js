@@ -13,7 +13,16 @@ sap.ui.define([
             UIComponent.prototype.init.apply(this, arguments);
 
             this.setModel(models.createDeviceModel(), "device");
-            this.setModel(models.createSessionModel(window.CRM_CONFIG.authorized, window.CRM_CONFIG.userId), "session");
+            this.setModel(
+                models.createSessionModel(
+                    window.CRM_CONFIG.authorized,
+                    window.CRM_CONFIG.userId,
+                    window.CRM_CONFIG.firstName,
+                    window.CRM_CONFIG.lastName,
+                    window.CRM_CONFIG.email
+                ),
+                "session"
+            );
 
             var oRouter = this.getRouter();
             oRouter.initialize();

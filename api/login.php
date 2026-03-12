@@ -24,7 +24,7 @@ try {
     $pdo = Database::connection($config);
 
     $statement = $pdo->prepare(
-        'SELECT id, email, password_hash, is_active
+        'SELECT id, first_name, last_name, email, password_hash, is_active
          FROM users
          WHERE email = :identifier
             OR CONCAT(COALESCE(first_name, ""), " ", COALESCE(last_name, "")) = :identifier
@@ -41,6 +41,8 @@ try {
     if ($isAuthorized) {
         $_SESSION['crm_user'] = [
             'id' => (int) $user['id'],
+            'first_name' => (string) ($user['first_name'] ?? ''),
+            'last_name' => (string) ($user['last_name'] ?? ''),
             'email' => (string) $user['email'],
         ];
         echo json_encode(['authorized' => true]);
