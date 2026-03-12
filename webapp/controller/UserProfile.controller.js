@@ -28,9 +28,10 @@ sap.ui.define([
         _loadProfile: async function () {
             var oProfileModel = this.getModel("profile");
             var iUserId = this.getModel("session").getProperty("/userId");
+            var oBundle = this.getResourceBundle();
 
             if (!iUserId) {
-                MessageToast.show("Utente corrente non disponibile.");
+                MessageToast.show(oBundle.getText("userProfileCurrentUserUnavailable"));
                 return;
             }
 
@@ -62,9 +63,10 @@ sap.ui.define([
             var oProfileModel = this.getModel("profile");
             var iUserId = this.getModel("session").getProperty("/userId");
             var oPayload = oProfileModel.getProperty("/data") || {};
+            var oBundle = this.getResourceBundle();
 
             if (!iUserId) {
-                MessageToast.show("Utente corrente non disponibile.");
+                MessageToast.show(oBundle.getText("userProfileCurrentUserUnavailable"));
                 return;
             }
 
@@ -88,9 +90,10 @@ sap.ui.define([
             var oProfileModel = this.getModel("profile");
             var iUserId = this.getModel("session").getProperty("/userId");
             var sPassword = (oProfileModel.getProperty("/passwordInput") || "").trim();
+            var oBundle = this.getResourceBundle();
 
             if (!iUserId) {
-                MessageToast.show("Utente corrente non disponibile.");
+                MessageToast.show(oBundle.getText("userProfileCurrentUserUnavailable"));
                 return;
             }
 

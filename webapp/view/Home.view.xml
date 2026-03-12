@@ -10,55 +10,55 @@
         </customHeader>
         <content>
             <VBox class="sapUiSmallMarginBottom" width="100%">
-                <Title text="Versione 2026 v1.0" level="H2" />
+                <Title text="{i18n>homeVersionTitle}" level="H2" />
                 <Text text="{i18n>shellBarSubtitle}" class="sapUiTinyMarginTop" />
             </VBox>
             <HBox justifyContent="Center" gap="30px" renderType="Bare" wrap="Wrap">
-                <GenericTile header="TodayBoard" subheader="Tutte le attivita da fare oggi" press="onTilePress" frameType="TwoByOne">
-                    <TileContent footer="Apri modulo">
-                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                <GenericTile header="{i18n>homeTileTodayBoardHeader}" subheader="{i18n>homeTileTodayBoardSubheader}" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="{i18n>homeTileOpenModule}">
+                        <NumericContent value="14" scale="{i18n>homeTileDefaultScale}" valueColor="Neutral" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile id="contactsTile" header="Contatti" subheader="Contatti e relative anagrafiche" press="onTilePress" frameType="TwoByOne">
-                    <TileContent footer="Apri modulo">
-                        <NumericContent value="128" scale="attivi" valueColor="Good" />
+                <GenericTile id="contactsTile" header="{i18n>homeTileContactsHeader}" subheader="{i18n>homeTileContactsSubheader}" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="{i18n>homeTileOpenModule}">
+                        <NumericContent value="128" scale="{i18n>homeTileContactsScale}" valueColor="Good" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile id="propertiesTile" header="Proprieta" subheader="Proprieta e relativi dettagli" press="onTilePress" frameType="TwoByOne">
-                    <TileContent footer="Apri modulo">
-                        <NumericContent value="36" scale="aperte" valueColor="Critical" />
+                <GenericTile id="propertiesTile" header="{i18n>homeTilePropertiesHeader}" subheader="{i18n>homeTilePropertiesSubheader}" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="{i18n>homeTileOpenModule}">
+                        <NumericContent value="36" scale="{i18n>homeTilePropertiesScale}" valueColor="Critical" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Comunicazioni" subheader="Comunicazioni" press="onTilePress" frameType="TwoByOne">
-                    <TileContent footer="Apri modulo">
-                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                <GenericTile header="{i18n>homeTileCommunicationsHeader}" subheader="{i18n>homeTileCommunicationsSubheader}" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="{i18n>homeTileOpenModule}">
+                        <NumericContent value="14" scale="{i18n>homeTileDefaultScale}" valueColor="Neutral" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Calendario" subheader="Calendario delle varie attivita da fare" press="onTilePress" frameType="TwoByOne">
-                    <TileContent footer="Apri modulo">
-                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                <GenericTile header="{i18n>homeTileCalendarHeader}" subheader="{i18n>homeTileCalendarSubheader}" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="{i18n>homeTileOpenModule}">
+                        <NumericContent value="14" scale="{i18n>homeTileDefaultScale}" valueColor="Neutral" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Attivita" subheader="Storico delle attivita generali" press="onTilePress" frameType="TwoByOne">
-                    <TileContent footer="Apri modulo">
-                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                <GenericTile header="{i18n>homeTileActivitiesHeader}" subheader="{i18n>homeTileActivitiesSubheader}" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="{i18n>homeTileOpenModule}">
+                        <NumericContent value="14" scale="{i18n>homeTileDefaultScale}" valueColor="Neutral" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Note" subheader="Storico delle note generali" press="onTilePress" frameType="TwoByOne">
-                    <TileContent footer="Apri modulo">
-                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                <GenericTile header="{i18n>homeTileNotesHeader}" subheader="{i18n>homeTileNotesSubheader}" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="{i18n>homeTileOpenModule}">
+                        <NumericContent value="14" scale="{i18n>homeTileDefaultScale}" valueColor="Neutral" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Statistiche" subheader="Varie statistiche" press="onTilePress" frameType="TwoByOne">
-                    <TileContent footer="Apri modulo">
-                        <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
+                <GenericTile header="{i18n>homeTileStatisticsHeader}" subheader="{i18n>homeTileStatisticsSubheader}" press="onTilePress" frameType="TwoByOne">
+                    <TileContent footer="{i18n>homeTileOpenModule}">
+                        <NumericContent value="14" scale="{i18n>homeTileDefaultScale}" valueColor="Neutral" />
                     </TileContent>
                 </GenericTile>
             </HBox>

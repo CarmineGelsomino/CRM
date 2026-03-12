@@ -11,6 +11,7 @@ sap.ui.define([
 
         onTilePress: function (oEvent) {
             var oTile = oEvent.getSource();
+            var oBundle = this.getResourceBundle();
 
             if (oTile.getId().endsWith("contactsTile")) {
                 this.navTo("contacts");
@@ -22,9 +23,7 @@ sap.ui.define([
                 return;
             }
 
-            if (oTile.getHeader() === "Opportunita" || oTile.getHeader() === "Ticket") {
-                MessageToast.show("Modulo " + oTile.getHeader() + " in preparazione");
-            }
+            MessageToast.show(oBundle.getText("homeModuleInPreparation", [oTile.getHeader()]));
         }
     });
 });

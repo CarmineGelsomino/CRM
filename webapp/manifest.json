@@ -28,7 +28,15 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "crm.i18n.i18n"
+          "bundleName": "crm.i18n.i18n",
+          "supportedLocales": [
+            "",
+            "it",
+            "it_IT",
+            "en",
+            "en_US"
+          ],
+          "fallbackLocale": ""
         }
       },
       "categoriesContact": {

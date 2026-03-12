@@ -12,7 +12,7 @@
 		</Image>
         <Title text="{i18n>shellBarTitle}" level="H5" />
         <ToolbarSpacer />
-        <MenuButton icon="sap-icon://menu2" type="Neutral" tooltip="Menu">
+        <MenuButton icon="sap-icon://menu2" type="Neutral" tooltip="{i18n>shellMenuTooltip}">
             <menu>
                 <Menu itemSelected="onShellMainMenuSelect">
                     <items>
@@ -26,12 +26,12 @@
                 </Menu>
             </menu>
         </MenuButton>
-        <Button icon="sap-icon://bell" type="Transparent" press="onShellNotificationsPress" tooltip="Notifiche" />
+        <Button icon="sap-icon://bell" type="Transparent" press="onShellNotificationsPress" tooltip="{i18n>shellNotificationsTooltip}" />
         <f:Avatar
             displaySize="XS"
             displayShape="Circle"
             initials="{ parts: [ { path: 'session>/firstName' }, { path: 'session>/lastName' }, { path: 'session>/email' } ], formatter: '.formatUserInitials' }"
-            tooltip="Profilo"
+            tooltip="{i18n>shellProfileTooltip}"
             press="onShellProfilePress" />
     </tnt:ToolHeader>
 </core:FragmentDefinition>

@@ -5,37 +5,42 @@
     xmlns:layout="sap.ui.layout"
     xmlns:core="sap.ui.core">
     <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
-    <Page title="Profilo utente" class="sapUiResponsiveContentPadding" busy="{profile>/busy}">
+    <Page title="{i18n>userProfilePageTitle}" class="sapUiResponsiveContentPadding" busy="{profile>/busy}">
         <content>
             <layout:VerticalLayout width="100%" class="sapUiContentPadding">
-                <Panel headerText="Dati profilo" class="sapUiResponsiveMargin">
+                <Panel headerText="{i18n>userProfilePanelTitle}" class="sapUiResponsiveMargin">
                     <content>
                         <VBox class="sapUiMediumMargin" renderType="Bare">
-                            <Label text="Nome" labelFor="profileFirstName" />
+                            <Label text="{i18n>userProfileFirstName}" labelFor="profileFirstName" />
                             <Input id="profileFirstName" value="{profile>/data/first_name}" />
 
-                            <Label text="Cognome" labelFor="profileLastName" class="sapUiSmallMarginTop" />
+                            <Label text="{i18n>userProfileLastName}" labelFor="profileLastName" class="sapUiSmallMarginTop" />
                             <Input id="profileLastName" value="{profile>/data/last_name}" />
 
-                            <Label text="Email" labelFor="profileEmail" class="sapUiSmallMarginTop" />
+                            <Label text="{i18n>userProfileEmail}" labelFor="profileEmail" class="sapUiSmallMarginTop" />
                             <Input id="profileEmail" value="{profile>/data/email}" type="Email" />
 
-                            <Label text="Utente attivo" labelFor="profileIsActive" class="sapUiSmallMarginTop" />
-                            <Switch id="profileIsActive" state="{= ${profile>/data/is_active} === 1 }" customTextOn="Si" customTextOff="No" change="onActiveSwitchChange" />
+                            <Label text="{i18n>userProfileIsActive}" labelFor="profileIsActive" class="sapUiSmallMarginTop" />
+                            <Switch
+                                id="profileIsActive"
+                                state="{= ${profile>/data/is_active} === 1 }"
+                                customTextOn="{i18n>userProfileSwitchOn}"
+                                customTextOff="{i18n>userProfileSwitchOff}"
+                                change="onActiveSwitchChange" />
 
-                            <Button text="Salva profilo" type="Emphasized" class="sapUiMediumMarginTop" press="onSaveProfile" />
+                            <Button text="{i18n>userProfileSaveButton}" type="Emphasized" class="sapUiMediumMarginTop" press="onSaveProfile" />
                         </VBox>
                     </content>
                 </Panel>
 
-                <Panel headerText="Reset password" class="sapUiResponsiveMargin">
+                <Panel headerText="{i18n>userProfilePasswordPanelTitle}" class="sapUiResponsiveMargin">
                     <content>
                         <VBox class="sapUiMediumMargin" renderType="Bare">
-                            <Text text="Inserisci una nuova password oppure lascia vuoto per generarne una automatica." />
-                            <Input value="{profile>/passwordInput}" type="Password" placeholder="Nuova password (opzionale)" class="sapUiSmallMarginTop" />
-                            <Button text="Reimposta password" type="Attention" class="sapUiSmallMarginTop" press="onResetPassword" />
+                            <Text text="{i18n>userProfilePasswordHint}" />
+                            <Input value="{profile>/passwordInput}" type="Password" placeholder="{i18n>userProfilePasswordPlaceholder}" class="sapUiSmallMarginTop" />
+                            <Button text="{i18n>userProfilePasswordResetButton}" type="Attention" class="sapUiSmallMarginTop" press="onResetPassword" />
                             <MessageStrip
-                                text="{= ${profile>/generatedPassword} ? 'Password generata: ' + ${profile>/generatedPassword} : '' }"
+                                text="{= ${profile>/generatedPassword} ? ${i18n>userProfileGeneratedPasswordPrefix} + ' ' + ${profile>/generatedPassword} : '' }"
                                 type="Information"
                                 visible="{= !!${profile>/generatedPassword} }"
                                 class="sapUiSmallMarginTop" />
