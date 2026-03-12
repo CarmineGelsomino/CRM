@@ -47,6 +47,10 @@
         "type": "sap.ui.model.json.JSONModel",
         "uri": "model/modelStatesProperty.json"
       },
+      "typeProperties": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/modelTypeProperties.json"
+      },
       "activityTypes": {
         "type": "sap.ui.model.json.JSONModel",
         "uri": "model/modelTypesNote.json"
@@ -98,6 +102,16 @@
           "target": "contactDetail"
         },
         {
+          "pattern": "properties",
+          "name": "properties",
+          "target": "properties"
+        },
+        {
+          "pattern": "properties/{propertyId}",
+          "name": "propertyDetail",
+          "target": "propertyDetail"
+        },
+        {
           "pattern": "profile",
           "name": "userProfile",
           "target": "userProfile"
@@ -119,6 +133,14 @@
         "contactDetail": {
           "viewName": "contactTile.ContactDetail",
           "viewId": "contactDetail"
+        },
+        "properties": {
+          "viewName": "propertyTile.Property",
+          "viewId": "properties"
+        },
+        "propertyDetail": {
+          "viewName": "propertyTile.DetailProperty",
+          "viewId": "propertyDetail"
         },
         "userProfile": {
           "viewName": "UserProfile",

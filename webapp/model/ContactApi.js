@@ -83,6 +83,7 @@ sap.ui.define([
 
     var PROPERTY_FIELDS = [
         "user_id",
+        "property_type",
         "address_line",
         "city",
         "postal_code",
@@ -179,7 +180,9 @@ sap.ui.define([
         return sMessage.indexOf("data truncated for column 'category'") !== -1 ||
             sMessage.indexOf('data truncated for column "category"') !== -1 ||
             sMessage.indexOf("data truncated for column 'status'") !== -1 ||
-            sMessage.indexOf('data truncated for column "status"') !== -1;
+            sMessage.indexOf('data truncated for column "status"') !== -1 ||
+            sMessage.indexOf("data truncated for column 'property_condition'") !== -1 ||
+            sMessage.indexOf('data truncated for column "property_condition"') !== -1;
     }
 
     function removeInvalidEnumFields(oPayload) {
@@ -191,6 +194,10 @@ sap.ui.define([
 
         if (oCleanPayload.status === "" || oCleanPayload.status === null || oCleanPayload.status === undefined) {
             delete oCleanPayload.status;
+        }
+
+        if (oCleanPayload.property_condition === "" || oCleanPayload.property_condition === null || oCleanPayload.property_condition === undefined) {
+            delete oCleanPayload.property_condition;
         }
 
         return oCleanPayload;
@@ -535,6 +542,70 @@ sap.ui.define([
         });
     }
 
+    function createProperty(oPayload) {
+        var oSafePayload = removeInvalidEnumFields(sanitizePayload(oPayload, PROPERTY_FIELDS));
+
+        return request({
+            entity: ENTITY_PROPERTIES,
+            method: "POST",
+            payload: oSafePayload,
+            errorMessage: "Impossibile creare la proprieta'.",
+            useMessageBox: true
+        }).catch(function (oError) {
+            if (shouldRetryWithoutEnumField(oError)) {
+                delete oSafePayload.property_condition;
+
+                return request({
+                    entity: ENTITY_PROPERTIES,
+                    method: "POST",
+                    payload: oSafePayload,
+                    errorMessage: "Impossibile creare la proprieta'.",
+                    useMessageBox: true
+                });
+            }
+
+            throw oError;
+        });
+    }
+
+    function updateProperty(iId, oPayload) {
+        var oSafePayload = removeInvalidEnumFields(sanitizePayload(oPayload, PROPERTY_FIELDS));
+
+        return request({
+            entity: ENTITY_PROPERTIES,
+            query: { id: iId },
+            method: "PUT",
+            payload: oSafePayload,
+            errorMessage: "Impossibile aggiornare la proprieta'.",
+            useMessageBox: true
+        }).catch(function (oError) {
+            if (shouldRetryWithoutEnumField(oError)) {
+                delete oSafePayload.property_condition;
+
+                return request({
+                    entity: ENTITY_PROPERTIES,
+                    query: { id: iId },
+                    method: "PUT",
+                    payload: oSafePayload,
+                    errorMessage: "Impossibile aggiornare la proprieta'.",
+                    useMessageBox: true
+                });
+            }
+
+            throw oError;
+        });
+    }
+
+    function deleteProperty(iId) {
+        return request({
+            entity: ENTITY_PROPERTIES,
+            query: { id: iId },
+            method: "DELETE",
+            errorMessage: "Impossibile eliminare la proprieta'.",
+            useMessageBox: true
+        });
+    }
+
     function listPropertyOwners(mFilters) {
         return request({
             entity: ENTITY_PROPERTY_OWNERS,
@@ -576,6 +647,23 @@ sap.ui.define([
         var aCreatePromises = (aPropertyOwners || []).map(function (oOwner) {
             return createPropertyOwner(Object.assign({}, oOwner, {
                 contact_id: iContactId
+            }));
+        });
+
+        await Promise.all(aCreatePromises);
+    }
+
+    async function replacePropertyContacts(iPropertyId, aOwners) {
+        var aExistingOwners = await listPropertyOwners({ property_id: iPropertyId });
+        var aDeletePromises = (aExistingOwners || []).map(function (oOwner) {
+            return deletePropertyOwner(oOwner.id);
+        });
+
+        await Promise.all(aDeletePromises);
+
+        var aCreatePromises = (aOwners || []).map(function (oOwner) {
+            return createPropertyOwner(Object.assign({}, oOwner, {
+                property_id: iPropertyId
             }));
         });
 
@@ -683,8 +771,12 @@ sap.ui.define([
         upsertBuyerProfileByContactId: upsertBuyerProfileByContactId,
         listProperties: listProperties,
         getProperty: getProperty,
+        createProperty: createProperty,
+        updateProperty: updateProperty,
+        deleteProperty: deleteProperty,
         listPropertyOwners: listPropertyOwners,
         replacePropertyOwners: replacePropertyOwners,
+        replacePropertyContacts: replacePropertyContacts,
         listActivities: listActivities,
         createActivity: createActivity,
         updateActivity: updateActivity,

@@ -1,0 +1,105 @@
+<mvc:View
+    controllerName="crm.controller.propertyTile.Property"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
+    <Page title="{i18n>propertiesPageTitle}" class="sapUiResponsiveContentPadding">
+        <customHeader>
+            <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
+        </customHeader>
+        <content>
+            <Title class="sapUiSmallMargin" text="{i18n>propertiesPageTitle}" titleStyle="H2" />
+            <Panel class="sapUiTinyMarginBottom" expandable="true">
+                <headerToolbar>
+                    <Toolbar>
+                        <Title text="{i18n>propertiesFiltersTitle}" level="H5" />
+                    </Toolbar>
+                </headerToolbar>
+                <content>
+                    <f:SimpleForm
+                        editable="true"
+                        layout="ColumnLayout"
+                        labelSpanXL="2"
+                        labelSpanL="2"
+                        labelSpanM="12"
+                        labelSpanS="12"
+                        emptySpanXL="0"
+                        emptySpanL="0"
+                        emptySpanM="0"
+                        emptySpanS="0"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2"
+                        singleContainerFullSize="false">
+                        <Label text="{i18n>propertiesFilterSearchLabel}" labelFor="propertySearchField" />
+                        <SearchField
+                            id="propertySearchField"
+                            width="100%"
+                            value="{propertyFilters>/searchQuery}"
+                            placeholder="{i18n>propertiesFilterSearchPlaceholder}"
+                            liveChange="onFilterChange"
+                            search="onFilterChange" />
+                        <Label text="{i18n>propertiesFilterConditionLabel}" labelFor="propertyConditionSelect" />
+                        <Select
+                            id="propertyConditionSelect"
+                            width="100%"
+                            forceSelection="false"
+                            selectedKey="{propertyFilters>/conditionKey}"
+                            change="onFilterChange"
+                            items="{statesProperty>/}">
+                            <core:Item key="" text="{i18n>propertiesFilterConditionAll}" />
+                            <core:Item key="{statesProperty>key}" text="{statesProperty>value}" />
+                        </Select>
+                    </f:SimpleForm>
+                    <Button text="{i18n>propertiesFilterClearButton}" icon="sap-icon://clear-filter" type="Transparent" press="onClearFilters" />
+                </content>
+            </Panel>
+
+            <Table
+                id="propertiesTable"
+                mode="SingleSelectLeft"
+                growing="true"
+                growingScrollToLoad="true"
+                busy="{properties>/busy}"
+                items="{properties>/properties}"
+                selectionChange="onSelectionChange"
+                noDataText="{i18n>propertiesTableNoData}">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="{= ${i18n>propertiesTableTitlePrefix} + ${properties>/properties}.length + ')' }" level="H3" />
+                        <ToolbarSpacer />
+                        <Button icon="sap-icon://refresh" tooltip="{i18n>propertiesTableRefreshTooltip}" press="onRefreshProperties" />
+                        <Button text="{i18n>propertiesTableSortButton}" icon="sap-icon://sort" press="onOpenSortDialog" />
+                        <Button text="{i18n>propertiesTableNewButton}" type="Emphasized" icon="sap-icon://add" press="onCreateProperty" />
+                        <Button text="{i18n>propertiesTableEditButton}" icon="sap-icon://edit" enabled="{= !!${properties>/selectedPropertyId}}" press="onEditProperty" />
+                        <Button text="{i18n>propertiesTableDeleteButton}" type="Negative" icon="sap-icon://delete" enabled="{= !!${properties>/selectedPropertyId}}" press="onDeleteProperty" />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="12rem"><Text text="{i18n>propertiesTableColumnType}" /></Column>
+                    <Column width="18rem"><Text text="{i18n>propertiesTableColumnAddress}" /></Column>
+                    <Column width="10rem"><Text text="{i18n>propertiesTableColumnCity}" /></Column>
+                    <Column width="14rem"><Text text="{i18n>propertiesTableColumnOwners}" /></Column>
+                    <Column width="10rem"><Text text="{i18n>propertiesTableColumnCondition}" /></Column>
+                    <Column width="8rem" hAlign="End"><Text text="{i18n>propertiesTableColumnActions}" /></Column>
+                </columns>
+                <items>
+                    <ColumnListItem type="Navigation" press="onOpenDetail">
+                        <cells>
+                            <Text text="{properties>property_type}" />
+                            <ObjectIdentifier title="{properties>property_label}" text="{= 'ID: ' + ${properties>id}}" />
+                            <Text text="{properties>city}" />
+                            <Text text="{= ${properties>owner_names} || ${properties>owner_count} + ' proprietari'}" />
+                            <ObjectStatus text="{properties>property_condition}" state="Information" />
+                            <HBox justifyContent="End">
+                                <Button icon="sap-icon://edit" type="Transparent" press="onRowEdit" />
+                                <Button icon="sap-icon://delete" type="Transparent" press="onRowDelete" />
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+    </Page>
+</mvc:View>

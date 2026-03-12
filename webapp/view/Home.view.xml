@@ -14,7 +14,7 @@
                 <Text text="{i18n>shellBarSubtitle}" class="sapUiTinyMarginTop" />
             </VBox>
             <HBox justifyContent="Center" gap="30px" renderType="Bare" wrap="Wrap">
-                <GenericTile header="TodayBoard" subheader="Tutte le attività da fare oggi" press="onTilePress" frameType="TwoByOne">
+                <GenericTile header="TodayBoard" subheader="Tutte le attivita da fare oggi" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="Apri modulo">
                         <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
                     </TileContent>
@@ -26,7 +26,7 @@
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Proprietà" subheader="Proprietà e relativi dettagli" press="onTilePress" frameType="TwoByOne">
+                <GenericTile id="propertiesTile" header="Proprieta" subheader="Proprieta e relativi dettagli" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="Apri modulo">
                         <NumericContent value="36" scale="aperte" valueColor="Critical" />
                     </TileContent>
@@ -38,13 +38,13 @@
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Calendario" subheader="Calendario delle varie attività da fare" press="onTilePress" frameType="TwoByOne">
+                <GenericTile header="Calendario" subheader="Calendario delle varie attivita da fare" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="Apri modulo">
                         <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="Attività" subheader="Storico delle attività generali" press="onTilePress" frameType="TwoByOne">
+                <GenericTile header="Attivita" subheader="Storico delle attivita generali" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="Apri modulo">
                         <NumericContent value="14" scale="in gestione" valueColor="Neutral" />
                     </TileContent>

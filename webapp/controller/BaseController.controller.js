@@ -65,6 +65,11 @@ sap.ui.define([
                 return;
             }
 
+            if (sText === oBundle.getText("shellMenuProperties")) {
+                this.navTo("properties");
+                return;
+            }
+
             if (sText === oBundle.getText("shellMenuProfile")) {
                 this.navTo("userProfile");
                 return;

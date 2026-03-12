@@ -17,7 +17,12 @@ sap.ui.define([
                 return;
             }
 
-            if (oTile.getHeader() === "Opportunità" || oTile.getHeader() === "Ticket") {
+            if (oTile.getId().endsWith("propertiesTile")) {
+                this.navTo("properties");
+                return;
+            }
+
+            if (oTile.getHeader() === "Opportunita" || oTile.getHeader() === "Ticket") {
                 MessageToast.show("Modulo " + oTile.getHeader() + " in preparazione");
             }
         }

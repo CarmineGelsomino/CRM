@@ -1,0 +1,22 @@
+[
+    {
+        "key": "appartamento",
+        "value": "Appartamento"
+    },
+    {
+        "key": "locale-commerciale",
+        "value": "Locale Commerciale"
+    },
+    {
+        "key": "box-auto",
+        "value": "Box auto"
+    },
+    {
+        "key": "cantina",
+        "value": "Cantina"
+    },
+    {
+        "key": "posto-auto",
+        "value": "Posto auto"
+    }
+]

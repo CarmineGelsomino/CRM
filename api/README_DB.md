@@ -331,6 +331,10 @@ CREATE TABLE properties (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+ALTER TABLE properties
+ADD COLUMN property_type VARCHAR(50) NULL
+AFTER user_id;
+
 -- =========================================================
 -- PROPERTY FEATURES
 -- =========================================================
