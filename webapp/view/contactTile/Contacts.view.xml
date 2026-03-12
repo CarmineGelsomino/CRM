@@ -96,7 +96,7 @@
                 <items>
                     <ColumnListItem type="Navigation" press="onOpenDetail">
                         <cells>
-                            <ObjectIdentifier title="{= ${contacts>first_name} + ' ' + ${contacts>last_name}}" text="{= ${i18n>contactsTableIdPrefix} + ${contacts>id}}" />
+                            <ObjectIdentifier title="{= ${contacts>first_name} + ' ' + ${contacts>last_name}}" />
                             <Text text="{contacts>email}" />
                             <tnt:InfoLabel
                                 text="{ parts: [ { path: 'contacts>category' }, { path: 'categoriesContact>/' } ], formatter: 'formatter.contactCategoryText' }"

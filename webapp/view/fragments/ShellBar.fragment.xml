@@ -1,7 +1,8 @@
 <core:FragmentDefinition
     xmlns="sap.m"
-    xmlns:core="sap.ui.core">
-    <OverflowToolbar>
+    xmlns:core="sap.ui.core"
+    xmlns:tnt="sap.tnt">
+    <tnt:ToolHeader>
         <Button icon="sap-icon://nav-back" type="Transparent" press="onShellNavHome" tooltip="{i18n>shellMenuHome}" />
         <Title text="{i18n>shellBarTitle}" level="H5" />
         <ToolbarSpacer />
@@ -21,5 +22,5 @@
         </MenuButton>
         <Button icon="sap-icon://bell" type="Transparent" press="onShellNotificationsPress" tooltip="Notifiche" />
         <Button icon="sap-icon://employee" type="Transparent" press="onShellProfilePress" tooltip="Profilo" />
-    </OverflowToolbar>
+    </tnt:ToolHeader>
 </core:FragmentDefinition>

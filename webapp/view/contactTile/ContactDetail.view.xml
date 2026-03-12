@@ -9,8 +9,6 @@
         <content>
             <ObjectHeader
                 title="{= ${contactDetail>/contact/first_name} + ' ' + ${contactDetail>/contact/last_name}}"
-                number="{contactDetail>/contact/id}"
-                numberUnit="{i18n>contactDetailIdUnit}"
                 intro="{contactDetail>/contact/category}"
                 responsive="true">
                 <attributes>
