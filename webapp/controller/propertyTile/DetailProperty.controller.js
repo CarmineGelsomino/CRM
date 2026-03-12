@@ -274,8 +274,11 @@ sap.ui.define([
             var oModel = oInput.getModel("propertyDetail");
             var sPath = oInput.getBindingContext("propertyDetail").getPath();
 
-            oModel.setProperty(sPath, createEmptyOwner());
-            oModel.setProperty(sPath + "/display_value", oInput.getValue());
+            oModel.setProperty(sPath + "/display_value", oEvent.getParameter("value"));
+            oModel.setProperty(sPath + "/contact_id", null);
+            oModel.setProperty(sPath + "/primary_phone", "");
+            oModel.setProperty(sPath + "/category", "");
+            oModel.setProperty(sPath + "/status", "");
         },
 
         onSuggestOwner: async function (oEvent) {
@@ -450,7 +453,7 @@ sap.ui.define([
                         new Label({ text: oBundle.getText("contactDetailActivityFieldType") }),
                         new Select("newPropertyActivityType", {
                             width: "100%",
-                            selectedKey: "call",
+                            selectedKey: "chiamata",
                             items: aActivityTypes.map(function (oType) {
                                 return new Item({
                                     key: oType.key,

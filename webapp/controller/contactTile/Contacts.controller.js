@@ -844,6 +844,7 @@ sap.ui.define([
                 return;
             }
 
+            oModel.setProperty(oContext.getPath() + "/display_value", oEvent.getParameter("value"));
             oModel.setProperty(oContext.getPath() + "/property_id", null);
         },
 

@@ -463,6 +463,7 @@ sap.ui.define([
                 return;
             }
 
+            oModel.setProperty(oContext.getPath() + "/display_value", oEvent.getParameter("value"));
             oModel.setProperty(oContext.getPath() + "/property_id", null);
         },
 
@@ -650,7 +651,7 @@ sap.ui.define([
                     new Label({ text: oBundle.getText("contactDetailActivityFieldType") }),
                     new Select("newActivityType", {
                         width: "100%",
-                        selectedKey: "call",
+                        selectedKey: "chiamata",
                         forceSelection: false,
                         items: aActivityTypes.map(function (oType) {
                             return new Item({
@@ -686,7 +687,7 @@ sap.ui.define([
                         }
 
                         var oPayload = {
-                            user_id: 1,
+                            user_id: this.getModel("session").getProperty("/userId") || 1,
                             contact_id: iContactId,
                             title: sTitle,
                             activity_type: sap.ui.getCore().byId("newActivityType").getSelectedKey(),
