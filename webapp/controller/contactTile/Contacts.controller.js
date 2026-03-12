@@ -22,7 +22,8 @@ sap.ui.define([
     "sap/m/library",
     "sap/ui/core/Item",
     "sap/m/ViewSettingsDialog",
-    "sap/m/ViewSettingsItem"
+    "sap/m/ViewSettingsItem",
+    "sap/ui/core/ListItem"
 ], function (
     BaseController,
     ContactApi,
@@ -47,7 +48,8 @@ sap.ui.define([
     mobileLibrary,
     Item,
     ViewSettingsDialog,
-    ViewSettingsItem
+    ViewSettingsItem,
+    ListItem
 ) {
     "use strict";
 
@@ -120,6 +122,23 @@ sap.ui.define([
         };
     }
 
+    function createEmptySellerProperty() {
+        return {
+            property_id: null,
+            display_value: ""
+        };
+    }
+
+    function formatPropertyDisplay(oProperty) {
+        var sAddress = (oProperty && oProperty.address_line || "").trim();
+        var sSubalterno = (oProperty && oProperty.subalterno || "").trim();
+        return sSubalterno ? sAddress + " - Sub. " + sSubalterno : sAddress;
+    }
+
+    function normalizeSearchValue(sValue) {
+        return (sValue || "").toLowerCase().replace(/\s+/g, " ").trim();
+    }
+
     function normalizePhoneList(sPrimaryPhone, aAdditionalPhones) {
         var aPhones = [];
         var sCleanPrimaryPhone = (sPrimaryPhone || "").trim();
@@ -187,6 +206,8 @@ sap.ui.define([
                 selectedContact: null,
                 busy: false
             }), "contacts");
+
+            this._aPropertyCache = null;
 
             this._oSortState = { path: "last_name", descending: false };
             this._loadContacts();
@@ -399,6 +420,7 @@ sap.ui.define([
             var oBuyerProfile = createEmptyBuyerProfile();
             var aContactPhones = [];
             var aContactAddresses = [];
+            var aSellerProperties = [createEmptySellerProperty()];
 
             if (bEdit && oContact && oContact.id) {
                 aContactPhones = await ContactApi.listContactPhones(oContact.id);
@@ -410,6 +432,8 @@ sap.ui.define([
 
                     oBuyerProfile = Object.assign(oBuyerProfile, oExistingBuyerProfile, oMappedPreferences);
                 }
+
+                aSellerProperties = await this._loadSellerPropertiesForContact(oContact.id);
             }
 
             return {
@@ -438,8 +462,43 @@ sap.ui.define([
                 }).map(function (oAddress) {
                     return { address_line: oAddress.address_line || "" };
                 }) : [],
-                buyerProfile: oBuyerProfile
+                buyerProfile: oBuyerProfile,
+                sellerProperties: aSellerProperties
             };
+        },
+
+        _ensurePropertyCache: async function () {
+            if (!this._aPropertyCache) {
+                this._aPropertyCache = await ContactApi.listProperties();
+            }
+
+            return this._aPropertyCache || [];
+        },
+
+        _loadSellerPropertiesForContact: async function (iContactId) {
+            var aOwners = await ContactApi.listPropertyOwners({ contact_id: iContactId });
+
+            if (!aOwners || !aOwners.length) {
+                return [createEmptySellerProperty()];
+            }
+
+            var aProperties = await this._ensurePropertyCache();
+            var mPropertiesById = (aProperties || []).reduce(function (mMap, oProperty) {
+                mMap[oProperty.id] = oProperty;
+                return mMap;
+            }, {});
+
+            var aSellerProperties = aOwners.map(function (oOwner) {
+                var oProperty = mPropertiesById[oOwner.property_id];
+                return {
+                    property_id: oOwner.property_id,
+                    display_value: formatPropertyDisplay(oProperty)
+                };
+            }).filter(function (oSellerProperty) {
+                return !!oSellerProperty.display_value;
+            });
+
+            return aSellerProperties.length ? aSellerProperties : [createEmptySellerProperty()];
         },
 
         _createAdditionalPhonesBox: function () {
@@ -523,9 +582,69 @@ sap.ui.define([
             });
         },
 
+        _createSellerPropertiesBox: function () {
+            var oBundle = this.getResourceBundle();
+            var sSellerVisible = "{= ${contactDialog>/contact/category} === 'venditore' }";
+
+            return new VBox({
+                width: "100%",
+                visible: sSellerVisible,
+                items: [
+                    new VBox({
+                        width: "100%",
+                        items: {
+                            path: "contactDialog>/sellerProperties",
+                            templateShareable: false,
+                            template: new VBox({
+                                width: "100%",
+                                items: [
+                                    new HBox({
+                                        width: "100%",
+                                        alignItems: "Center",
+                                        items: [
+                                            new Input({
+                                                width: "100%",
+                                                value: "{contactDialog>display_value}",
+                                                placeholder: oBundle.getText("contactsDialogSellerPropertyPlaceholder"),
+                                                showSuggestion: true,
+                                                startSuggestion: 3,
+                                                suggest: this._onSuggestSellerProperty.bind(this),
+                                                suggestionItemSelected: this._onSellerPropertySelected.bind(this),
+                                                liveChange: this._onSellerPropertyLiveChange.bind(this)
+                                            }),
+                                            new Button({
+                                                icon: "sap-icon://add",
+                                                type: "Transparent",
+                                                tooltip: oBundle.getText("contactsDialogAddSellerPropertyButton"),
+                                                press: this._onAddSellerPropertyPress.bind(this)
+                                            }),
+                                            new Button({
+                                                icon: "sap-icon://less",
+                                                type: "Transparent",
+                                                tooltip: oBundle.getText("contactsDialogRemoveSellerPropertyButton"),
+                                                press: this._onRemoveSellerPropertyPress.bind(this),
+                                                visible: "{= ${contactDialog>/sellerProperties}.length > 1 }"
+                                            })
+                                        ]
+                                    }).addStyleClass("sapUiTinyMarginBottom")
+                                ]
+                            })
+                        }
+                    }),
+                    new Button({
+                        text: oBundle.getText("contactsDialogCreateMissingPropertyButton"),
+                        type: "Transparent",
+                        icon: "sap-icon://add-document",
+                        press: this._onOpenMissingPropertyDialog.bind(this)
+                    })
+                ]
+            });
+        },
+
         _buildContactDialogContent: function () {
             var oBundle = this.getResourceBundle();
             var sBuyerVisible = "{= ${contactDialog>/contact/category} === 'acquirente' }";
+            var sSellerVisible = "{= ${contactDialog>/contact/category} === 'venditore' }";
             var sMortgageOtherVisible = "{= ${contactDialog>/contact/category} === 'acquirente' && ${contactDialog>/buyerProfile/mortgage_type} === 'altro' }";
             var sPreferenceOtherVisible = "{= ${contactDialog>/contact/category} === 'acquirente' && ${contactDialog>/buyerProfile/preferences/altro} }";
 
@@ -575,6 +694,8 @@ sap.ui.define([
                 }),
                 new Label({ text: oBundle.getText("contactsDialogFieldGenericInfo") }),
                 new TextArea({ width: "100%", rows: 4, value: "{contactDialog>/contact/generic_info}" }),
+                new Label({ text: oBundle.getText("contactsDialogFieldSellerProperties"), visible: sSellerVisible }),
+                this._createSellerPropertiesBox(),
                 new Label({ text: oBundle.getText("contactsDialogFieldRequestedArea"), visible: sBuyerVisible }),
                 new Input({ value: "{contactDialog>/buyerProfile/requested_area}", visible: sBuyerVisible }),
                 new Label({ text: oBundle.getText("contactsDialogFieldPropertyType"), visible: sBuyerVisible }),
@@ -678,6 +799,183 @@ sap.ui.define([
 
             aAddresses.splice(iIndex, 1);
             oModel.setProperty("/addresses", aAddresses);
+        },
+
+        _onAddSellerPropertyPress: function (oEvent) {
+            var oModel = oEvent.getSource().getModel("contactDialog");
+            var aSellerProperties = oModel.getProperty("/sellerProperties") || [];
+
+            aSellerProperties.push(createEmptySellerProperty());
+            oModel.setProperty("/sellerProperties", aSellerProperties);
+        },
+
+        _onRemoveSellerPropertyPress: function (oEvent) {
+            var oModel = oEvent.getSource().getModel("contactDialog");
+            var oContext = oEvent.getSource().getBindingContext("contactDialog");
+            var sPath = oContext && oContext.getPath();
+            var aSellerProperties = oModel.getProperty("/sellerProperties") || [];
+            var iIndex;
+
+            if (!sPath) {
+                return;
+            }
+
+            iIndex = Number(sPath.split("/").pop());
+
+            if (Number.isNaN(iIndex)) {
+                return;
+            }
+
+            aSellerProperties.splice(iIndex, 1);
+
+            if (!aSellerProperties.length) {
+                aSellerProperties.push(createEmptySellerProperty());
+            }
+
+            oModel.setProperty("/sellerProperties", aSellerProperties);
+        },
+
+        _onSellerPropertyLiveChange: function (oEvent) {
+            var oInput = oEvent.getSource();
+            var oContext = oInput.getBindingContext("contactDialog");
+            var oModel = oInput.getModel("contactDialog");
+
+            if (!oContext || !oModel) {
+                return;
+            }
+
+            oModel.setProperty(oContext.getPath() + "/property_id", null);
+        },
+
+        _onSuggestSellerProperty: async function (oEvent) {
+            var oInput = oEvent.getSource();
+            var sValue = normalizeSearchValue(oEvent.getParameter("suggestValue"));
+            var aProperties = await this._ensurePropertyCache();
+            var aMatches = [];
+
+            if (sValue.length < 3) {
+                oInput.destroySuggestionItems();
+                return;
+            }
+
+            aMatches = (aProperties || []).filter(function (oProperty) {
+                return normalizeSearchValue(formatPropertyDisplay(oProperty)).indexOf(sValue) !== -1;
+            }).slice(0, 10);
+
+            oInput.destroySuggestionItems();
+            aMatches.forEach(function (oProperty) {
+                oInput.addSuggestionItem(new ListItem({
+                    key: String(oProperty.id),
+                    text: formatPropertyDisplay(oProperty),
+                    additionalText: (oProperty.city || "").trim()
+                }));
+            });
+        },
+
+        _onSellerPropertySelected: async function (oEvent) {
+            var oSelectedItem = oEvent.getParameter("selectedItem");
+            var oInput = oEvent.getSource();
+            var oContext = oInput.getBindingContext("contactDialog");
+            var oModel = oInput.getModel("contactDialog");
+            var iPropertyId;
+
+            if (!oSelectedItem || !oContext || !oModel) {
+                return;
+            }
+
+            iPropertyId = Number(oSelectedItem.getKey());
+            oModel.setProperty(oContext.getPath() + "/property_id", iPropertyId);
+            oModel.setProperty(oContext.getPath() + "/display_value", oSelectedItem.getText());
+        },
+
+        _normalizeSellerPropertiesForSave: function (aSellerProperties) {
+            return (aSellerProperties || []).filter(function (oSellerProperty) {
+                return (oSellerProperty.display_value || "").trim();
+            }).map(function (oSellerProperty, iIndex) {
+                return {
+                    property_id: oSellerProperty.property_id,
+                    is_primary_owner: iIndex === 0 ? 1 : 0,
+                    display_value: (oSellerProperty.display_value || "").trim()
+                };
+            });
+        },
+
+        _validateSellerProperties: function (oDialogData) {
+            var oBundle = this.getResourceBundle();
+            var oContact = oDialogData.contact || {};
+            var aSellerProperties = this._normalizeSellerPropertiesForSave(oDialogData.sellerProperties);
+            var bHasInvalidProperty;
+
+            if (oContact.category !== "venditore") {
+                return true;
+            }
+
+            bHasInvalidProperty = aSellerProperties.some(function (oSellerProperty) {
+                return !oSellerProperty.property_id;
+            });
+
+            if (bHasInvalidProperty) {
+                MessageToast.show(oBundle.getText("contactsDialogSellerPropertyValidation"));
+                return false;
+            }
+
+            return true;
+        },
+
+        _saveSellerProperties: async function (iContactId, oDialogData) {
+            var oContact = oDialogData.contact || {};
+            var aSellerProperties = this._normalizeSellerPropertiesForSave(oDialogData.sellerProperties);
+
+            if (oContact.category !== "venditore") {
+                await ContactApi.replacePropertyOwners(iContactId, []);
+                return;
+            }
+
+            await ContactApi.replacePropertyOwners(iContactId, aSellerProperties.map(function (oSellerProperty) {
+                return {
+                    property_id: oSellerProperty.property_id,
+                    is_primary_owner: oSellerProperty.is_primary_owner
+                };
+            }));
+        },
+
+        _onOpenMissingPropertyDialog: function () {
+            var oBundle = this.getResourceBundle();
+
+            MessageBox.show(oBundle.getText("contactsDialogMissingPropertyPrompt"), {
+                icon: MessageBox.Icon.QUESTION,
+                title: oBundle.getText("contactsDialogMissingPropertyTitle"),
+                actions: [
+                    oBundle.getText("contactsDialogMissingPropertyActionHere"),
+                    oBundle.getText("contactsDialogMissingPropertyActionModule"),
+                    MessageBox.Action.CANCEL
+                ],
+                emphasizedAction: oBundle.getText("contactsDialogMissingPropertyActionHere"),
+                onClose: function (sAction) {
+                    if (sAction === oBundle.getText("contactsDialogMissingPropertyActionHere")) {
+                        this._openInlinePropertyPlaceholderDialog();
+                        return;
+                    }
+
+                    if (sAction === oBundle.getText("contactsDialogMissingPropertyActionModule")) {
+                        this._openPropertyModulePlaceholder();
+                    }
+                }.bind(this)
+            });
+        },
+
+        _openInlinePropertyPlaceholderDialog: function () {
+            var oBundle = this.getResourceBundle();
+
+            MessageBox.information(oBundle.getText("contactsDialogMissingPropertyHerePlaceholder"), {
+                title: oBundle.getText("contactsDialogMissingPropertyHereTitle")
+            });
+        },
+
+        _openPropertyModulePlaceholder: function () {
+            var oBundle = this.getResourceBundle();
+
+            MessageToast.show(oBundle.getText("contactsDialogMissingPropertyModulePlaceholder"));
         },
 
         _saveContactPhones: async function (iContactId, oDialogData) {
@@ -899,6 +1197,10 @@ sap.ui.define([
                             return;
                         }
 
+                        if (!this._validateSellerProperties(oDialogData)) {
+                            return;
+                        }
+
                         try {
                             if (bEdit) {
                                 oSavedContact = await ContactApi.updateContact(oContact.id, oPayload);
@@ -909,6 +1211,7 @@ sap.ui.define([
                             await this._saveContactPhones(oSavedContact.id, oDialogData);
                             await this._saveContactAddresses(oSavedContact.id, oDialogData);
                             await this._saveBuyerProfileData(oSavedContact.id, oDialogData);
+                            await this._saveSellerProperties(oSavedContact.id, oDialogData);
 
                             MessageToast.show(oBundle.getText(bEdit ? "contactsUpdateSuccess" : "contactsCreateSuccess"));
                             oDialog.close();

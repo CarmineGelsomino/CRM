@@ -13,7 +13,9 @@ sap.ui.define([
     "sap/m/Select",
     "sap/ui/core/Item",
     "sap/m/DateTimePicker",
-    "sap/m/library"
+    "sap/m/library",
+    "sap/m/MessageBox",
+    "sap/ui/core/ListItem"
 ], function (
     BaseController,
     ContactApi,
@@ -29,7 +31,9 @@ sap.ui.define([
     Select,
     Item,
     DateTimePicker,
-    mobileLibrary
+    mobileLibrary,
+    MessageBox,
+    ListItem
 ) {
     "use strict";
 
@@ -102,6 +106,23 @@ sap.ui.define([
         };
     }
 
+    function createEmptySellerProperty() {
+        return {
+            property_id: null,
+            display_value: ""
+        };
+    }
+
+    function formatPropertyDisplay(oProperty) {
+        var sAddress = (oProperty && oProperty.address_line || "").trim();
+        var sSubalterno = (oProperty && oProperty.subalterno || "").trim();
+        return sSubalterno ? sAddress + " - Sub. " + sSubalterno : sAddress;
+    }
+
+    function normalizeSearchValue(sValue) {
+        return (sValue || "").toLowerCase().replace(/\s+/g, " ").trim();
+    }
+
     function normalizePhoneList(sPrimaryPhone, aAdditionalPhones) {
         var aPhones = [];
         var sCleanPrimaryPhone = (sPrimaryPhone || "").trim();
@@ -163,10 +184,13 @@ sap.ui.define([
                 contact: {},
                 phones: [],
                 addresses: [],
+                sellerProperties: [createEmptySellerProperty()],
                 buyerProfile: createEmptyBuyerProfile(),
                 activities: [],
                 notes: []
             }), "contactDetail");
+
+            this._aPropertyCache = null;
 
             this.getRouter().getRoute("contactDetail").attachPatternMatched(this._onRouteMatched, this);
         },
@@ -184,6 +208,7 @@ sap.ui.define([
                 var oContact = await ContactApi.getContact(iContactId);
                 var aContactPhones = await ContactApi.listContactPhones(iContactId);
                 var aContactAddresses = await ContactApi.listContactAddresses({ contact_id: iContactId });
+                var aSellerProperties = await this._loadSellerPropertiesForContact(iContactId);
                 var oBuyerProfile = createEmptyBuyerProfile();
                 var oExistingBuyerProfile = await ContactApi.getBuyerProfileByContactId(iContactId);
 
@@ -216,12 +241,46 @@ sap.ui.define([
                 }).map(function (oAddress) {
                     return { address_line: oAddress.address_line || "" };
                 }));
+                oModel.setProperty("/sellerProperties", aSellerProperties);
                 oModel.setProperty("/buyerProfile", oBuyerProfile);
                 oModel.setProperty("/activities", aActivities || []);
                 oModel.setProperty("/notes", aNotes || []);
             } catch (oError) {
                 // Error feedback is already handled in ContactApi
             }
+        },
+
+        _ensurePropertyCache: async function () {
+            if (!this._aPropertyCache) {
+                this._aPropertyCache = await ContactApi.listProperties();
+            }
+
+            return this._aPropertyCache || [];
+        },
+
+        _loadSellerPropertiesForContact: async function (iContactId) {
+            var aOwners = await ContactApi.listPropertyOwners({ contact_id: iContactId });
+
+            if (!aOwners || !aOwners.length) {
+                return [createEmptySellerProperty()];
+            }
+
+            var aProperties = await this._ensurePropertyCache();
+            var mPropertiesById = (aProperties || []).reduce(function (mMap, oProperty) {
+                mMap[oProperty.id] = oProperty;
+                return mMap;
+            }, {});
+            var aSellerProperties = aOwners.map(function (oOwner) {
+                var oProperty = mPropertiesById[oOwner.property_id];
+                return {
+                    property_id: oOwner.property_id,
+                    display_value: formatPropertyDisplay(oProperty)
+                };
+            }).filter(function (oSellerProperty) {
+                return !!oSellerProperty.display_value;
+            });
+
+            return aSellerProperties.length ? aSellerProperties : [createEmptySellerProperty()];
         },
 
         _consumePendingPostCreateAction: function (iContactId) {
@@ -255,11 +314,16 @@ sap.ui.define([
                 return;
             }
 
+            if (!this._validateSellerProperties(oModel.getProperty("/sellerProperties"), oContact.category)) {
+                return;
+            }
+
             try {
                 await ContactApi.updateContact(iContactId, oContact);
                 await this._saveContactPhones(iContactId, oContact, oModel.getProperty("/phones"));
                 await this._saveContactAddresses(iContactId, oContact, oModel.getProperty("/addresses"));
                 await this._saveBuyerProfileData(iContactId, oContact, oBuyerProfile);
+                await this._saveSellerProperties(iContactId, oContact.category, oModel.getProperty("/sellerProperties"));
                 MessageToast.show(oBundle.getText("contactDetailUpdateSuccess"));
                 await this._loadContact(iContactId);
             } catch (oError) {
@@ -354,6 +418,175 @@ sap.ui.define([
 
             aAddresses.splice(iIndex, 1);
             oModel.setProperty("/addresses", aAddresses);
+        },
+
+        onAddSellerProperty: function () {
+            var oModel = this.getModel("contactDetail");
+            var aSellerProperties = oModel.getProperty("/sellerProperties") || [];
+
+            aSellerProperties.push(createEmptySellerProperty());
+            oModel.setProperty("/sellerProperties", aSellerProperties);
+        },
+
+        onRemoveSellerProperty: function (oEvent) {
+            var oModel = this.getModel("contactDetail");
+            var oContext = oEvent.getSource().getBindingContext("contactDetail");
+            var sPath = oContext && oContext.getPath();
+            var aSellerProperties = oModel.getProperty("/sellerProperties") || [];
+            var iIndex;
+
+            if (!sPath) {
+                return;
+            }
+
+            iIndex = Number(sPath.split("/").pop());
+
+            if (Number.isNaN(iIndex)) {
+                return;
+            }
+
+            aSellerProperties.splice(iIndex, 1);
+
+            if (!aSellerProperties.length) {
+                aSellerProperties.push(createEmptySellerProperty());
+            }
+
+            oModel.setProperty("/sellerProperties", aSellerProperties);
+        },
+
+        onSellerPropertyLiveChange: function (oEvent) {
+            var oInput = oEvent.getSource();
+            var oContext = oInput.getBindingContext("contactDetail");
+            var oModel = oInput.getModel("contactDetail");
+
+            if (!oContext || !oModel) {
+                return;
+            }
+
+            oModel.setProperty(oContext.getPath() + "/property_id", null);
+        },
+
+        onSuggestSellerProperty: async function (oEvent) {
+            var oInput = oEvent.getSource();
+            var sValue = normalizeSearchValue(oEvent.getParameter("suggestValue"));
+            var aProperties = await this._ensurePropertyCache();
+            var aMatches = [];
+
+            if (sValue.length < 3) {
+                oInput.destroySuggestionItems();
+                return;
+            }
+
+            aMatches = (aProperties || []).filter(function (oProperty) {
+                return normalizeSearchValue(formatPropertyDisplay(oProperty)).indexOf(sValue) !== -1;
+            }).slice(0, 10);
+
+            oInput.destroySuggestionItems();
+            aMatches.forEach(function (oProperty) {
+                oInput.addSuggestionItem(new ListItem({
+                    key: String(oProperty.id),
+                    text: formatPropertyDisplay(oProperty),
+                    additionalText: (oProperty.city || "").trim()
+                }));
+            });
+        },
+
+        onSellerPropertySelected: function (oEvent) {
+            var oSelectedItem = oEvent.getParameter("selectedItem");
+            var oInput = oEvent.getSource();
+            var oContext = oInput.getBindingContext("contactDetail");
+            var oModel = oInput.getModel("contactDetail");
+            var iPropertyId;
+
+            if (!oSelectedItem || !oContext || !oModel) {
+                return;
+            }
+
+            iPropertyId = Number(oSelectedItem.getKey());
+            oModel.setProperty(oContext.getPath() + "/property_id", iPropertyId);
+            oModel.setProperty(oContext.getPath() + "/display_value", oSelectedItem.getText());
+        },
+
+        _normalizeSellerPropertiesForSave: function (aSellerProperties) {
+            return (aSellerProperties || []).filter(function (oSellerProperty) {
+                return (oSellerProperty.display_value || "").trim();
+            }).map(function (oSellerProperty, iIndex) {
+                return {
+                    property_id: oSellerProperty.property_id,
+                    is_primary_owner: iIndex === 0 ? 1 : 0,
+                    display_value: (oSellerProperty.display_value || "").trim()
+                };
+            });
+        },
+
+        _validateSellerProperties: function (aSellerProperties, sCategory) {
+            var oBundle = this.getResourceBundle();
+
+            if (sCategory !== "venditore") {
+                return true;
+            }
+
+            if (this._normalizeSellerPropertiesForSave(aSellerProperties).some(function (oSellerProperty) {
+                return !oSellerProperty.property_id;
+            })) {
+                MessageToast.show(oBundle.getText("contactsDialogSellerPropertyValidation"));
+                return false;
+            }
+
+            return true;
+        },
+
+        _saveSellerProperties: async function (iContactId, sCategory, aSellerProperties) {
+            if (sCategory !== "venditore") {
+                await ContactApi.replacePropertyOwners(iContactId, []);
+                return;
+            }
+
+            await ContactApi.replacePropertyOwners(iContactId, this._normalizeSellerPropertiesForSave(aSellerProperties).map(function (oSellerProperty) {
+                return {
+                    property_id: oSellerProperty.property_id,
+                    is_primary_owner: oSellerProperty.is_primary_owner
+                };
+            }));
+        },
+
+        onOpenMissingPropertyDialog: function () {
+            var oBundle = this.getResourceBundle();
+
+            MessageBox.show(oBundle.getText("contactsDialogMissingPropertyPrompt"), {
+                icon: MessageBox.Icon.QUESTION,
+                title: oBundle.getText("contactsDialogMissingPropertyTitle"),
+                actions: [
+                    oBundle.getText("contactsDialogMissingPropertyActionHere"),
+                    oBundle.getText("contactsDialogMissingPropertyActionModule"),
+                    MessageBox.Action.CANCEL
+                ],
+                emphasizedAction: oBundle.getText("contactsDialogMissingPropertyActionHere"),
+                onClose: function (sAction) {
+                    if (sAction === oBundle.getText("contactsDialogMissingPropertyActionHere")) {
+                        this._openInlinePropertyPlaceholderDialog();
+                        return;
+                    }
+
+                    if (sAction === oBundle.getText("contactsDialogMissingPropertyActionModule")) {
+                        this._openPropertyModulePlaceholder();
+                    }
+                }.bind(this)
+            });
+        },
+
+        _openInlinePropertyPlaceholderDialog: function () {
+            var oBundle = this.getResourceBundle();
+
+            MessageBox.information(oBundle.getText("contactsDialogMissingPropertyHerePlaceholder"), {
+                title: oBundle.getText("contactsDialogMissingPropertyHereTitle")
+            });
+        },
+
+        _openPropertyModulePlaceholder: function () {
+            var oBundle = this.getResourceBundle();
+
+            MessageToast.show(oBundle.getText("contactsDialogMissingPropertyModulePlaceholder"));
         },
 
         onCallPrimaryPhone: function () {

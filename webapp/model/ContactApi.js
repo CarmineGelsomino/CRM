@@ -9,6 +9,8 @@ sap.ui.define([
     var ENTITY_CONTACT_ADDRESSES = "contact_addresses";
     var ENTITY_BUYER_PROFILES = "buyer_profiles";
     var ENTITY_BUYER_PREFERENCES = "buyer_preferences";
+    var ENTITY_PROPERTIES = "properties";
+    var ENTITY_PROPERTY_OWNERS = "property_owners";
     var ENTITY_ACTIVITIES = "activities";
     var ENTITY_NOTES = "notes";
 
@@ -77,6 +79,33 @@ sap.ui.define([
         "buyer_profile_id",
         "preference_type",
         "other_value"
+    ];
+
+    var PROPERTY_FIELDS = [
+        "user_id",
+        "address_line",
+        "city",
+        "postal_code",
+        "province",
+        "country",
+        "subalterno",
+        "apartment_floor",
+        "internal_sqm",
+        "external_sqm",
+        "other_info",
+        "description",
+        "property_condition",
+        "listing_url",
+        "owner_home_address",
+        "work_contact",
+        "first_av",
+        "administrator"
+    ];
+
+    var PROPERTY_OWNER_FIELDS = [
+        "property_id",
+        "contact_id",
+        "is_primary_owner"
     ];
 
     function buildUrl(sEntity, mQuery) {
@@ -486,6 +515,73 @@ sap.ui.define([
         await Promise.all(aCreatePromises);
     }
 
+    function listProperties(mFilters) {
+        return request({
+            entity: ENTITY_PROPERTIES,
+            query: mFilters,
+            method: "GET",
+            errorMessage: "Impossibile caricare le proprieta'.",
+            useMessageBox: true
+        });
+    }
+
+    function getProperty(iId) {
+        return request({
+            entity: ENTITY_PROPERTIES,
+            query: { id: iId },
+            method: "GET",
+            errorMessage: "Proprieta' non trovata.",
+            useMessageBox: true
+        });
+    }
+
+    function listPropertyOwners(mFilters) {
+        return request({
+            entity: ENTITY_PROPERTY_OWNERS,
+            query: mFilters,
+            method: "GET",
+            errorMessage: "Impossibile caricare gli abbinamenti proprieta-contatto.",
+            useMessageBox: true
+        });
+    }
+
+    function createPropertyOwner(oPayload) {
+        return request({
+            entity: ENTITY_PROPERTY_OWNERS,
+            method: "POST",
+            payload: sanitizePayload(oPayload, PROPERTY_OWNER_FIELDS),
+            errorMessage: "Impossibile associare la proprieta' al contatto.",
+            useMessageBox: true
+        });
+    }
+
+    function deletePropertyOwner(iId) {
+        return request({
+            entity: ENTITY_PROPERTY_OWNERS,
+            query: { id: iId },
+            method: "DELETE",
+            errorMessage: "Impossibile rimuovere l'associazione proprieta-contatto.",
+            useMessageBox: true
+        });
+    }
+
+    async function replacePropertyOwners(iContactId, aPropertyOwners) {
+        var aExistingOwners = await listPropertyOwners({ contact_id: iContactId });
+        var aDeletePromises = (aExistingOwners || []).map(function (oOwner) {
+            return deletePropertyOwner(oOwner.id);
+        });
+
+        await Promise.all(aDeletePromises);
+
+        var aCreatePromises = (aPropertyOwners || []).map(function (oOwner) {
+            return createPropertyOwner(Object.assign({}, oOwner, {
+                contact_id: iContactId
+            }));
+        });
+
+        await Promise.all(aCreatePromises);
+    }
+
     function listActivities(iContactId, mFilters) {
         return request({
             entity: ENTITY_ACTIVITIES,
@@ -585,6 +681,10 @@ sap.ui.define([
         listBuyerPreferences: listBuyerPreferences,
         replaceBuyerPreferences: replaceBuyerPreferences,
         upsertBuyerProfileByContactId: upsertBuyerProfileByContactId,
+        listProperties: listProperties,
+        getProperty: getProperty,
+        listPropertyOwners: listPropertyOwners,
+        replacePropertyOwners: replacePropertyOwners,
         listActivities: listActivities,
         createActivity: createActivity,
         updateActivity: updateActivity,

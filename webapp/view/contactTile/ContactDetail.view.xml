@@ -115,6 +115,48 @@
                     </Select>
                     <Label text="{i18n>contactDetailFieldInfo}" />
                     <TextArea rows="4" value="{contactDetail>/contact/generic_info}" />
+                    <Label text="{i18n>contactsDialogFieldSellerProperties}" visible="{= ${contactDetail>/contact/category} === 'venditore' }" />
+                    <VBox width="100%" visible="{= ${contactDetail>/contact/category} === 'venditore' }">
+                        <items>
+                            <VBox
+                                width="100%"
+                                items="{
+                                    path: 'contactDetail>/sellerProperties'
+                                }">
+                                <items>
+                                    <HBox width="100%" alignItems="Center" class="sapUiTinyMarginBottom">
+                                        <items>
+                                            <Input
+                                                value="{contactDetail>display_value}"
+                                                width="100%"
+                                                placeholder="{i18n>contactsDialogSellerPropertyPlaceholder}"
+                                                showSuggestion="true"
+                                                startSuggestion="3"
+                                                suggest="onSuggestSellerProperty"
+                                                suggestionItemSelected="onSellerPropertySelected"
+                                                liveChange="onSellerPropertyLiveChange" />
+                                            <Button
+                                                icon="sap-icon://add"
+                                                type="Transparent"
+                                                tooltip="{i18n>contactsDialogAddSellerPropertyButton}"
+                                                press="onAddSellerProperty" />
+                                            <Button
+                                                icon="sap-icon://less"
+                                                type="Transparent"
+                                                tooltip="{i18n>contactsDialogRemoveSellerPropertyButton}"
+                                                visible="{= ${contactDetail>/sellerProperties}.length > 1 }"
+                                                press="onRemoveSellerProperty" />
+                                        </items>
+                                    </HBox>
+                                </items>
+                            </VBox>
+                            <Button
+                                text="{i18n>contactsDialogCreateMissingPropertyButton}"
+                                type="Transparent"
+                                icon="sap-icon://add-document"
+                                press="onOpenMissingPropertyDialog" />
+                        </items>
+                    </VBox>
                 </f:content>
             </f:SimpleForm>
 
