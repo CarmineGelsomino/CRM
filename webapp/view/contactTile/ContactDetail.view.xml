@@ -10,6 +10,7 @@
             <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
         </customHeader>
         <content>
+            <Title class="sapUiSmallMargin" text="{i18n>contactDetailPageTitle}" titleStyle="H2"/>
             <ObjectHeader
                 title="{= ${contactDetail>/contact/first_name} + ' ' + ${contactDetail>/contact/last_name}}"
                 intro="{contactDetail>/contact/category}"

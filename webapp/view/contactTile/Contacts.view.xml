@@ -9,9 +9,10 @@
     
     <Page title="{i18n>contactsPageTitle}" class="sapUiResponsiveContentPadding">
         <customHeader>
-        <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
+            <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
         </customHeader>
         <content>
+            <Title class="sapUiSmallMargin" text="{i18n>contactsPageTitle}" titleStyle="H2"/>
             <Panel class="sapUiTinyMarginBottom" expandable="true">
                 <headerToolbar>
                     <Toolbar>
