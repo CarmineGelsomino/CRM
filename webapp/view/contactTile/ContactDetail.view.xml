@@ -18,6 +18,7 @@
                 <attributes>
                     <ObjectAttribute text="{= ${i18n>contactDetailEmailPrefix} + ${contactDetail>/contact/email}}" />
                     <ObjectAttribute text="{= ${i18n>contactDetailPecPrefix} + ${contactDetail>/contact/pec_email}}" />
+                    <ObjectAttribute text="{= ${i18n>contactDetailPhonePrefix} + ${contactDetail>/contact/primary_phone}}" active="{= !!${contactDetail>/contact/primary_phone} }" press="onCallPrimaryPhone" />
                 </attributes>
                 <statuses>
                     <ObjectStatus
@@ -36,6 +37,40 @@
                     <Input value="{contactDetail>/contact/email}" type="Email" />
                     <Label text="{i18n>contactsDialogFieldPec}" />
                     <Input value="{contactDetail>/contact/pec_email}" type="Email" />
+                    <Label text="{i18n>contactsDialogFieldPrimaryPhone}" />
+                    <Input value="{contactDetail>/contact/primary_phone}" type="Tel" placeholder="{i18n>contactsDialogPhonePrimaryPlaceholder}" />
+                    <Label text="{i18n>contactsDialogFieldAdditionalPhones}" />
+                    <VBox width="100%">
+                        <items>
+                            <VBox
+                                width="100%"
+                                items="{
+                                    path: 'contactDetail>/phones'
+                                }">
+                                <items>
+                                    <HBox width="100%" alignItems="Center" class="sapUiTinyMarginBottom">
+                                        <items>
+                                            <Input
+                                                value="{contactDetail>phone}"
+                                                type="Tel"
+                                                width="100%"
+                                                placeholder="{i18n>contactsDialogPhoneAdditionalPlaceholder}" />
+                                            <Button
+                                                icon="sap-icon://less"
+                                                type="Transparent"
+                                                tooltip="{i18n>contactsDialogRemovePhoneButton}"
+                                                press="onRemovePhone" />
+                                        </items>
+                                    </HBox>
+                                </items>
+                            </VBox>
+                            <Button
+                                text="{i18n>contactsDialogAddPhoneButton}"
+                                icon="sap-icon://add"
+                                type="Transparent"
+                                press="onAddPhone" />
+                        </items>
+                    </VBox>
                     <Label text="{i18n>contactsDialogFieldCategory}" />
                     <Select selectedKey="{contactDetail>/contact/category}" items="{categoriesContact>/}">
                         <core:Item key="{categoriesContact>key}" text="{categoriesContact>value}" />

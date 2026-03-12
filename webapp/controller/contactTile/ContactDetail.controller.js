@@ -12,7 +12,8 @@ sap.ui.define([
     "sap/m/TextArea",
     "sap/m/Select",
     "sap/ui/core/Item",
-    "sap/m/DateTimePicker"
+    "sap/m/DateTimePicker",
+    "sap/m/library"
 ], function (
     BaseController,
     ContactApi,
@@ -27,11 +28,13 @@ sap.ui.define([
     TextArea,
     Select,
     Item,
-    DateTimePicker
+    DateTimePicker,
+    mobileLibrary
 ) {
     "use strict";
 
     var BUYER_PREFERENCE_KEYS = ["box", "posto_auto", "cantina", "terrazzo", "altro"];
+    var URLHelper = mobileLibrary.URLHelper;
 
     function createEmptyBuyerProfile() {
         return {
@@ -87,6 +90,37 @@ sap.ui.define([
             });
     }
 
+    function createEmptyAdditionalPhone() {
+        return {
+            phone: ""
+        };
+    }
+
+    function normalizePhoneList(sPrimaryPhone, aAdditionalPhones) {
+        var aPhones = [];
+        var sCleanPrimaryPhone = (sPrimaryPhone || "").trim();
+
+        if (sCleanPrimaryPhone) {
+            aPhones.push({
+                phone: sCleanPrimaryPhone,
+                is_primary: 1
+            });
+        }
+
+        (aAdditionalPhones || []).forEach(function (oPhone) {
+            var sPhone = (oPhone && oPhone.phone || "").trim();
+
+            if (sPhone) {
+                aPhones.push({
+                    phone: sPhone,
+                    is_primary: 0
+                });
+            }
+        });
+
+        return aPhones;
+    }
+
     return BaseController.extend("crm.controller.contactTile.ContactDetail", {
         onInit: function () {
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
@@ -94,6 +128,7 @@ sap.ui.define([
             this.setModel(new JSONModel({
                 contactId: null,
                 contact: {},
+                phones: [],
                 buyerProfile: createEmptyBuyerProfile(),
                 activities: [],
                 notes: []
@@ -113,6 +148,7 @@ sap.ui.define([
         _loadContact: async function (iContactId) {
             try {
                 var oContact = await ContactApi.getContact(iContactId);
+                var aContactPhones = await ContactApi.listContactPhones(iContactId);
                 var oBuyerProfile = createEmptyBuyerProfile();
                 var oExistingBuyerProfile = await ContactApi.getBuyerProfileByContactId(iContactId);
 
@@ -124,8 +160,18 @@ sap.ui.define([
                 var aActivities = await ContactApi.listActivities(iContactId);
                 var aNotes = await ContactApi.listNotes(iContactId);
                 var oModel = this.getModel("contactDetail");
+                var oPrimaryPhone = (aContactPhones || []).find(function (oPhone) {
+                    return Number(oPhone.is_primary) === 1;
+                });
 
-                oModel.setProperty("/contact", oContact || {});
+                oModel.setProperty("/contact", Object.assign({}, oContact || {}, {
+                    primary_phone: (oPrimaryPhone && oPrimaryPhone.phone) || (oContact && oContact.primary_phone) || ""
+                }));
+                oModel.setProperty("/phones", (aContactPhones || []).filter(function (oPhone) {
+                    return Number(oPhone.is_primary) !== 1;
+                }).map(function (oPhone) {
+                    return { phone: oPhone.phone || "" };
+                }));
                 oModel.setProperty("/buyerProfile", oBuyerProfile);
                 oModel.setProperty("/activities", aActivities || []);
                 oModel.setProperty("/notes", aNotes || []);
@@ -167,6 +213,7 @@ sap.ui.define([
 
             try {
                 await ContactApi.updateContact(iContactId, oContact);
+                await this._saveContactPhones(iContactId, oContact, oModel.getProperty("/phones"));
                 await this._saveBuyerProfileData(iContactId, oContact, oBuyerProfile);
                 MessageToast.show(oBundle.getText("contactDetailUpdateSuccess"));
                 await this._loadContact(iContactId);
@@ -196,6 +243,49 @@ sap.ui.define([
 
             var oSavedBuyerProfile = await ContactApi.upsertBuyerProfileByContactId(iContactId, oBuyerPayload);
             await ContactApi.replaceBuyerPreferences(oSavedBuyerProfile.id, buildBuyerPreferencesPayload(oBuyerProfile));
+        },
+
+        _saveContactPhones: async function (iContactId, oContact, aAdditionalPhones) {
+            await ContactApi.replaceContactPhones(iContactId, normalizePhoneList(oContact.primary_phone, aAdditionalPhones));
+        },
+
+        onAddPhone: function () {
+            var oModel = this.getModel("contactDetail");
+            var aPhones = oModel.getProperty("/phones") || [];
+
+            aPhones.push(createEmptyAdditionalPhone());
+            oModel.setProperty("/phones", aPhones);
+        },
+
+        onRemovePhone: function (oEvent) {
+            var oModel = this.getModel("contactDetail");
+            var oContext = oEvent.getSource().getBindingContext("contactDetail");
+            var sPath = oContext && oContext.getPath();
+            var aPhones = oModel.getProperty("/phones") || [];
+            var iIndex;
+
+            if (!sPath) {
+                return;
+            }
+
+            iIndex = Number(sPath.split("/").pop());
+
+            if (Number.isNaN(iIndex)) {
+                return;
+            }
+
+            aPhones.splice(iIndex, 1);
+            oModel.setProperty("/phones", aPhones);
+        },
+
+        onCallPrimaryPhone: function () {
+            var sPhone = (this.getModel("contactDetail").getProperty("/contact/primary_phone") || "").trim();
+
+            if (!sPhone) {
+                return;
+            }
+
+            URLHelper.triggerTel(sPhone);
         },
 
         onFilterActivities: function (oEvent) {
