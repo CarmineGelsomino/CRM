@@ -14,6 +14,9 @@ sap.ui.define([
     "sap/m/TextArea",
     "sap/m/Select",
     "sap/m/CheckBox",
+    "sap/m/Text",
+    "sap/m/Bar",
+    "sap/m/Title",
     "sap/ui/core/Item",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem"
@@ -33,6 +36,9 @@ sap.ui.define([
     TextArea,
     Select,
     CheckBox,
+    Text,
+    Bar,
+    Title,
     Item,
     ViewSettingsDialog,
     ViewSettingsItem
@@ -420,8 +426,146 @@ sap.ui.define([
             await ContactApi.replaceBuyerPreferences(oSavedBuyerProfile.id, buildBuyerPreferencesPayload(oBuyerProfile));
         },
 
+        _setPendingPostCreateAction: function (iContactId, sAction) {
+            this.getOwnerComponent()._oPendingContactAction = {
+                contactId: iContactId,
+                action: sAction
+            };
+        },
+
+        _clearPendingPostCreateAction: function () {
+            this.getOwnerComponent()._oPendingContactAction = null;
+        },
+
+        _buildDialogHeader: function (sTitle, fnOnClose) {
+            var oBundle = this.getResourceBundle();
+
+            return new Bar({
+                contentMiddle: [
+                    new Title({ text: sTitle })
+                ],
+                contentRight: [
+                    new Button({
+                        icon: "sap-icon://decline",
+                        type: "Transparent",
+                        tooltip: oBundle.getText("contactsDialogCloseTooltip"),
+                        press: fnOnClose
+                    })
+                ]
+            });
+        },
+
+        _openPostCreateActionDialog: function (oContact) {
+            var oBundle = this.getResourceBundle();
+            var bActionSelected = false;
+            var oDialog = new Dialog({
+                type: "Message",
+                contentWidth: "28rem",
+                customHeader: this._buildDialogHeader(
+                    oBundle.getText("contactsPostCreateActionTitle"),
+                    function () {
+                        oDialog.close();
+                    }
+                ),
+                content: [
+                    new Text({
+                        text: oBundle.getText("contactsPostCreateActionText"),
+                        wrapping: true
+                    })
+                ],
+                buttons: [
+                    new Button({
+                        text: oBundle.getText("contactsPostCreateNoteButton"),
+                        type: "Emphasized",
+                        press: function () {
+                            bActionSelected = true;
+                            this._setPendingPostCreateAction(oContact.id, "note");
+                            oDialog.close();
+                            this.navTo("contactDetail", { contactId: oContact.id });
+                        }.bind(this)
+                    }),
+                    new Button({
+                        text: oBundle.getText("contactsPostCreateActivityButton"),
+                        press: function () {
+                            bActionSelected = true;
+                            this._setPendingPostCreateAction(oContact.id, "activity");
+                            oDialog.close();
+                            this.navTo("contactDetail", { contactId: oContact.id });
+                        }.bind(this)
+                    }),
+                    new Button({
+                        text: oBundle.getText("contactsDialogCloseButton"),
+                        press: function () {
+                            oDialog.close();
+                        }
+                    })
+                ],
+                afterClose: async function () {
+                    oDialog.destroy();
+
+                    if (!bActionSelected) {
+                        this._clearPendingPostCreateAction();
+                        await this._loadContacts();
+                    }
+                }.bind(this)
+            });
+
+            this.getView().addDependent(oDialog);
+            oDialog.open();
+        },
+
+        _openPostCreatePrompt: function (oContact) {
+            var oBundle = this.getResourceBundle();
+            var bConfirmed = false;
+            var oDialog = new Dialog({
+                type: "Message",
+                contentWidth: "30rem",
+                customHeader: this._buildDialogHeader(
+                    oBundle.getText("contactsPostCreatePromptTitle"),
+                    function () {
+                        oDialog.close();
+                    }
+                ),
+                content: [
+                    new Text({
+                        text: oBundle.getText("contactsPostCreatePromptText"),
+                        wrapping: true
+                    })
+                ],
+                buttons: [
+                    new Button({
+                        text: oBundle.getText("contactsPostCreatePromptYes"),
+                        type: "Emphasized",
+                        press: function () {
+                            bConfirmed = true;
+                            oDialog.close();
+                            this._openPostCreateActionDialog(oContact);
+                        }.bind(this)
+                    }),
+                    new Button({
+                        text: oBundle.getText("contactsPostCreatePromptNo"),
+                        press: function () {
+                            oDialog.close();
+                        }
+                    })
+                ],
+                afterClose: async function () {
+                    oDialog.destroy();
+
+                    if (!bConfirmed) {
+                        this._clearPendingPostCreateAction();
+                        await this._loadContacts();
+                    }
+                }.bind(this)
+            });
+
+            this.getView().addDependent(oDialog);
+            oDialog.open();
+        },
+
         _openContactDialog: async function (sMode, oContact) {
             var bEdit = sMode === "edit";
+            var oBundle = this.getResourceBundle();
             var oDialogModelData;
 
             try {
@@ -431,13 +575,13 @@ sap.ui.define([
             }
 
             var oDialog = new Dialog({
-                title: bEdit ? "Modifica contatto" : "Nuovo contatto",
+                title: bEdit ? oBundle.getText("contactsDialogEditTitle") : oBundle.getText("contactsDialogCreateTitle"),
                 contentWidth: "42rem",
                 resizable: true,
                 type: "Message",
                 content: this._buildContactDialogContent(),
                 beginButton: new Button({
-                    text: "Salva",
+                    text: oBundle.getText("contactsDialogSaveButton"),
                     type: "Emphasized",
                     press: async function () {
                         var oDialogData = oDialog.getModel("contactDialog").getData();
@@ -454,29 +598,33 @@ sap.ui.define([
                         var oSavedContact;
 
                         if (!oPayload.first_name || !oPayload.last_name) {
-                            MessageToast.show("Nome e cognome sono obbligatori.");
+                            MessageToast.show(oBundle.getText("contactsValidationNameRequired"));
                             return;
                         }
 
                         try {
                             if (bEdit) {
                                 oSavedContact = await ContactApi.updateContact(oContact.id, oPayload);
-                                MessageToast.show("Contatto aggiornato correttamente.");
+                                MessageToast.show(oBundle.getText("contactsUpdateSuccess"));
                             } else {
                                 oSavedContact = await ContactApi.createContact(Object.assign({ user_id: iUserId }, oPayload));
-                                MessageToast.show("Contatto creato correttamente.");
+                                MessageToast.show(oBundle.getText("contactsCreateSuccess"));
                             }
 
                             await this._saveBuyerProfileData(oSavedContact.id, oDialogData);
                             oDialog.close();
                             await this._loadContacts();
+
+                            if (!bEdit) {
+                                this._openPostCreatePrompt(oSavedContact);
+                            }
                         } catch (oError) {
                             // Error feedback is already handled in ContactApi
                         }
                     }.bind(this)
                 }),
                 endButton: new Button({
-                    text: "Annulla",
+                    text: oBundle.getText("contactsDialogCancelButton"),
                     press: function () {
                         oDialog.close();
                     }

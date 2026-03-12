@@ -105,7 +105,9 @@ sap.ui.define([
         _onRouteMatched: function (oEvent) {
             var iContactId = Number(oEvent.getParameter("arguments").contactId);
             this.getModel("contactDetail").setProperty("/contactId", iContactId);
-            this._loadContact(iContactId);
+            this._loadContact(iContactId).then(function () {
+                this._consumePendingPostCreateAction(iContactId);
+            }.bind(this));
         },
 
         _loadContact: async function (iContactId) {
@@ -127,6 +129,25 @@ sap.ui.define([
                 oModel.setProperty("/notes", aNotes || []);
             } catch (oError) {
                 // Error feedback is already handled in ContactApi
+            }
+        },
+
+        _consumePendingPostCreateAction: function (iContactId) {
+            var oPendingAction = this.getOwnerComponent()._oPendingContactAction;
+
+            if (!oPendingAction || oPendingAction.contactId !== iContactId) {
+                return;
+            }
+
+            this.getOwnerComponent()._oPendingContactAction = null;
+
+            if (oPendingAction.action === "note") {
+                this.onAddNote();
+                return;
+            }
+
+            if (oPendingAction.action === "activity") {
+                this.onAddActivity();
             }
         },
 
