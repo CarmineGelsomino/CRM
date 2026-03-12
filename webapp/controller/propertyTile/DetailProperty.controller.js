@@ -442,6 +442,22 @@ sap.ui.define([
             return (oDefaultState && oDefaultState.key) || "";
         },
 
+        onSectionTabSelect: function (oEvent) {
+            this._scrollToSection(oEvent.getParameter("key"));
+        },
+
+        _scrollToSection: function (sSectionId) {
+            var oSection = this.byId(sSectionId);
+            var oDomRef = oSection && oSection.getDomRef();
+
+            if (oDomRef) {
+                oDomRef.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+        },
+
         onAddActivity: function () {
             this._openContactBoundDialog("activity");
         },

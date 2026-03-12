@@ -29,7 +29,19 @@
                 </attributes>
             </ObjectHeader>
 
-            <f:SimpleForm editable="true" layout="ResponsiveGridLayout" title="{i18n>propertyDetailSectionPropertyData}" class="sapUiSmallMarginTop">
+            <IconTabBar
+                class="sapUiSmallMarginTop"
+                expandable="false"
+                select="onSectionTabSelect">
+                <items>
+                    <IconTabFilter key="propertyDataSection" text="{i18n>propertyDetailTabPropertyData}" icon="sap-icon://home" />
+                    <IconTabFilter key="ownersSection" text="{i18n>propertyDetailTabOwners}" icon="sap-icon://group" />
+                    <IconTabFilter key="propertyActivitiesSection" text="{i18n>propertyDetailTabActivities}" icon="sap-icon://activities" />
+                    <IconTabFilter key="propertyNotesSection" text="{i18n>propertyDetailTabNotes}" icon="sap-icon://notes" />
+                </items>
+            </IconTabBar>
+
+            <f:SimpleForm id="propertyDataSection" editable="true" layout="ResponsiveGridLayout" title="{i18n>propertyDetailSectionPropertyData}" class="sapUiSmallMarginTop">
                 <f:content>
                     <Label text="{i18n>propertyDetailFieldAddress}" />
                     <Input value="{propertyDetail>/property/address_line}" />
@@ -74,7 +86,7 @@
                 </f:content>
             </f:SimpleForm>
 
-            <Panel headerText="{i18n>propertyDetailOwnersTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+            <Panel id="ownersSection" headerText="{i18n>propertyDetailOwnersTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
                 <content>
                     <VBox width="100%">
                         <items>
@@ -113,7 +125,7 @@
                 <Button text="{i18n>propertyDetailSaveButton}" type="Emphasized" icon="sap-icon://save" press="onSaveProperty" />
             </Toolbar>
 
-            <Panel headerText="{i18n>propertyDetailAggregatedActivitiesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+            <Panel id="propertyActivitiesSection" headerText="{i18n>propertyDetailAggregatedActivitiesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
                 <headerToolbar>
                     <OverflowToolbar>
                         <Title text="{i18n>propertyDetailAggregatedActivitiesTitle}" level="H4" />
@@ -165,7 +177,7 @@
                 </List>
             </Panel>
 
-            <Panel headerText="{i18n>propertyDetailAggregatedNotesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+            <Panel id="propertyNotesSection" headerText="{i18n>propertyDetailAggregatedNotesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
                 <headerToolbar>
                     <OverflowToolbar>
                         <Title text="{i18n>propertyDetailAggregatedNotesTitle}" level="H4" />

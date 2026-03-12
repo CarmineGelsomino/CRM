@@ -192,6 +192,73 @@ sap.ui.define([
             ":" + pad(oDate.getSeconds());
     }
 
+    function parseActivityDate(sValue) {
+        if (!sValue) {
+            return null;
+        }
+
+        var oDate = new Date(String(sValue).replace(" ", "T"));
+        return Number.isNaN(oDate.getTime()) ? null : oDate;
+    }
+
+    function formatDateTimeForDisplay(oDate) {
+        if (!(oDate instanceof Date) || Number.isNaN(oDate.getTime())) {
+            return "";
+        }
+
+        return new Intl.DateTimeFormat("it-IT", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }).format(oDate);
+    }
+
+    function getActivityActualDate(oActivity) {
+        return parseActivityDate(oActivity && (oActivity.completed_at || oActivity.created_at || oActivity.reminder_at));
+    }
+
+    function getLatestActivityDateByType(aActivities, sType) {
+        var aDates = (aActivities || []).filter(function (oActivity) {
+            return oActivity.activity_type === sType;
+        }).map(getActivityActualDate).filter(Boolean);
+
+        if (!aDates.length) {
+            return null;
+        }
+
+        return new Date(Math.max.apply(null, aDates.map(function (oDate) {
+            return oDate.getTime();
+        })));
+    }
+
+    function getNextReminderDateByType(aActivities, sType) {
+        var iNow = Date.now();
+        var aDates = (aActivities || []).filter(function (oActivity) {
+            return oActivity.activity_type === sType;
+        }).map(function (oActivity) {
+            return parseActivityDate(oActivity.reminder_at);
+        }).filter(function (oDate) {
+            return oDate && oDate.getTime() >= iNow;
+        }).sort(function (oLeft, oRight) {
+            return oLeft.getTime() - oRight.getTime();
+        });
+
+        return aDates[0] || null;
+    }
+
+    function buildHistoryData(aActivities, oBundle) {
+        return {
+            lastCall: formatDateTimeForDisplay(getLatestActivityDateByType(aActivities, "chiamata")) || oBundle.getText("contactDetailHistoryNotAvailable"),
+            lastMeeting: formatDateTimeForDisplay(getLatestActivityDateByType(aActivities, "evento")) || oBundle.getText("contactDetailHistoryNotAvailable"),
+            lastEmail: formatDateTimeForDisplay(getLatestActivityDateByType(aActivities, "email")) || oBundle.getText("contactDetailHistoryNotAvailable"),
+            nextCall: formatDateTimeForDisplay(getNextReminderDateByType(aActivities, "chiamata")) || oBundle.getText("contactDetailHistoryNotPlanned"),
+            nextMeeting: formatDateTimeForDisplay(getNextReminderDateByType(aActivities, "evento")) || oBundle.getText("contactDetailHistoryNotPlanned"),
+            nextEmail: formatDateTimeForDisplay(getNextReminderDateByType(aActivities, "email")) || oBundle.getText("contactDetailHistoryNotPlanned")
+        };
+    }
+
     return BaseController.extend("crm.controller.contactTile.ContactDetail", {
         onInit: function () {
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
@@ -204,7 +271,8 @@ sap.ui.define([
                 sellerProperties: [createEmptySellerProperty()],
                 buyerProfile: createEmptyBuyerProfile(),
                 activities: [],
-                notes: []
+                notes: [],
+                history: {}
             }), "contactDetail");
 
             this._aPropertyCache = null;
@@ -262,6 +330,7 @@ sap.ui.define([
                 oModel.setProperty("/buyerProfile", oBuyerProfile);
                 oModel.setProperty("/activities", aActivities || []);
                 oModel.setProperty("/notes", aNotes || []);
+                oModel.setProperty("/history", buildHistoryData(aActivities || [], this.getResourceBundle()));
             } catch (oError) {
                 // Error feedback is already handled in ContactApi
             }
@@ -660,6 +729,22 @@ sap.ui.define([
             });
 
             return (oDefaultState && oDefaultState.key) || "";
+        },
+
+        onSectionTabSelect: function (oEvent) {
+            this._scrollToSection(oEvent.getParameter("key"));
+        },
+
+        _scrollToSection: function (sSectionId) {
+            var oSection = this.byId(sSectionId);
+            var oDomRef = oSection && oSection.getDomRef();
+
+            if (oDomRef) {
+                oDomRef.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
         },
 
         onAddActivity: function () {

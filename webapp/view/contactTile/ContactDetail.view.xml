@@ -30,7 +30,24 @@
                 </statuses>
             </ObjectHeader>
 
-            <f:SimpleForm editable="true" layout="ResponsiveGridLayout" title="{i18n>contactDetailSectionContactData}" class="sapUiSmallMarginTop">
+            <IconTabBar
+                class="sapUiSmallMarginTop"
+                expandable="false"
+                select="onSectionTabSelect">
+                <items>
+                    <IconTabFilter key="contactDataSection" text="{i18n>contactDetailTabContactData}" icon="sap-icon://customer" />
+                    <IconTabFilter
+                        key="buyerProfileSection"
+                        text="{i18n>contactDetailTabBuyerProfile}"
+                        icon="sap-icon://customer-financial-fact-sheet"
+                        visible="{= ${contactDetail>/contact/category} === 'acquirente' }" />
+                    <IconTabFilter key="historySection" text="{i18n>contactDetailTabHistory}" icon="sap-icon://history" />
+                    <IconTabFilter key="activitiesSection" text="{i18n>contactDetailTabActivities}" icon="sap-icon://activities" />
+                    <IconTabFilter key="notesSection" text="{i18n>contactDetailTabNotes}" icon="sap-icon://notes" />
+                </items>
+            </IconTabBar>
+
+            <f:SimpleForm id="contactDataSection" editable="true" layout="ResponsiveGridLayout" title="{i18n>contactDetailSectionContactData}" class="sapUiSmallMarginTop">
                 <f:content>
                     <Label text="{i18n>contactsDialogFieldFirstName}" />
                     <Input value="{contactDetail>/contact/first_name}" />
@@ -163,6 +180,7 @@
             </f:SimpleForm>
 
             <f:SimpleForm
+                id="buyerProfileSection"
                 editable="true"
                 layout="ResponsiveGridLayout"
                 title="{i18n>contactDetailSectionBuyerProfile}"
@@ -203,12 +221,49 @@
                 </f:content>
             </f:SimpleForm>
 
+            <Panel id="historySection" headerText="{i18n>contactDetailHistoryTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+                <content>
+                    <HBox wrap="Wrap" justifyContent="Start">
+                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryLastCall}">
+                            <content>
+                                <ObjectStatus text="{contactDetail>/history/lastCall}" state="Information" />
+                            </content>
+                        </Panel>
+                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryLastMeeting}">
+                            <content>
+                                <ObjectStatus text="{contactDetail>/history/lastMeeting}" state="Information" />
+                            </content>
+                        </Panel>
+                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryLastEmail}">
+                            <content>
+                                <ObjectStatus text="{contactDetail>/history/lastEmail}" state="Information" />
+                            </content>
+                        </Panel>
+                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryNextCall}">
+                            <content>
+                                <ObjectStatus text="{contactDetail>/history/nextCall}" state="Warning" />
+                            </content>
+                        </Panel>
+                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryNextMeeting}">
+                            <content>
+                                <ObjectStatus text="{contactDetail>/history/nextMeeting}" state="Warning" />
+                            </content>
+                        </Panel>
+                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryNextEmail}">
+                            <content>
+                                <ObjectStatus text="{contactDetail>/history/nextEmail}" state="Warning" />
+                            </content>
+                        </Panel>
+                    </HBox>
+                </content>
+            </Panel>
+
             <Toolbar class="sapUiSmallMarginTop sapUiTinyMarginBottom">
                 <ToolbarSpacer />
                 <Button text="{i18n>contactDetailSaveButton}" type="Emphasized" icon="sap-icon://save" press="onSaveContact" />
             </Toolbar>
 
-            <Panel headerText="{i18n>contactDetailActivitiesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+            <Panel id="activitiesSection" headerText="{i18n>contactDetailActivitiesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
                 <headerToolbar>
                     <OverflowToolbar>
                         <Title text="{i18n>contactDetailActivitiesTitle}" level="H4" />
@@ -256,7 +311,7 @@
                 </List>
             </Panel>
 
-            <Panel headerText="{i18n>contactDetailNotesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
+            <Panel id="notesSection" headerText="{i18n>contactDetailNotesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
                 <headerToolbar>
                     <OverflowToolbar>
                         <Title text="{i18n>contactDetailNotesTitle}" level="H4" />
