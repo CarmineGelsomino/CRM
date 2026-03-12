@@ -214,9 +214,9 @@
                         <SearchField id="activitySearchField" width="14rem" placeholder="{i18n>contactDetailActivitiesFilterPlaceholder}" liveChange="onFilterActivities" search="onFilterActivities" />
                         <Select width="10rem" selectedKey="" change="onFilterActivities" id="activityStatusFilter">
                             <core:Item key="" text="{i18n>contactDetailActivityStatusAll}" />
-                            <core:Item key="todo" text="{i18n>contactDetailActivityStatusTodo}" />
-                            <core:Item key="in_corso" text="{i18n>contactDetailActivityStatusInProgress}" />
-                            <core:Item key="completata" text="{i18n>contactDetailActivityStatusCompleted}" />
+                            <core:Item key="da_fare" text="{i18n>contactDetailActivityStatusTodo}" />
+                            <core:Item key="sospeso" text="{i18n>contactDetailActivityStatusInProgress}" />
+                            <core:Item key="completato" text="{i18n>contactDetailActivityStatusCompleted}" />
                         </Select>
                         <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddActivity" />
                     </OverflowToolbar>
@@ -228,7 +228,7 @@
                             <Text text="{contactDetail>description}" />
                             <HBox renderType="Bare" class="sapUiTinyMarginTop">
                                 <ObjectStatus text="{contactDetail>priority}" state="Information" class="sapUiTinyMarginEnd" />
-                                <ObjectStatus text="{contactDetail>status}" state="{= ${contactDetail>status} === 'completata' ? 'Success' : 'Warning'}" />
+                                <ObjectStatus text="{contactDetail>status}" state="{= ${contactDetail>status} === 'completato' ? 'Success' : 'Warning'}" />
                             </HBox>
                         </VBox>
                     </CustomListItem>

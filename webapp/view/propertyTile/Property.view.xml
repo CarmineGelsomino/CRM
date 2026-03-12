@@ -79,8 +79,8 @@
                 </headerToolbar>
                 <columns>
                     <Column width="12rem"><Text text="{i18n>propertiesTableColumnType}" /></Column>
-                    <Column width="18rem"><Text text="{i18n>propertiesTableColumnAddress}" /></Column>
-                    <Column width="10rem"><Text text="{i18n>propertiesTableColumnCity}" /></Column>
+                    <Column width="20rem"><Text text="{i18n>propertiesTableColumnAddress}" /></Column>
+                    <Column width="8rem"><Text text="{i18n>propertiesTableColumnInternalSqm}" /></Column>
                     <Column width="14rem"><Text text="{i18n>propertiesTableColumnOwners}" /></Column>
                     <Column width="10rem"><Text text="{i18n>propertiesTableColumnCondition}" /></Column>
                     <Column width="8rem" hAlign="End"><Text text="{i18n>propertiesTableColumnActions}" /></Column>
@@ -89,8 +89,8 @@
                     <ColumnListItem type="Navigation" press="onOpenDetail">
                         <cells>
                             <Text text="{ parts: [ { path: 'properties>property_type' }, { path: 'typeProperties>/' } ], formatter: 'formatter.lookupText' }" />
-                            <ObjectIdentifier title="{properties>property_label}" text="{= 'ID: ' + ${properties>id}}" />
-                            <Text text="{properties>city}" />
+                            <ObjectIdentifier title="{properties>property_label}" text="{properties>city}" />
+                            <Text text="{properties>internal_sqm}" />
                             <Text text="{= ${properties>owner_names} || ${properties>owner_count} + ' proprietari'}" />
                             <ObjectStatus text="{ parts: [ { path: 'properties>property_condition' }, { path: 'statesProperty>/' } ], formatter: 'formatter.lookupText' }" state="Information" />
                             <HBox justifyContent="End">

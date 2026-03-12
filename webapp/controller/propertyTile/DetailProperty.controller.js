@@ -91,6 +91,23 @@ sap.ui.define([
         };
     }
 
+    function formatDateTimeForApi(oDate) {
+        if (!(oDate instanceof Date) || Number.isNaN(oDate.getTime())) {
+            return null;
+        }
+
+        function pad(iValue) {
+            return String(iValue).padStart(2, "0");
+        }
+
+        return oDate.getFullYear() +
+            "-" + pad(oDate.getMonth() + 1) +
+            "-" + pad(oDate.getDate()) +
+            " " + pad(oDate.getHours()) +
+            ":" + pad(oDate.getMinutes()) +
+            ":" + pad(oDate.getSeconds());
+    }
+
     return BaseController.extend("crm.controller.propertyTile.DetailProperty", {
         onInit: function () {
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
@@ -480,6 +497,7 @@ sap.ui.define([
                         type: "Emphasized",
                         press: async function () {
                             var sTitle = sap.ui.getCore().byId("newPropertyActivityTitle").getValue().trim();
+                            var oReminderDate = sap.ui.getCore().byId("newPropertyActivityReminder").getDateValue();
 
                             if (!sTitle) {
                                 MessageToast.show(oBundle.getText("contactDetailActivityTitleRequired"));
@@ -493,9 +511,9 @@ sap.ui.define([
                                     title: sTitle,
                                     activity_type: sap.ui.getCore().byId("newPropertyActivityType").getSelectedKey(),
                                     description: sap.ui.getCore().byId("newPropertyActivityDescription").getValue(),
-                                    reminder_at: sap.ui.getCore().byId("newPropertyActivityReminder").getValue(),
+                                    reminder_at: formatDateTimeForApi(oReminderDate),
                                     priority: sap.ui.getCore().byId("newPropertyActivityPriority").getSelectedKey(),
-                                    status: "todo"
+                                    status: "da_fare"
                                 });
                                 MessageToast.show(oBundle.getText("contactDetailActivityAdded"));
                                 oDialog.close();

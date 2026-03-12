@@ -13,10 +13,14 @@ sap.ui.define([
     "sap/m/Input",
     "sap/m/TextArea",
     "sap/m/Select",
+    "sap/m/VBox",
+    "sap/m/HBox",
+    "sap/m/ObjectStatus",
     "sap/ui/layout/form/SimpleForm",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem",
-    "sap/ui/core/Item"
+    "sap/ui/core/Item",
+    "sap/ui/core/ListItem"
 ], function (
     BaseController,
     ContactApi,
@@ -32,10 +36,14 @@ sap.ui.define([
     Input,
     TextArea,
     Select,
+    VBox,
+    HBox,
+    ObjectStatus,
     SimpleForm,
     ViewSettingsDialog,
     ViewSettingsItem,
-    Item
+    Item,
+    ListItem
 ) {
     "use strict";
 
@@ -68,6 +76,24 @@ sap.ui.define([
         };
     }
 
+    function createEmptyOwner() {
+        return {
+            contact_id: null,
+            display_value: "",
+            primary_phone: "",
+            category: "",
+            status: ""
+        };
+    }
+
+    function normalizeSearchValue(sValue) {
+        return (sValue || "").toLowerCase().replace(/\s+/g, " ").trim();
+    }
+
+    function buildContactDisplay(oContact) {
+        return ((oContact.first_name || "") + " " + (oContact.last_name || "")).trim();
+    }
+
     return BaseController.extend("crm.controller.propertyTile.Property", {
         onInit: function () {
             this.getView().setModel(this.getOwnerComponent().getModel("session"), "session");
@@ -82,8 +108,17 @@ sap.ui.define([
                 busy: false
             }), "properties");
 
+            this._aContactCache = null;
             this._oSortState = { path: "address_line", descending: false };
             this._loadProperties();
+        },
+
+        _ensureContactCache: async function () {
+            if (!this._aContactCache) {
+                this._aContactCache = await ContactApi.listContacts();
+            }
+
+            return this._aContactCache || [];
         },
 
         _loadProperties: async function () {
@@ -286,63 +321,270 @@ sap.ui.define([
         _buildDialogContent: function () {
             var oBundle = this.getResourceBundle();
 
-            return new SimpleForm({
-                editable: true,
-                layout: "ResponsiveGridLayout",
-                content: [
-                    new Label({ text: oBundle.getText("propertyDetailFieldAddress") }),
-                    new Input({ value: "{propertyDialog>/address_line}" }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldType") }),
-                    new Select({
-                        selectedKey: "{propertyDialog>/property_type}",
-                        items: {
-                            path: "typeProperties>/",
-                            templateShareable: false,
-                            template: new Item({
-                                key: "{typeProperties>key}",
-                                text: "{typeProperties>value}"
-                            })
-                        }
+            return new VBox({
+                width: "100%",
+                items: [
+                    new SimpleForm({
+                        editable: true,
+                        layout: "ResponsiveGridLayout",
+                        content: [
+                            new Label({ text: oBundle.getText("propertyDetailFieldAddress") }),
+                            new Input({ value: "{propertyDialog>/property/address_line}" }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldType") }),
+                            new Select({
+                                selectedKey: "{propertyDialog>/property/property_type}",
+                                items: {
+                                    path: "typeProperties>/",
+                                    templateShareable: false,
+                                    template: new Item({
+                                        key: "{typeProperties>key}",
+                                        text: "{typeProperties>value}"
+                                    })
+                                }
+                            }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldCity") }),
+                            new Input({ value: "{propertyDialog>/property/city}" }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldPostalCode") }),
+                            new Input({ value: "{propertyDialog>/property/postal_code}" }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldProvince") }),
+                            new Input({ value: "{propertyDialog>/property/province}" }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldCountry") }),
+                            new Input({ value: "{propertyDialog>/property/country}" }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldSubalterno") }),
+                            new Input({ value: "{propertyDialog>/property/subalterno}" }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldFloor") }),
+                            new Input({ value: "{propertyDialog>/property/apartment_floor}" }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldInternalSqm") }),
+                            new Input({ value: "{propertyDialog>/property/internal_sqm}", type: "Number" }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldExternalSqm") }),
+                            new Input({ value: "{propertyDialog>/property/external_sqm}", type: "Number" }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldCondition") }),
+                            new Select({
+                                selectedKey: "{propertyDialog>/property/property_condition}",
+                                items: {
+                                    path: "statesProperty>/",
+                                    templateShareable: false,
+                                    template: new Item({
+                                        key: "{statesProperty>key}",
+                                        text: "{statesProperty>value}"
+                                    })
+                                }
+                            }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldDescription") }),
+                            new TextArea({ value: "{propertyDialog>/property/description}", rows: 3 }),
+                            new Label({ text: oBundle.getText("propertyDetailFieldOtherInfo") }),
+                            new TextArea({ value: "{propertyDialog>/property/other_info}", rows: 3 })
+                        ]
                     }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldCity") }),
-                    new Input({ value: "{propertyDialog>/city}" }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldPostalCode") }),
-                    new Input({ value: "{propertyDialog>/postal_code}" }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldProvince") }),
-                    new Input({ value: "{propertyDialog>/province}" }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldCountry") }),
-                    new Input({ value: "{propertyDialog>/country}" }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldSubalterno") }),
-                    new Input({ value: "{propertyDialog>/subalterno}" }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldFloor") }),
-                    new Input({ value: "{propertyDialog>/apartment_floor}" }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldInternalSqm") }),
-                    new Input({ value: "{propertyDialog>/internal_sqm}", type: "Number" }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldExternalSqm") }),
-                    new Input({ value: "{propertyDialog>/external_sqm}", type: "Number" }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldCondition") }),
-                    new Select({
-                        selectedKey: "{propertyDialog>/property_condition}",
-                        items: {
-                            path: "statesProperty>/",
-                            templateShareable: false,
-                            template: new Item({
-                                key: "{statesProperty>key}",
-                                text: "{statesProperty>value}"
-                            })
-                        }
-                    }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldDescription") }),
-                    new TextArea({ value: "{propertyDialog>/description}", rows: 3 }),
-                    new Label({ text: oBundle.getText("propertyDetailFieldOtherInfo") }),
-                    new TextArea({ value: "{propertyDialog>/other_info}", rows: 3 })
+                    new Label({ text: oBundle.getText("propertyDetailOwnersTitle") }).addStyleClass("sapUiSmallMarginTop"),
+                    this._createOwnersBox()
                 ]
             });
         },
 
-        _openPropertyDialog: function (sMode, oProperty) {
+        _createOwnersBox: function () {
+            var oBundle = this.getResourceBundle();
+
+            return new VBox({
+                width: "100%",
+                items: [
+                    new VBox({
+                        width: "100%",
+                        items: {
+                            path: "propertyDialog>/linkedContacts",
+                            templateShareable: false,
+                            template: new VBox({
+                                width: "100%",
+                                items: [
+                                    new HBox({
+                                        width: "100%",
+                                        alignItems: "Center",
+                                        wrap: "Wrap",
+                                        items: [
+                                            new Input({
+                                                width: "100%",
+                                                value: "{propertyDialog>display_value}",
+                                                placeholder: oBundle.getText("propertyDetailOwnerSearchPlaceholder"),
+                                                showSuggestion: true,
+                                                startSuggestion: 2,
+                                                suggest: this.onSuggestOwner.bind(this),
+                                                suggestionItemSelected: this.onOwnerSelected.bind(this),
+                                                liveChange: this.onOwnerLiveChange.bind(this)
+                                            }),
+                                            new Button({
+                                                icon: "sap-icon://less",
+                                                type: "Transparent",
+                                                tooltip: oBundle.getText("propertyDetailRemoveOwnerButton"),
+                                                press: this.onRemoveOwner.bind(this),
+                                                visible: "{= ${propertyDialog>/linkedContacts}.length > 1 }"
+                                            })
+                                        ]
+                                    }),
+                                    new HBox({
+                                        renderType: "Bare",
+                                        items: [
+                                            new ObjectStatus({
+                                                text: "{propertyDialog>category}",
+                                                state: "Information"
+                                            }).addStyleClass("sapUiTinyMarginEnd"),
+                                            new ObjectStatus({
+                                                text: "{propertyDialog>status}",
+                                                state: "Success"
+                                            })
+                                        ]
+                                    }).addStyleClass("sapUiTinyMarginTop sapUiTinyMarginBottom")
+                                ]
+                            })
+                        }
+                    }),
+                    new Button({
+                        text: oBundle.getText("propertyDetailAddOwnerButton"),
+                        icon: "sap-icon://add",
+                        type: "Transparent",
+                        press: this.onAddOwner.bind(this)
+                    })
+                ]
+            });
+        },
+
+        _loadOwners: async function (iPropertyId) {
+            var aOwnerLinks = await ContactApi.listPropertyOwners({ property_id: iPropertyId });
+
+            if (!aOwnerLinks || !aOwnerLinks.length) {
+                return [createEmptyOwner()];
+            }
+
+            var aContacts = await this._ensureContactCache();
+            var mContactsById = (aContacts || []).reduce(function (mMap, oContact) {
+                mMap[oContact.id] = oContact;
+                return mMap;
+            }, {});
+
+            return aOwnerLinks.map(function (oOwner) {
+                var oContact = mContactsById[oOwner.contact_id] || {};
+                return {
+                    contact_id: oOwner.contact_id,
+                    display_value: buildContactDisplay(oContact),
+                    primary_phone: oContact.primary_phone || "",
+                    category: oContact.category || "",
+                    status: oContact.status || ""
+                };
+            });
+        },
+
+        _normalizeLinkedContactsForSave: function (aLinkedContacts) {
+            return (aLinkedContacts || []).filter(function (oLinkedContact) {
+                return (oLinkedContact.display_value || "").trim();
+            }).map(function (oOwner, iIndex) {
+                return {
+                    contact_id: oOwner.contact_id,
+                    is_primary_owner: iIndex === 0 ? 1 : 0
+                };
+            });
+        },
+
+        _validateLinkedContacts: function (aLinkedContacts) {
+            if (this._normalizeLinkedContactsForSave(aLinkedContacts).some(function (oOwner) {
+                return !oOwner.contact_id;
+            })) {
+                MessageToast.show(this.getResourceBundle().getText("propertyDetailOwnerValidation"));
+                return false;
+            }
+
+            return true;
+        },
+
+        onAddOwner: function (oEvent) {
+            var oModel = oEvent.getSource().getModel("propertyDialog");
+            var aLinkedContacts = oModel.getProperty("/linkedContacts") || [];
+
+            aLinkedContacts.push(createEmptyOwner());
+            oModel.setProperty("/linkedContacts", aLinkedContacts);
+        },
+
+        onRemoveOwner: function (oEvent) {
+            var oModel = oEvent.getSource().getModel("propertyDialog");
+            var sPath = oEvent.getSource().getBindingContext("propertyDialog").getPath();
+            var aLinkedContacts = oModel.getProperty("/linkedContacts") || [];
+            var iIndex = Number(sPath.split("/").pop());
+
+            if (Number.isNaN(iIndex)) {
+                return;
+            }
+
+            aLinkedContacts.splice(iIndex, 1);
+            oModel.setProperty("/linkedContacts", aLinkedContacts.length ? aLinkedContacts : [createEmptyOwner()]);
+        },
+
+        onOwnerLiveChange: function (oEvent) {
+            var oInput = oEvent.getSource();
+            var oModel = oInput.getModel("propertyDialog");
+            var sPath = oInput.getBindingContext("propertyDialog").getPath();
+
+            oModel.setProperty(sPath + "/display_value", oEvent.getParameter("value"));
+            oModel.setProperty(sPath + "/contact_id", null);
+            oModel.setProperty(sPath + "/primary_phone", "");
+            oModel.setProperty(sPath + "/category", "");
+            oModel.setProperty(sPath + "/status", "");
+        },
+
+        onSuggestOwner: async function (oEvent) {
+            var oInput = oEvent.getSource();
+            var sValue = normalizeSearchValue(oEvent.getParameter("suggestValue"));
+            var aContacts = await this._ensureContactCache();
+            var aMatches;
+
+            if (sValue.length < 2) {
+                oInput.destroySuggestionItems();
+                return;
+            }
+
+            aMatches = (aContacts || []).filter(function (oContact) {
+                var sLabel = normalizeSearchValue(buildContactDisplay(oContact));
+                var sEmail = normalizeSearchValue(oContact.email || "");
+                return sLabel.indexOf(sValue) !== -1 || sEmail.indexOf(sValue) !== -1;
+            }).slice(0, 10);
+
+            oInput.destroySuggestionItems();
+            aMatches.forEach(function (oContact) {
+                oInput.addSuggestionItem(new ListItem({
+                    key: String(oContact.id),
+                    text: buildContactDisplay(oContact),
+                    additionalText: oContact.email || ""
+                }));
+            });
+        },
+
+        onOwnerSelected: async function (oEvent) {
+            var oSelectedItem = oEvent.getParameter("selectedItem");
+            if (!oSelectedItem) {
+                return;
+            }
+
+            var oInput = oEvent.getSource();
+            var oModel = oInput.getModel("propertyDialog");
+            var sPath = oInput.getBindingContext("propertyDialog").getPath();
+            var iContactId = Number(oSelectedItem.getKey());
+            var aContacts = await this._ensureContactCache();
+            var oContact = (aContacts || []).find(function (oCurrentContact) {
+                return oCurrentContact.id === iContactId;
+            }) || {};
+
+            oModel.setProperty(sPath, {
+                contact_id: iContactId,
+                display_value: oSelectedItem.getText(),
+                primary_phone: oContact.primary_phone || "",
+                category: oContact.category || "",
+                status: oContact.status || ""
+            });
+        },
+
+        _openPropertyDialog: async function (sMode, oProperty) {
             var bEdit = sMode === "edit";
             var oBundle = this.getResourceBundle();
+            var aLinkedContacts = bEdit && oProperty && oProperty.id
+                ? await this._loadOwners(oProperty.id)
+                : [createEmptyOwner()];
             var oDialog = new Dialog({
                 title: bEdit ? oBundle.getText("propertiesDialogEditTitle") : oBundle.getText("propertiesDialogCreateTitle"),
                 contentWidth: "42rem",
@@ -353,11 +595,16 @@ sap.ui.define([
                     text: oBundle.getText("propertiesDialogSaveButton"),
                     type: "Emphasized",
                     press: async function () {
-                        var oPayload = oDialog.getModel("propertyDialog").getData();
+                        var oDialogData = oDialog.getModel("propertyDialog").getData();
+                        var oPayload = oDialogData.property || {};
                         var oSavedProperty;
 
                         if (!(oPayload.address_line || "").trim() || !(oPayload.city || "").trim()) {
                             MessageToast.show(oBundle.getText("propertiesValidationAddressRequired"));
+                            return;
+                        }
+
+                        if (!this._validateLinkedContacts(oDialogData.linkedContacts)) {
                             return;
                         }
 
@@ -369,6 +616,11 @@ sap.ui.define([
                                     user_id: this.getModel("session").getProperty("/userId") || 1
                                 }, oPayload));
                             }
+
+                            await ContactApi.replacePropertyContacts(
+                                oSavedProperty.id,
+                                this._normalizeLinkedContactsForSave(oDialogData.linkedContacts)
+                            );
 
                             MessageToast.show(oBundle.getText(bEdit ? "propertiesUpdateSuccess" : "propertiesCreateSuccess"));
                             oDialog.close();
@@ -393,7 +645,10 @@ sap.ui.define([
                 }
             });
 
-            oDialog.setModel(new JSONModel(Object.assign(createEmptyProperty(), oProperty || {})), "propertyDialog");
+            oDialog.setModel(new JSONModel({
+                property: Object.assign(createEmptyProperty(), oProperty || {}),
+                linkedContacts: aLinkedContacts
+            }), "propertyDialog");
             this.getView().addDependent(oDialog);
             oDialog.open();
         }
