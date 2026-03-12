@@ -15,6 +15,8 @@ sap.ui.define([
     "sap/m/Select",
     "sap/m/CheckBox",
     "sap/m/Text",
+    "sap/m/HBox",
+    "sap/m/VBox",
     "sap/m/Bar",
     "sap/m/Title",
     "sap/m/library",
@@ -38,6 +40,8 @@ sap.ui.define([
     Select,
     CheckBox,
     Text,
+    HBox,
+    VBox,
     Bar,
     Title,
     mobileLibrary,
@@ -102,6 +106,37 @@ sap.ui.define([
                     other_value: sKey === "altro" ? (oBuyerProfile.preference_other || "").trim() : null
                 };
             });
+    }
+
+    function createEmptyAdditionalPhone() {
+        return {
+            phone: ""
+        };
+    }
+
+    function normalizePhoneList(sPrimaryPhone, aAdditionalPhones) {
+        var aPhones = [];
+        var sCleanPrimaryPhone = (sPrimaryPhone || "").trim();
+
+        if (sCleanPrimaryPhone) {
+            aPhones.push({
+                phone: sCleanPrimaryPhone,
+                is_primary: 1
+            });
+        }
+
+        (aAdditionalPhones || []).forEach(function (oPhone) {
+            var sPhone = (oPhone && oPhone.phone || "").trim();
+
+            if (sPhone) {
+                aPhones.push({
+                    phone: sPhone,
+                    is_primary: 0
+                });
+            }
+        });
+
+        return aPhones;
     }
 
     return BaseController.extend("crm.controller.contactTile.Contacts", {
@@ -316,8 +351,10 @@ sap.ui.define([
 
         _createDialogModelData: async function (bEdit, oContact) {
             var oBuyerProfile = createEmptyBuyerProfile();
+            var aContactPhones = [];
 
             if (bEdit && oContact && oContact.id) {
+                aContactPhones = await ContactApi.listContactPhones(oContact.id);
                 var oExistingBuyerProfile = await ContactApi.getBuyerProfileByContactId(oContact.id);
                 if (oExistingBuyerProfile) {
                     var aPreferences = await ContactApi.listBuyerPreferences(oExistingBuyerProfile.id);
@@ -333,12 +370,61 @@ sap.ui.define([
                     last_name: bEdit ? (oContact.last_name || "") : "",
                     email: bEdit ? (oContact.email || "") : "",
                     pec_email: bEdit ? (oContact.pec_email || "") : "",
+                    primary_phone: bEdit ? (((aContactPhones || []).find(function (oPhone) {
+                        return Number(oPhone.is_primary) === 1;
+                    }) || {}).phone || oContact.primary_phone || "") : "",
                     category: bEdit ? (oContact.category || "venditore") : "venditore",
                     status: bEdit ? (oContact.status || "attivo") : "attivo",
                     generic_info: bEdit ? (oContact.generic_info || "") : ""
                 },
+                phones: bEdit ? (aContactPhones || []).filter(function (oPhone) {
+                    return Number(oPhone.is_primary) !== 1;
+                }).map(function (oPhone) {
+                    return { phone: oPhone.phone || "" };
+                }) : [],
                 buyerProfile: oBuyerProfile
             };
+        },
+
+        _createAdditionalPhonesBox: function () {
+            var oBundle = this.getResourceBundle();
+
+            return new VBox({
+                width: "100%",
+                items: [
+                    new VBox({
+                        width: "100%",
+                        items: {
+                            path: "contactDialog>/phones",
+                            templateShareable: false,
+                            template: new HBox({
+                                width: "100%",
+                                alignItems: "Center",
+                                items: [
+                                    new Input({
+                                        type: "Tel",
+                                        width: "100%",
+                                        value: "{contactDialog>phone}",
+                                        placeholder: oBundle.getText("contactsDialogPhoneAdditionalPlaceholder")
+                                    }),
+                                    new Button({
+                                        icon: "sap-icon://less",
+                                        type: "Transparent",
+                                        tooltip: oBundle.getText("contactsDialogRemovePhoneButton"),
+                                        press: this._onRemovePhonePress.bind(this)
+                                    })
+                                ]
+                            }).addStyleClass("sapUiTinyMarginBottom")
+                        }
+                    }),
+                    new Button({
+                        text: oBundle.getText("contactsDialogAddPhoneButton"),
+                        icon: "sap-icon://add",
+                        type: "Transparent",
+                        press: this._onAddPhonePress.bind(this)
+                    })
+                ]
+            });
         },
 
         _buildContactDialogContent: function () {
@@ -356,6 +442,14 @@ sap.ui.define([
                 new Input({ type: "Email", value: "{contactDialog>/contact/email}" }),
                 new Label({ text: oBundle.getText("contactsDialogFieldPec") }),
                 new Input({ type: "Email", value: "{contactDialog>/contact/pec_email}" }),
+                new Label({ text: oBundle.getText("contactsDialogFieldPrimaryPhone") }),
+                new Input({
+                    type: "Tel",
+                    value: "{contactDialog>/contact/primary_phone}",
+                    placeholder: oBundle.getText("contactsDialogPhonePrimaryPlaceholder")
+                }),
+                new Label({ text: oBundle.getText("contactsDialogFieldAdditionalPhones") }),
+                this._createAdditionalPhonesBox(),
                 new Label({ text: oBundle.getText("contactsDialogFieldCategory") }),
                 new Select({
                     selectedKey: "{contactDialog>/contact/category}",
@@ -423,6 +517,44 @@ sap.ui.define([
                 new Label({ text: oBundle.getText("contactsDialogFieldPreferenceOther"), visible: sPreferenceOtherVisible }),
                 new Input({ value: "{contactDialog>/buyerProfile/preference_other}", visible: sPreferenceOtherVisible })
             ];
+        },
+
+        _onAddPhonePress: function (oEvent) {
+            var oModel = oEvent.getSource().getModel("contactDialog");
+            var aPhones = oModel.getProperty("/phones") || [];
+
+            aPhones.push(createEmptyAdditionalPhone());
+            oModel.setProperty("/phones", aPhones);
+        },
+
+        _onRemovePhonePress: function (oEvent) {
+            var oModel = oEvent.getSource().getModel("contactDialog");
+            var oContext = oEvent.getSource().getBindingContext("contactDialog");
+            var sPath = oContext && oContext.getPath();
+            var aPhones = oModel.getProperty("/phones") || [];
+            var iIndex;
+
+            if (!sPath) {
+                return;
+            }
+
+            iIndex = Number(sPath.split("/").pop());
+
+            if (Number.isNaN(iIndex)) {
+                return;
+            }
+
+            aPhones.splice(iIndex, 1);
+            oModel.setProperty("/phones", aPhones);
+        },
+
+        _saveContactPhones: async function (iContactId, oDialogData) {
+            var aPhones = normalizePhoneList(
+                oDialogData.contact && oDialogData.contact.primary_phone,
+                oDialogData.phones
+            );
+
+            await ContactApi.replaceContactPhones(iContactId, aPhones);
         },
 
         _saveBuyerProfileData: async function (iContactId, oDialogData) {
@@ -629,13 +761,14 @@ sap.ui.define([
                         try {
                             if (bEdit) {
                                 oSavedContact = await ContactApi.updateContact(oContact.id, oPayload);
-                                MessageToast.show(oBundle.getText("contactsUpdateSuccess"));
                             } else {
                                 oSavedContact = await ContactApi.createContact(Object.assign({ user_id: iUserId }, oPayload));
-                                MessageToast.show(oBundle.getText("contactsCreateSuccess"));
                             }
 
+                            await this._saveContactPhones(oSavedContact.id, oDialogData);
                             await this._saveBuyerProfileData(oSavedContact.id, oDialogData);
+
+                            MessageToast.show(oBundle.getText(bEdit ? "contactsUpdateSuccess" : "contactsCreateSuccess"));
                             oDialog.close();
                             await this._loadContacts();
 

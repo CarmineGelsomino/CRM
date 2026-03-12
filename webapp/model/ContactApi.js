@@ -5,6 +5,7 @@ sap.ui.define([
     "use strict";
 
     var ENTITY_CONTACTS = "contacts";
+    var ENTITY_CONTACT_PHONES = "contact_phones";
     var ENTITY_BUYER_PROFILES = "buyer_profiles";
     var ENTITY_BUYER_PREFERENCES = "buyer_preferences";
     var ENTITY_ACTIVITIES = "activities";
@@ -51,6 +52,13 @@ sap.ui.define([
         "purchase_price_to_renovate",
         "mortgage_type",
         "mortgage_other"
+    ];
+
+    var CONTACT_PHONE_FIELDS = [
+        "contact_id",
+        "phone",
+        "is_primary",
+        "note"
     ];
 
     var BUYER_PREFERENCE_FIELDS = [
@@ -267,6 +275,53 @@ sap.ui.define([
         });
     }
 
+    function listContactPhones(iContactId) {
+        return request({
+            entity: ENTITY_CONTACT_PHONES,
+            query: { contact_id: iContactId },
+            method: "GET",
+            errorMessage: "Impossibile caricare i numeri di telefono.",
+            useMessageBox: true
+        });
+    }
+
+    function createContactPhone(oPayload) {
+        return request({
+            entity: ENTITY_CONTACT_PHONES,
+            method: "POST",
+            payload: sanitizePayload(oPayload, CONTACT_PHONE_FIELDS),
+            errorMessage: "Impossibile salvare il numero di telefono.",
+            useMessageBox: true
+        });
+    }
+
+    function deleteContactPhone(iId) {
+        return request({
+            entity: ENTITY_CONTACT_PHONES,
+            query: { id: iId },
+            method: "DELETE",
+            errorMessage: "Impossibile eliminare il numero di telefono.",
+            useMessageBox: true
+        });
+    }
+
+    async function replaceContactPhones(iContactId, aPhones) {
+        var aExistingPhones = await listContactPhones(iContactId);
+        var aDeletePromises = (aExistingPhones || []).map(function (oPhone) {
+            return deleteContactPhone(oPhone.id);
+        });
+
+        await Promise.all(aDeletePromises);
+
+        var aCreatePromises = (aPhones || []).map(function (oPhone) {
+            return createContactPhone(Object.assign({}, oPhone, {
+                contact_id: iContactId
+            }));
+        });
+
+        await Promise.all(aCreatePromises);
+    }
+
     function listBuyerProfiles(mFilters) {
         return request({
             entity: ENTITY_BUYER_PROFILES,
@@ -460,6 +515,8 @@ sap.ui.define([
         createContact: createContact,
         updateContact: updateContact,
         deleteContact: deleteContact,
+        listContactPhones: listContactPhones,
+        replaceContactPhones: replaceContactPhones,
         getBuyerProfileByContactId: getBuyerProfileByContactId,
         createBuyerProfile: createBuyerProfile,
         updateBuyerProfile: updateBuyerProfile,
