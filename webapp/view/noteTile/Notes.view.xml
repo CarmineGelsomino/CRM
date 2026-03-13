@@ -1,0 +1,133 @@
+<mvc:View
+    controllerName="crm.controller.noteTile.Notes"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    core:require="{ formatter: 'crm/model/formatter' }">
+    <Page title="{i18n>notesPageTitle}" class="sapUiResponsiveContentPadding" navButtonPress="onNavBackPress" showNavButton="true">
+        <customHeader>
+            <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
+        </customHeader>
+        <content>
+            <Title class="sapUiSmallMargin" text="{i18n>notesPageTitle}" titleStyle="H2" />
+            <Panel class="sapUiTinyMarginBottom" expandable="true">
+                <headerToolbar>
+                    <Toolbar>
+                        <Title text="{i18n>notesFiltersTitle}" level="H5" />
+                    </Toolbar>
+                </headerToolbar>
+                <content>
+                    <f:SimpleForm
+                        editable="true"
+                        layout="ColumnLayout"
+                        labelSpanXL="2"
+                        labelSpanL="2"
+                        labelSpanM="12"
+                        labelSpanS="12"
+                        emptySpanXL="0"
+                        emptySpanL="0"
+                        emptySpanM="0"
+                        emptySpanS="0"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2"
+                        singleContainerFullSize="false">
+                        <Label text="{i18n>notesFilterSearchLabel}" labelFor="notesSearchField" />
+                        <SearchField
+                            id="notesSearchField"
+                            width="100%"
+                            value="{noteFilters>/searchQuery}"
+                            placeholder="{i18n>notesFilterSearchPlaceholder}"
+                            liveChange="onFilterChange"
+                            search="onFilterChange" />
+                        <Label text="{i18n>notesFilterContactLabel}" labelFor="notesContactSelect" />
+                        <Select
+                            id="notesContactSelect"
+                            width="100%"
+                            forceSelection="false"
+                            selectedKey="{noteFilters>/contactId}"
+                            change="onFilterChange"
+                            items="{notes>/contacts}">
+                            <core:Item key="" text="{i18n>notesFilterContactAll}" />
+                            <core:Item key="{notes>id}" text="{= (${notes>first_name} || '') + ' ' + (${notes>last_name} || '') }" />
+                        </Select>
+                        <Label text="{i18n>notesFilterCategoryLabel}" labelFor="notesCategorySelect" />
+                        <Select
+                            id="notesCategorySelect"
+                            width="100%"
+                            forceSelection="false"
+                            selectedKey="{noteFilters>/categoryKey}"
+                            change="onFilterChange"
+                            items="{categoriesContact>/}">
+                            <core:Item key="" text="{i18n>notesFilterCategoryAll}" />
+                            <core:Item key="{categoriesContact>key}" text="{categoriesContact>value}" />
+                        </Select>
+                        <Label text="{i18n>notesFilterStatusLabel}" labelFor="notesStatusSelect" />
+                        <Select
+                            id="notesStatusSelect"
+                            width="100%"
+                            forceSelection="false"
+                            selectedKey="{noteFilters>/statusKey}"
+                            change="onFilterChange"
+                            items="{statesContact>/}">
+                            <core:Item key="" text="{i18n>notesFilterStatusAll}" />
+                            <core:Item key="{statesContact>key}" text="{statesContact>value}" />
+                        </Select>
+                    </f:SimpleForm>
+                    <Button text="{i18n>notesFilterClearButton}" icon="sap-icon://clear-filter" type="Transparent" press="onClearFilters" />
+                </content>
+            </Panel>
+
+            <Table
+                id="notesTable"
+                mode="SingleSelectLeft"
+                growing="true"
+                growingScrollToLoad="true"
+                busy="{notes>/busy}"
+                items="{notes>/notes}"
+                selectionChange="onSelectionChange"
+                noDataText="{i18n>notesTableNoData}">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="{= ${i18n>notesTableTitlePrefix} + ${notes>/notes}.length + ')' }" level="H3" />
+                        <ToolbarSpacer />
+                        <Button icon="sap-icon://refresh" tooltip="{i18n>notesTableRefreshTooltip}" press="onRefreshNotes" />
+                        <Button text="{i18n>notesTableSortButton}" icon="sap-icon://sort" press="onOpenSortDialog" />
+                        <Button text="{i18n>notesTableNewButton}" type="Emphasized" icon="sap-icon://add" press="onCreateNote" />
+                        <Button text="{i18n>notesTableEditButton}" icon="sap-icon://edit" enabled="{= !!${notes>/selectedNoteId}}" press="onEditNote" />
+                        <Button text="{i18n>notesTableDeleteButton}" type="Negative" icon="sap-icon://delete" enabled="{= !!${notes>/selectedNoteId}}" press="onDeleteNote" />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="26rem"><Text text="{i18n>notesTableColumnMessage}" /></Column>
+                    <Column width="18rem"><Text text="{i18n>notesTableColumnContact}" /></Column>
+                    <Column width="12rem"><Text text="{i18n>notesTableColumnCategory}" /></Column>
+                    <Column width="10rem"><Text text="{i18n>notesTableColumnStatus}" /></Column>
+                    <Column width="12rem"><Text text="{i18n>notesTableColumnCreated}" /></Column>
+                    <Column width="12rem"><Text text="{i18n>notesTableColumnUpdated}" /></Column>
+                    <Column width="8rem" hAlign="End"><Text text="{i18n>notesTableColumnActions}" /></Column>
+                </columns>
+                <items>
+                    <ColumnListItem vAlign="Top">
+                        <cells>
+                            <ObjectIdentifier title="{notes>messagePreview}" text="{= ${i18n>notesTableIdPrefix} + ${notes>id} }" />
+                            <VBox>
+                                <Text text="{notes>contactFullName}" wrapping="true" />
+                                <Text text="{notes>contactEmail}" wrapping="true" />
+                            </VBox>
+                            <Text text="{ parts: [ { path: 'notes>contactCategory' }, { path: 'categoriesContact>/' } ], formatter: 'formatter.lookupText' }" />
+                            <ObjectStatus text="{ parts: [ { path: 'notes>contactStatus' }, { path: 'statesContact>/' } ], formatter: 'formatter.lookupText' }" state="Information" />
+                            <Text text="{notes>createdAtFormatted}" />
+                            <Text text="{notes>updatedAtFormatted}" />
+                            <HBox justifyContent="End">
+                                <Button icon="sap-icon://edit" type="Transparent" press="onRowEdit" />
+                                <Button icon="sap-icon://delete" type="Transparent" press="onRowDelete" />
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+    </Page>
+</mvc:View>

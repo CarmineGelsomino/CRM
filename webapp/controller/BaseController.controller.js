@@ -70,6 +70,11 @@ sap.ui.define([
                 return;
             }
 
+            if (sText === oBundle.getText("shellMenuNotes")) {
+                this.navTo("notes");
+                return;
+            }
+
             if (sText === oBundle.getText("shellMenuProfile")) {
                 this.navTo("userProfile");
                 return;
