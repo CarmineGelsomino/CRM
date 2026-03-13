@@ -50,7 +50,7 @@
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="{i18n>homeTileNotesHeader}" subheader="{i18n>homeTileNotesSubheader}" press="onTilePress" frameType="TwoByOne">
+                <GenericTile id="notesTile" header="{i18n>homeTileNotesHeader}" subheader="{i18n>homeTileNotesSubheader}" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="{i18n>homeTileOpenModule}">
                         <NumericContent value="14" scale="{i18n>homeTileDefaultScale}" valueColor="Neutral" />
                     </TileContent>

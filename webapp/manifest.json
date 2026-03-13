@@ -130,6 +130,11 @@
           "target": "propertyDetail"
         },
         {
+          "pattern": "notes",
+          "name": "notes",
+          "target": "notes"
+        },
+        {
           "pattern": "profile",
           "name": "userProfile",
           "target": "userProfile"
@@ -164,6 +169,10 @@
         "propertyDetail": {
           "viewName": "propertyTile.DetailProperty",
           "viewId": "propertyDetail"
+        },
+        "notes": {
+          "viewName": "noteTile.Notes",
+          "viewId": "notes"
         },
         "userProfile": {
           "viewName": "UserProfile",
