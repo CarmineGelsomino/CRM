@@ -5,204 +5,240 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form"
+    xmlns:uxap="sap.uxap"
     core:require="{ formatter: 'crm/model/formatter' }">
-    <Page title="{i18n>propertyDetailPageTitle}" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
+    <Page title="{i18n>propertyDetailPageTitle}" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true" enableScrolling="false">
         <customHeader>
             <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
         </customHeader>
         <content>
-            <Title class="sapUiSmallMargin" text="{i18n>propertyDetailPageTitle}" titleStyle="H2" />
-            <ObjectHeader
-                title="{ parts: [ { path: 'propertyDetail>/property' } ], formatter: '.buildPropertyHeader' }"
-                intro="{ parts: [ { path: 'propertyDetail>/property/property_type' }, { path: 'typeProperties>/' } ], formatter: 'formatter.lookupText' }"
-                responsive="true">
-                <attributes>
-                    <ObjectAttribute
-                        title="{i18n>propertyDetailFieldType}"
-                        text="{ parts: [ { path: 'propertyDetail>/property/property_type' }, { path: 'typeProperties>/' } ], formatter: 'formatter.lookupText' }" />
-                    <ObjectAttribute text="{= ${i18n>propertyDetailAddressPrefix} + ${propertyDetail>/property/address_line}}" />
-                    <ObjectAttribute text="{= ${i18n>propertyDetailCityPrefix} + ${propertyDetail>/property/city}}" />
-                    <ObjectAttribute
-                        title="{i18n>propertyDetailFieldCondition}"
-                        text="{ parts: [ { path: 'propertyDetail>/property/property_condition' }, { path: 'statesProperty>/' } ], formatter: 'formatter.lookupText' }" />
-                    <ObjectAttribute text="{propertyDetail>/property/listing_url}" active="{= !!${propertyDetail>/property/listing_url} }" press="onOpenListingUrl" />
-                </attributes>
-            </ObjectHeader>
-
-            <IconTabBar
-                class="sapUiSmallMarginTop"
-                expandable="false"
-                select="onSectionTabSelect">
-                <items>
-                    <IconTabFilter key="propertyDataSection" text="{i18n>propertyDetailTabPropertyData}" icon="sap-icon://home" />
-                    <IconTabFilter key="ownersSection" text="{i18n>propertyDetailTabOwners}" icon="sap-icon://group" />
-                    <IconTabFilter key="propertyActivitiesSection" text="{i18n>propertyDetailTabActivities}" icon="sap-icon://activities" />
-                    <IconTabFilter key="propertyNotesSection" text="{i18n>propertyDetailTabNotes}" icon="sap-icon://notes" />
-                </items>
-            </IconTabBar>
-
-            <f:SimpleForm id="propertyDataSection" editable="true" layout="ResponsiveGridLayout" title="{i18n>propertyDetailSectionPropertyData}" class="sapUiSmallMarginTop">
-                <f:content>
-                    <Label text="{i18n>propertyDetailFieldAddress}" />
-                    <Input value="{propertyDetail>/property/address_line}" />
-                    <Label text="{i18n>propertyDetailFieldType}" />
-                    <Select selectedKey="{propertyDetail>/property/property_type}" items="{typeProperties>/}">
-                        <core:Item key="{typeProperties>key}" text="{typeProperties>value}" />
-                    </Select>
-                    <Label text="{i18n>propertyDetailFieldCity}" />
-                    <Input value="{propertyDetail>/property/city}" />
-                    <Label text="{i18n>propertyDetailFieldPostalCode}" />
-                    <Input value="{propertyDetail>/property/postal_code}" />
-                    <Label text="{i18n>propertyDetailFieldProvince}" />
-                    <Input value="{propertyDetail>/property/province}" />
-                    <Label text="{i18n>propertyDetailFieldCountry}" />
-                    <Input value="{propertyDetail>/property/country}" />
-                    <Label text="{i18n>propertyDetailFieldSubalterno}" />
-                    <Input value="{propertyDetail>/property/subalterno}" />
-                    <Label text="{i18n>propertyDetailFieldFloor}" />
-                    <Input value="{propertyDetail>/property/apartment_floor}" />
-                    <Label text="{i18n>propertyDetailFieldInternalSqm}" />
-                    <Input value="{propertyDetail>/property/internal_sqm}" type="Number" />
-                    <Label text="{i18n>propertyDetailFieldExternalSqm}" />
-                    <Input value="{propertyDetail>/property/external_sqm}" type="Number" />
-                    <Label text="{i18n>propertyDetailFieldCondition}" />
-                    <Select selectedKey="{propertyDetail>/property/property_condition}" items="{statesProperty>/}">
-                        <core:Item key="{statesProperty>key}" text="{statesProperty>value}" />
-                    </Select>
-                    <Label text="{i18n>propertyDetailFieldListingUrl}" />
-                    <Input value="{propertyDetail>/property/listing_url}" type="Url" />
-                    <Label text="{i18n>propertyDetailFieldOwnerHomeAddress}" />
-                    <Input value="{propertyDetail>/property/owner_home_address}" />
-                    <Label text="{i18n>propertyDetailFieldWorkContact}" />
-                    <Input value="{propertyDetail>/property/work_contact}" />
-                    <Label text="{i18n>propertyDetailFieldFirstAvailability}" />
-                    <Input value="{propertyDetail>/property/first_av}" />
-                    <Label text="{i18n>propertyDetailFieldAdministrator}" />
-                    <Input value="{propertyDetail>/property/administrator}" />
-                    <Label text="{i18n>propertyDetailFieldDescription}" />
-                    <TextArea rows="4" value="{propertyDetail>/property/description}" />
-                    <Label text="{i18n>propertyDetailFieldOtherInfo}" />
-                    <TextArea rows="4" value="{propertyDetail>/property/other_info}" />
-                </f:content>
-            </f:SimpleForm>
-
-            <Panel id="ownersSection" headerText="{i18n>propertyDetailOwnersTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
-                <content>
-                    <VBox width="100%">
-                        <items>
-                            <VBox width="100%" items="{propertyDetail>/linkedContacts}">
-                                <items>
-                                    <VBox class="sapUiTinyMarginBottom">
-                                        <HBox width="100%" alignItems="Center" wrap="Wrap">
-                                            <Input
-                                                width="100%"
-                                                value="{propertyDetail>display_value}"
-                                                placeholder="{i18n>propertyDetailOwnerSearchPlaceholder}"
-                                                showSuggestion="true"
-                                                startSuggestion="2"
-                                                suggest="onSuggestOwner"
-                                                suggestionItemSelected="onOwnerSelected"
-                                                liveChange="onOwnerLiveChange" />
-                                            <Button icon="sap-icon://call" type="Transparent" press="onCallOwner" enabled="{= !!${propertyDetail>primary_phone} }" />
-                                            <Button icon="sap-icon://customer-view" type="Transparent" press="onOpenLinkedContact" enabled="{= !!${propertyDetail>contact_id} }" tooltip="{i18n>propertyDetailOpenContactButton}" />
-                                            <Button icon="sap-icon://less" type="Transparent" press="onRemoveOwner" visible="{= ${propertyDetail>/linkedContacts}.length > 1 }" tooltip="{i18n>propertyDetailRemoveOwnerButton}" />
-                                        </HBox>
-                                        <HBox class="sapUiTinyMarginTop" renderType="Bare">
-                                            <ObjectStatus text="{propertyDetail>category}" state="Information" class="sapUiTinyMarginEnd" />
-                                            <ObjectStatus text="{propertyDetail>status}" state="Success" />
-                                        </HBox>
-                                    </VBox>
-                                </items>
-                            </VBox>
-                            <Button text="{i18n>propertyDetailAddOwnerButton}" icon="sap-icon://add" type="Transparent" press="onAddOwner" />
-                        </items>
-                    </VBox>
-                </content>
-            </Panel>
-
-            <Toolbar class="sapUiSmallMarginTop sapUiTinyMarginBottom">
-                <ToolbarSpacer />
-                <Button text="{i18n>propertyDetailSaveButton}" type="Emphasized" icon="sap-icon://save" press="onSaveProperty" />
-            </Toolbar>
-
-            <Panel id="propertyActivitiesSection" headerText="{i18n>propertyDetailAggregatedActivitiesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title text="{i18n>propertyDetailAggregatedActivitiesTitle}" level="H4" />
-                        <ToolbarSpacer />
-                        <SearchField id="propertyActivitySearchField" width="14rem" placeholder="{i18n>contactDetailActivitiesFilterPlaceholder}" liveChange="onFilterActivities" search="onFilterActivities" />
-                        <Select id="propertyActivityStatusFilter" width="10rem" selectedKey="" change="onFilterActivities" items="{activityStates>/}">
-                            <core:Item key="{activityStates>key}" text="{activityStates>value}" />
-                        </Select>
-                        <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddActivity" />
-                    </OverflowToolbar>
-                </headerToolbar>
-                <List id="propertyActivitiesList" items="{propertyDetail>/activities}" noDataText="{i18n>contactDetailActivitiesNoData}">
-                    <CustomListItem>
-                        <VBox class="sapUiSmallMarginTop sapUiSmallMarginBottom">
-                            <HBox justifyContent="SpaceBetween" alignItems="Start" wrap="Wrap">
-                                <Title text="{propertyDetail>title}" level="H5" />
-                                <HBox alignItems="Center" renderType="Bare">
-                                    <Text
-                                        text="{= ${propertyDetail>reminder_at} ? ${i18n>contactDetailActivityFieldReminder} + ': ' + ${propertyDetail>reminder_at} : '' }"
-                                        class="sapUiTinyMarginBegin sapUiTinyMarginTop" />
-                                    <Button
-                                        icon="sap-icon://edit"
-                                        type="Transparent"
-                                        tooltip="{i18n>contactDetailEditActivityTitle}"
-                                        press="onEditActivity" />
-                                </HBox>
-                            </HBox>
-                            <Text
-                                text="{propertyDetail>description}"
-                                visible="{= !!${propertyDetail>description} }"
-                                class="sapUiTinyMarginTop" />
-                            <Link
-                                text="{= ${i18n>propertyDetailLinkedContactPrefix} + ${propertyDetail>contact_name}}"
-                                press="onOpenActivityContact"
-                                class="sapUiSmallMarginTop" />
-                            <FlexBox wrap="Wrap" class="sapUiSmallMarginTop">
-                                <items>
-                                    <tnt:InfoLabel
-                                        text="{ parts: [ { path: 'propertyDetail>activity_type' }, { path: 'activityTypes>/' } ], formatter: 'formatter.lookupText' }"
-                                        colorScheme="{ path: 'propertyDetail>activity_type', formatter: 'formatter.activityTypeColorScheme' }"
-                                        visible="{= !!${propertyDetail>activity_type} }"
-                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
-                                    <tnt:InfoLabel
-                                        text="{ path: 'propertyDetail>priority', formatter: 'formatter.activityPriorityText' }"
-                                        colorScheme="{ path: 'propertyDetail>priority', formatter: 'formatter.activityPriorityColorScheme' }"
-                                        visible="{= !!${propertyDetail>priority} }"
-                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
-                                    <ObjectStatus
-                                        text="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
-                                        state="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }"
-                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
-                                </items>
-                            </FlexBox>
-                        </VBox>
-                    </CustomListItem>
-                </List>
-            </Panel>
-
-            <Panel id="propertyNotesSection" headerText="{i18n>propertyDetailAggregatedNotesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title text="{i18n>propertyDetailAggregatedNotesTitle}" level="H4" />
-                        <ToolbarSpacer />
-                        <SearchField width="14rem" placeholder="{i18n>contactDetailNotesFilterPlaceholder}" liveChange="onFilterNotes" search="onFilterNotes" />
-                        <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddNote" />
-                    </OverflowToolbar>
-                </headerToolbar>
-                <List id="propertyNotesList" items="{propertyDetail>/notes}" noDataText="{i18n>contactDetailNotesNoData}">
-                    <CustomListItem>
-                        <VBox>
-                            <Text text="{propertyDetail>message}" />
-                            <Link text="{= ${i18n>propertyDetailLinkedContactPrefix} + ${propertyDetail>contact_name}}" press="onOpenNoteContact" />
-                            <Text text="{= ${i18n>contactDetailNoteCreatedAtPrefix} + ${propertyDetail>created_at}}" />
-                        </VBox>
-                    </CustomListItem>
-                </List>
-            </Panel>
+            <uxap:ObjectPageLayout id="propertyObjectPage" height="100%" useIconTabBar="true" upperCaseAnchorBar="false" showAnchorBarPopover="false">
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:heading>
+                            <Title text="{i18n>propertyDetailPageTitle}" titleStyle="H2" />
+                        </uxap:heading>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
+                <uxap:headerContent>
+                    <ObjectHeader
+                        title="{ parts: [ { path: 'propertyDetail>/property' } ], formatter: '.buildPropertyHeader' }"
+                        intro="{ parts: [ { path: 'propertyDetail>/property/property_type' }, { path: 'typeProperties>/' } ], formatter: 'formatter.lookupText' }"
+                        responsive="true">
+                        <attributes>
+                            <ObjectAttribute
+                                title="{i18n>propertyDetailFieldType}"
+                                text="{ parts: [ { path: 'propertyDetail>/property/property_type' }, { path: 'typeProperties>/' } ], formatter: 'formatter.lookupText' }" />
+                            <ObjectAttribute text="{= ${i18n>propertyDetailAddressPrefix} + ${propertyDetail>/property/address_line}}" />
+                            <ObjectAttribute text="{= ${i18n>propertyDetailCityPrefix} + ${propertyDetail>/property/city}}" />
+                            <ObjectAttribute
+                                title="{i18n>propertyDetailFieldCondition}"
+                                text="{ parts: [ { path: 'propertyDetail>/property/property_condition' }, { path: 'statesProperty>/' } ], formatter: 'formatter.lookupText' }" />
+                            <ObjectAttribute text="{propertyDetail>/property/listing_url}" active="{= !!${propertyDetail>/property/listing_url} }" press="onOpenListingUrl" />
+                        </attributes>
+                    </ObjectHeader>
+                </uxap:headerContent>
+                <uxap:sections>
+                    <uxap:ObjectPageSection id="propertyDataSection" title="{i18n>propertyDetailTabPropertyData}" showTitle="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <Panel headerText="{i18n>propertyDetailSectionPropertyData}" expandable="true" expanded="true">
+                                        <content>
+                                            <f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+                                                <f:content>
+                                                    <Label text="{i18n>propertyDetailFieldAddress}" />
+                                                    <Input value="{propertyDetail>/property/address_line}" />
+                                                    <Label text="{i18n>propertyDetailFieldType}" />
+                                                    <Select selectedKey="{propertyDetail>/property/property_type}" items="{typeProperties>/}">
+                                                        <core:Item key="{typeProperties>key}" text="{typeProperties>value}" />
+                                                    </Select>
+                                                    <Label text="{i18n>propertyDetailFieldCity}" />
+                                                    <Input value="{propertyDetail>/property/city}" />
+                                                    <Label text="{i18n>propertyDetailFieldPostalCode}" />
+                                                    <Input value="{propertyDetail>/property/postal_code}" />
+                                                    <Label text="{i18n>propertyDetailFieldProvince}" />
+                                                    <Input value="{propertyDetail>/property/province}" />
+                                                    <Label text="{i18n>propertyDetailFieldCountry}" />
+                                                    <Input value="{propertyDetail>/property/country}" />
+                                                    <Label text="{i18n>propertyDetailFieldSubalterno}" />
+                                                    <Input value="{propertyDetail>/property/subalterno}" />
+                                                    <Label text="{i18n>propertyDetailFieldFloor}" />
+                                                    <Input value="{propertyDetail>/property/apartment_floor}" />
+                                                    <Label text="{i18n>propertyDetailFieldInternalSqm}" />
+                                                    <Input value="{propertyDetail>/property/internal_sqm}" type="Number" />
+                                                    <Label text="{i18n>propertyDetailFieldExternalSqm}" />
+                                                    <Input value="{propertyDetail>/property/external_sqm}" type="Number" />
+                                                    <Label text="{i18n>propertyDetailFieldCondition}" />
+                                                    <Select selectedKey="{propertyDetail>/property/property_condition}" items="{statesProperty>/}">
+                                                        <core:Item key="{statesProperty>key}" text="{statesProperty>value}" />
+                                                    </Select>
+                                                    <Label text="{i18n>propertyDetailFieldListingUrl}" />
+                                                    <Input value="{propertyDetail>/property/listing_url}" type="Url" />
+                                                    <Label text="{i18n>propertyDetailFieldOwnerHomeAddress}" />
+                                                    <Input value="{propertyDetail>/property/owner_home_address}" />
+                                                    <Label text="{i18n>propertyDetailFieldWorkContact}" />
+                                                    <Input value="{propertyDetail>/property/work_contact}" />
+                                                    <Label text="{i18n>propertyDetailFieldFirstAvailability}" />
+                                                    <Input value="{propertyDetail>/property/first_av}" />
+                                                    <Label text="{i18n>propertyDetailFieldAdministrator}" />
+                                                    <Input value="{propertyDetail>/property/administrator}" />
+                                                    <Label text="{i18n>propertyDetailFieldDescription}" />
+                                                    <TextArea rows="4" value="{propertyDetail>/property/description}" />
+                                                    <Label text="{i18n>propertyDetailFieldOtherInfo}" />
+                                                    <TextArea rows="4" value="{propertyDetail>/property/other_info}" />
+                                                </f:content>
+                                            </f:SimpleForm>
+                                            <Toolbar class="sapUiSmallMarginTop sapUiTinyMarginBottom">
+                                                <ToolbarSpacer />
+                                                <Button text="{i18n>propertyDetailSaveButton}" type="Emphasized" icon="sap-icon://save" press="onSaveProperty" />
+                                            </Toolbar>
+                                        </content>
+                                    </Panel>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection id="ownersSection" title="{i18n>propertyDetailTabOwners}" showTitle="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <Panel headerText="{i18n>propertyDetailOwnersTitle}" expandable="true" expanded="true">
+                                        <content>
+                                            <VBox width="100%">
+                                                <items>
+                                                    <VBox width="100%" items="{propertyDetail>/linkedContacts}">
+                                                        <items>
+                                                            <VBox class="sapUiTinyMarginBottom">
+                                                                <HBox width="100%" alignItems="Center" wrap="Wrap">
+                                                                    <Input
+                                                                        width="100%"
+                                                                        value="{propertyDetail>display_value}"
+                                                                        placeholder="{i18n>propertyDetailOwnerSearchPlaceholder}"
+                                                                        showSuggestion="true"
+                                                                        startSuggestion="2"
+                                                                        suggest="onSuggestOwner"
+                                                                        suggestionItemSelected="onOwnerSelected"
+                                                                        liveChange="onOwnerLiveChange" />
+                                                                    <Button icon="sap-icon://call" type="Transparent" press="onCallOwner" enabled="{= !!${propertyDetail>primary_phone} }" />
+                                                                    <Button icon="sap-icon://customer-view" type="Transparent" press="onOpenLinkedContact" enabled="{= !!${propertyDetail>contact_id} }" tooltip="{i18n>propertyDetailOpenContactButton}" />
+                                                                    <Button icon="sap-icon://less" type="Transparent" press="onRemoveOwner" visible="{= ${propertyDetail>/linkedContacts}.length > 1 }" tooltip="{i18n>propertyDetailRemoveOwnerButton}" />
+                                                                </HBox>
+                                                                <HBox class="sapUiTinyMarginTop" renderType="Bare">
+                                                                    <ObjectStatus text="{propertyDetail>category}" state="Information" class="sapUiTinyMarginEnd" />
+                                                                    <ObjectStatus text="{propertyDetail>status}" state="Success" />
+                                                                </HBox>
+                                                            </VBox>
+                                                        </items>
+                                                    </VBox>
+                                                    <Button text="{i18n>propertyDetailAddOwnerButton}" icon="sap-icon://add" type="Transparent" press="onAddOwner" />
+                                                </items>
+                                            </VBox>
+                                        </content>
+                                    </Panel>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection id="propertyActivitiesSection" title="{i18n>propertyDetailTabActivities}" showTitle="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <Panel headerText="{i18n>propertyDetailAggregatedActivitiesTitle}" expandable="true" expanded="true">
+                                        <headerToolbar>
+                                            <OverflowToolbar>
+                                                <Title text="{i18n>propertyDetailAggregatedActivitiesTitle}" level="H4" />
+                                                <ToolbarSpacer />
+                                                <SearchField id="propertyActivitySearchField" width="14rem" placeholder="{i18n>contactDetailActivitiesFilterPlaceholder}" liveChange="onFilterActivities" search="onFilterActivities" />
+                                                <Select id="propertyActivityStatusFilter" width="10rem" selectedKey="" change="onFilterActivities" items="{activityStates>/}">
+                                                    <core:Item key="{activityStates>key}" text="{activityStates>value}" />
+                                                </Select>
+                                                <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddActivity" />
+                                            </OverflowToolbar>
+                                        </headerToolbar>
+                                        <content>
+                                            <List id="propertyActivitiesList" items="{propertyDetail>/activities}" noDataText="{i18n>contactDetailActivitiesNoData}">
+                                                <CustomListItem>
+                                                    <VBox class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+                                                        <HBox justifyContent="SpaceBetween" alignItems="Start" wrap="Wrap">
+                                                            <Title text="{propertyDetail>title}" level="H5" />
+                                                            <HBox alignItems="Center" renderType="Bare">
+                                                                <Text
+                                                                    text="{= ${propertyDetail>reminder_at} ? ${i18n>contactDetailActivityFieldReminder} + ': ' + ${propertyDetail>reminder_at} : '' }"
+                                                                    class="sapUiTinyMarginBegin sapUiTinyMarginTop" />
+                                                                <Button
+                                                                    icon="sap-icon://edit"
+                                                                    type="Transparent"
+                                                                    tooltip="{i18n>contactDetailEditActivityTitle}"
+                                                                    press="onEditActivity" />
+                                                            </HBox>
+                                                        </HBox>
+                                                        <Text
+                                                            text="{propertyDetail>description}"
+                                                            visible="{= !!${propertyDetail>description} }"
+                                                            class="sapUiTinyMarginTop" />
+                                                        <Link
+                                                            text="{= ${i18n>propertyDetailLinkedContactPrefix} + ${propertyDetail>contact_name}}"
+                                                            press="onOpenActivityContact"
+                                                            class="sapUiSmallMarginTop" />
+                                                        <FlexBox wrap="Wrap" class="sapUiSmallMarginTop">
+                                                            <items>
+                                                                <tnt:InfoLabel
+                                                                    text="{ parts: [ { path: 'propertyDetail>activity_type' }, { path: 'activityTypes>/' } ], formatter: 'formatter.lookupText' }"
+                                                                    colorScheme="{ path: 'propertyDetail>activity_type', formatter: 'formatter.activityTypeColorScheme' }"
+                                                                    visible="{= !!${propertyDetail>activity_type} }"
+                                                                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                                                <tnt:InfoLabel
+                                                                    text="{ path: 'propertyDetail>priority', formatter: 'formatter.activityPriorityText' }"
+                                                                    colorScheme="{ path: 'propertyDetail>priority', formatter: 'formatter.activityPriorityColorScheme' }"
+                                                                    visible="{= !!${propertyDetail>priority} }"
+                                                                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                                                <ObjectStatus
+                                                                    text="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
+                                                                    state="{ parts: [ { path: 'propertyDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }"
+                                                                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                                            </items>
+                                                        </FlexBox>
+                                                    </VBox>
+                                                </CustomListItem>
+                                            </List>
+                                        </content>
+                                    </Panel>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection id="propertyNotesSection" title="{i18n>propertyDetailTabNotes}" showTitle="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <Panel headerText="{i18n>propertyDetailAggregatedNotesTitle}" expandable="true" expanded="true">
+                                        <headerToolbar>
+                                            <OverflowToolbar>
+                                                <Title text="{i18n>propertyDetailAggregatedNotesTitle}" level="H4" />
+                                                <ToolbarSpacer />
+                                                <SearchField width="14rem" placeholder="{i18n>contactDetailNotesFilterPlaceholder}" liveChange="onFilterNotes" search="onFilterNotes" />
+                                                <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddNote" />
+                                            </OverflowToolbar>
+                                        </headerToolbar>
+                                        <content>
+                                            <List id="propertyNotesList" items="{propertyDetail>/notes}" noDataText="{i18n>contactDetailNotesNoData}">
+                                                <CustomListItem>
+                                                    <VBox>
+                                                        <Text text="{propertyDetail>message}" />
+                                                        <Link text="{= ${i18n>propertyDetailLinkedContactPrefix} + ${propertyDetail>contact_name}}" press="onOpenNoteContact" />
+                                                        <Text text="{= ${i18n>contactDetailNoteCreatedAtPrefix} + ${propertyDetail>created_at}}" />
+                                                    </VBox>
+                                                </CustomListItem>
+                                            </List>
+                                        </content>
+                                    </Panel>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                </uxap:sections>
+            </uxap:ObjectPageLayout>
         </content>
     </Page>
 </mvc:View>

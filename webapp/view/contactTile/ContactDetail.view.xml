@@ -5,332 +5,365 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form"
+    xmlns:uxap="sap.uxap"
     core:require="{ formatter: 'crm/model/formatter' }">
-    
-    <Page title="{i18n>contactDetailPageTitle}" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true">
+    <Page title="{i18n>contactDetailPageTitle}" class="sapUiResponsiveContentPadding" navButtonPress="onNavBack" showNavButton="true" enableScrolling="false">
         <customHeader>
             <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML"/>
         </customHeader>
         <content>
-            <Title class="sapUiSmallMargin" text="{i18n>contactDetailPageTitle}" titleStyle="H2"/>
-            <ObjectHeader
-                title="{= ${contactDetail>/contact/first_name} + ' ' + ${contactDetail>/contact/last_name}}"
-                intro="{contactDetail>/contact/category}"
-                responsive="true">
-                <attributes>
-                    <ObjectAttribute text="{= ${i18n>contactDetailEmailPrefix} + ${contactDetail>/contact/email}}" />
-                    <ObjectAttribute text="{= ${i18n>contactDetailPecPrefix} + ${contactDetail>/contact/pec_email}}" />
-                    <ObjectAttribute text="{= ${i18n>contactDetailPhonePrefix} + ${contactDetail>/contact/primary_phone}}" active="{= !!${contactDetail>/contact/primary_phone} }" press="onCallPrimaryPhone" />
-                    <ObjectAttribute text="{= ${i18n>contactDetailAddressPrefix} + ${contactDetail>/contact/primary_address}}" />
-                </attributes>
-                <statuses>
-                    <ObjectStatus
-                        text="{contactDetail>/contact/status}"
-                        state="{= ${contactDetail>/contact/status} === 'Attivo' || ${contactDetail>/contact/status} === 'attivo' ? 'Success' : (${contactDetail>/contact/status} === 'Futuro' || ${contactDetail>/contact/status} === 'futuro' ? 'Warning' : 'None')}" />
-                </statuses>
-            </ObjectHeader>
-
-            <IconTabBar
-                class="sapUiSmallMarginTop"
-                expandable="false"
-                select="onSectionTabSelect">
-                <items>
-                    <IconTabFilter key="contactDataSection" text="{i18n>contactDetailTabContactData}" icon="sap-icon://customer" />
-                    <IconTabFilter
-                        key="buyerProfileSection"
-                        text="{i18n>contactDetailTabBuyerProfile}"
-                        icon="sap-icon://customer-financial-fact-sheet"
-                        visible="{= ${contactDetail>/contact/category} === 'acquirente' }" />
-                    <IconTabFilter key="historySection" text="{i18n>contactDetailTabHistory}" icon="sap-icon://history" />
-                    <IconTabFilter key="activitiesSection" text="{i18n>contactDetailTabActivities}" icon="sap-icon://activities" />
-                    <IconTabFilter key="notesSection" text="{i18n>contactDetailTabNotes}" icon="sap-icon://notes" />
-                </items>
-            </IconTabBar>
-
-            <f:SimpleForm id="contactDataSection" editable="true" layout="ResponsiveGridLayout" title="{i18n>contactDetailSectionContactData}" class="sapUiSmallMarginTop">
-                <f:content>
-                    <Label text="{i18n>contactsDialogFieldFirstName}" />
-                    <Input value="{contactDetail>/contact/first_name}" />
-                    <Label text="{i18n>contactsDialogFieldLastName}" />
-                    <Input value="{contactDetail>/contact/last_name}" />
-                    <Label text="{i18n>contactsDialogFieldEmail}" />
-                    <Input value="{contactDetail>/contact/email}" type="Email" />
-                    <Label text="{i18n>contactsDialogFieldPec}" />
-                    <Input value="{contactDetail>/contact/pec_email}" type="Email" />
-                    <Label text="{i18n>contactsDialogFieldPrimaryPhone}" />
-                    <Input value="{contactDetail>/contact/primary_phone}" type="Tel" placeholder="{i18n>contactsDialogPhonePrimaryPlaceholder}" />
-                    <Label text="{i18n>contactsDialogFieldAdditionalPhones}" />
-                    <VBox width="100%">
-                        <items>
-                            <VBox
-                                width="100%"
-                                items="{
-                                    path: 'contactDetail>/phones'
-                                }">
-                                <items>
-                                    <HBox width="100%" alignItems="Center" class="sapUiTinyMarginBottom">
-                                        <items>
-                                            <Input
-                                                value="{contactDetail>phone}"
-                                                type="Tel"
-                                                width="100%"
-                                                placeholder="{i18n>contactsDialogPhoneAdditionalPlaceholder}" />
-                                            <Button
-                                                icon="sap-icon://less"
-                                                type="Transparent"
-                                                tooltip="{i18n>contactsDialogRemovePhoneButton}"
-                                                press="onRemovePhone" />
-                                        </items>
-                                    </HBox>
-                                </items>
-                            </VBox>
-                            <Button
-                                text="{i18n>contactsDialogAddPhoneButton}"
-                                icon="sap-icon://add"
-                                type="Transparent"
-                                press="onAddPhone" />
-                        </items>
-                    </VBox>
-                    <Label text="{i18n>contactsDialogFieldPrimaryAddress}" />
-                    <Input value="{contactDetail>/contact/primary_address}" placeholder="{i18n>contactsDialogAddressPrimaryPlaceholder}" />
-                    <Label text="{i18n>contactsDialogFieldAdditionalAddresses}" />
-                    <VBox width="100%">
-                        <items>
-                            <VBox
-                                width="100%"
-                                items="{
-                                    path: 'contactDetail>/addresses'
-                                }">
-                                <items>
-                                    <HBox width="100%" alignItems="Center" class="sapUiTinyMarginBottom">
-                                        <items>
-                                            <Input
-                                                value="{contactDetail>address_line}"
-                                                width="100%"
-                                                placeholder="{i18n>contactsDialogAddressAdditionalPlaceholder}" />
-                                            <Button
-                                                icon="sap-icon://less"
-                                                type="Transparent"
-                                                tooltip="{i18n>contactsDialogRemoveAddressButton}"
-                                                press="onRemoveAddress" />
-                                        </items>
-                                    </HBox>
-                                </items>
-                            </VBox>
-                            <Button
-                                text="{i18n>contactsDialogAddAddressButton}"
-                                icon="sap-icon://add"
-                                type="Transparent"
-                                press="onAddAddress" />
-                        </items>
-                    </VBox>
-                    <Label text="{i18n>contactsDialogFieldCategory}" />
-                    <Select selectedKey="{contactDetail>/contact/category}" items="{categoriesContact>/}">
-                        <core:Item key="{categoriesContact>key}" text="{categoriesContact>value}" />
-                    </Select>
-                    <Label text="{i18n>contactsDialogFieldStatus}" />
-                    <Select selectedKey="{contactDetail>/contact/status}" items="{statesContact>/}">
-                        <core:Item key="{statesContact>key}" text="{statesContact>value}" />
-                    </Select>
-                    <Label text="{i18n>contactDetailFieldInfo}" />
-                    <TextArea rows="4" value="{contactDetail>/contact/generic_info}" />
-                    <Label text="{i18n>contactsDialogFieldSellerProperties}" visible="{= ${contactDetail>/contact/category} === 'venditore' }" />
-                    <VBox width="100%" visible="{= ${contactDetail>/contact/category} === 'venditore' }">
-                        <items>
-                            <VBox
-                                width="100%"
-                                items="{
-                                    path: 'contactDetail>/sellerProperties'
-                                }">
-                                <items>
-                                    <HBox width="100%" alignItems="Center" class="sapUiTinyMarginBottom">
-                                        <items>
-                                            <Input
-                                                value="{contactDetail>display_value}"
-                                                width="100%"
-                                                placeholder="{i18n>contactsDialogSellerPropertyPlaceholder}"
-                                                showSuggestion="true"
-                                                startSuggestion="3"
-                                                suggest="onSuggestSellerProperty"
-                                                suggestionItemSelected="onSellerPropertySelected"
-                                                liveChange="onSellerPropertyLiveChange" />
-                                            <Button
-                                                icon="sap-icon://add"
-                                                type="Transparent"
-                                                tooltip="{i18n>contactsDialogAddSellerPropertyButton}"
-                                                press="onAddSellerProperty" />
-                                            <Button
-                                                icon="sap-icon://less"
-                                                type="Transparent"
-                                                tooltip="{i18n>contactsDialogRemoveSellerPropertyButton}"
-                                                visible="{= ${contactDetail>/sellerProperties}.length > 1 }"
-                                                press="onRemoveSellerProperty" />
-                                        </items>
-                                    </HBox>
-                                </items>
-                            </VBox>
-                            <Button
-                                text="{i18n>contactsDialogCreateMissingPropertyButton}"
-                                type="Transparent"
-                                icon="sap-icon://add-document"
-                                press="onOpenMissingPropertyDialog" />
-                        </items>
-                    </VBox>
-                </f:content>
-            </f:SimpleForm>
-
-            <f:SimpleForm
-                id="buyerProfileSection"
-                editable="true"
-                layout="ResponsiveGridLayout"
-                title="{i18n>contactDetailSectionBuyerProfile}"
-                class="sapUiSmallMarginTop"
-                visible="{= ${contactDetail>/contact/category} === 'acquirente' }">
-                <f:content>
-                    <Label text="{i18n>contactsDialogFieldRequestedArea}" />
-                    <Input value="{contactDetail>/buyerProfile/requested_area}" />
-                    <Label text="{i18n>contactsDialogFieldPropertyType}" />
-                    <Input value="{contactDetail>/buyerProfile/property_type}" />
-                    <Label text="{i18n>contactsDialogFieldFloorPreference}" />
-                    <Select selectedKey="{contactDetail>/buyerProfile/floor_preference}" items="{favoriteFloor>/}">
-                        <core:Item key="{favoriteFloor>key}" text="{favoriteFloor>value}" />
-                    </Select>
-                    <Label text="{i18n>contactsDialogFieldBudgetRenovated}" />
-                    <Input value="{contactDetail>/buyerProfile/purchase_price_renovated}" type="Number" />
-                    <Label text="{i18n>contactsDialogFieldBudgetToRenovate}" />
-                    <Input value="{contactDetail>/buyerProfile/purchase_price_to_renovate}" type="Number" />
-                    <Label text="{i18n>contactsDialogFieldMortgage}" />
-                    <Select selectedKey="{contactDetail>/buyerProfile/mortgage_type}" items="{valueMutuo>/}">
-                        <core:Item key="{valueMutuo>key}" text="{valueMutuo>value}" />
-                    </Select>
-                    <Label text="{i18n>contactsDialogFieldMortgageDetail}" visible="{= ${contactDetail>/buyerProfile/mortgage_type} === 'altro' }" />
-                    <TextArea
-                        rows="3"
-                        value="{contactDetail>/buyerProfile/mortgage_other}"
-                        visible="{= ${contactDetail>/buyerProfile/mortgage_type} === 'altro' }" />
-                    <Label text="{i18n>contactsDialogFieldPreferences}" />
-                    <VBox>
-                        <CheckBox text="{i18n>contactsDialogPreferenceBox}" selected="{contactDetail>/buyerProfile/preferences/box}" />
-                        <CheckBox text="{i18n>contactsDialogPreferenceParking}" selected="{contactDetail>/buyerProfile/preferences/posto_auto}" />
-                        <CheckBox text="{i18n>contactsDialogPreferenceCellar}" selected="{contactDetail>/buyerProfile/preferences/cantina}" />
-                        <CheckBox text="{i18n>contactsDialogPreferenceTerrace}" selected="{contactDetail>/buyerProfile/preferences/terrazzo}" />
-                        <CheckBox text="{i18n>contactsDialogPreferenceOther}" selected="{contactDetail>/buyerProfile/preferences/altro}" />
-                    </VBox>
-                    <Label text="{i18n>contactsDialogFieldPreferenceOther}" visible="{= ${contactDetail>/buyerProfile/preferences/altro} }" />
-                    <Input value="{contactDetail>/buyerProfile/preference_other}" visible="{= ${contactDetail>/buyerProfile/preferences/altro} }" />
-                </f:content>
-            </f:SimpleForm>
-
-            <Panel id="historySection" headerText="{i18n>contactDetailHistoryTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
-                <content>
-                    <HBox wrap="Wrap" justifyContent="Start">
-                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryLastCall}">
-                            <content>
-                                <ObjectStatus text="{contactDetail>/history/lastCall}" state="Information" />
-                            </content>
-                        </Panel>
-                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryLastMeeting}">
-                            <content>
-                                <ObjectStatus text="{contactDetail>/history/lastMeeting}" state="Information" />
-                            </content>
-                        </Panel>
-                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryLastEmail}">
-                            <content>
-                                <ObjectStatus text="{contactDetail>/history/lastEmail}" state="Information" />
-                            </content>
-                        </Panel>
-                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryNextCall}">
-                            <content>
-                                <ObjectStatus text="{contactDetail>/history/nextCall}" state="Warning" />
-                            </content>
-                        </Panel>
-                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryNextMeeting}">
-                            <content>
-                                <ObjectStatus text="{contactDetail>/history/nextMeeting}" state="Warning" />
-                            </content>
-                        </Panel>
-                        <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryNextEmail}">
-                            <content>
-                                <ObjectStatus text="{contactDetail>/history/nextEmail}" state="Warning" />
-                            </content>
-                        </Panel>
-                    </HBox>
-                </content>
-            </Panel>
-
-            <Toolbar class="sapUiSmallMarginTop sapUiTinyMarginBottom">
-                <ToolbarSpacer />
-                <Button text="{i18n>contactDetailSaveButton}" type="Emphasized" icon="sap-icon://save" press="onSaveContact" />
-            </Toolbar>
-
-            <Panel id="activitiesSection" headerText="{i18n>contactDetailActivitiesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title text="{i18n>contactDetailActivitiesTitle}" level="H4" />
-                        <ToolbarSpacer />
-                        <SearchField id="activitySearchField" width="14rem" placeholder="{i18n>contactDetailActivitiesFilterPlaceholder}" liveChange="onFilterActivities" search="onFilterActivities" />
-                        <Select width="10rem" selectedKey="" change="onFilterActivities" id="activityStatusFilter" items="{activityStates>/}">
-                            <core:Item key="{activityStates>key}" text="{activityStates>value}" />
-                        </Select>
-                        <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddActivity" />
-                    </OverflowToolbar>
-                </headerToolbar>
-                <List id="activitiesList" items="{contactDetail>/activities}" noDataText="{i18n>contactDetailActivitiesNoData}">
-                    <CustomListItem>
-                        <VBox class="sapUiSmallMarginTop sapUiSmallMarginBottom">
-                            <HBox justifyContent="SpaceBetween" alignItems="Start" wrap="Wrap">
-                                <Title text="{contactDetail>title}" level="H5" />
-                                <HBox alignItems="Center" renderType="Bare">
-                                    <Text
-                                        text="{= ${contactDetail>reminder_at} ? ${i18n>contactDetailActivityFieldReminder} + ': ' + ${contactDetail>reminder_at} : '' }"
-                                        class="sapUiTinyMarginBegin sapUiTinyMarginTop" />
-                                    <Button
-                                        icon="sap-icon://edit"
-                                        type="Transparent"
-                                        tooltip="{i18n>contactDetailEditActivityTitle}"
-                                        press="onEditActivity" />
-                                </HBox>
-                            </HBox>
-                            <Text
-                                text="{contactDetail>description}"
-                                visible="{= !!${contactDetail>description} }"
-                                class="sapUiTinyMarginTop" />
-                            <FlexBox wrap="Wrap" class="sapUiSmallMarginTop">
-                                <items>
-                                    <tnt:InfoLabel
-                                        text="{ parts: [ { path: 'contactDetail>activity_type' }, { path: 'activityTypes>/' } ], formatter: 'formatter.lookupText' }"
-                                        colorScheme="{ path: 'contactDetail>activity_type', formatter: 'formatter.activityTypeColorScheme' }"
-                                        visible="{= !!${contactDetail>activity_type} }"
-                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
-                                    <tnt:InfoLabel
-                                        text="{ path: 'contactDetail>priority', formatter: 'formatter.activityPriorityText' }"
-                                        colorScheme="{ path: 'contactDetail>priority', formatter: 'formatter.activityPriorityColorScheme' }"
-                                        visible="{= !!${contactDetail>priority} }"
-                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
-                                    <ObjectStatus
-                                        text="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
-                                        state="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }"
-                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
-                                </items>
-                            </FlexBox>
-                        </VBox>
-                    </CustomListItem>
-                </List>
-            </Panel>
-
-            <Panel id="notesSection" headerText="{i18n>contactDetailNotesTitle}" expandable="true" expanded="true" class="sapUiSmallMarginTop">
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title text="{i18n>contactDetailNotesTitle}" level="H4" />
-                        <ToolbarSpacer />
-                        <SearchField width="14rem" placeholder="{i18n>contactDetailNotesFilterPlaceholder}" liveChange="onFilterNotes" search="onFilterNotes" />
-                        <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddNote" />
-                    </OverflowToolbar>
-                </headerToolbar>
-                <List id="notesList" items="{contactDetail>/notes}" noDataText="{i18n>contactDetailNotesNoData}">
-                    <StandardListItem title="{contactDetail>message}" description="{= ${i18n>contactDetailNoteCreatedAtPrefix} + ${contactDetail>created_at}}" />
-                </List>
-            </Panel>
+            <uxap:ObjectPageLayout id="contactObjectPage" height="100%" useIconTabBar="true" upperCaseAnchorBar="false" showAnchorBarPopover="false">
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:heading>
+                            <Title text="{i18n>contactDetailPageTitle}" titleStyle="H2"/>
+                        </uxap:heading>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
+                <uxap:headerContent>
+                    <ObjectHeader
+                        title="{= ${contactDetail>/contact/first_name} + ' ' + ${contactDetail>/contact/last_name}}"
+                        intro="{contactDetail>/contact/category}"
+                        responsive="true">
+                        <attributes>
+                            <ObjectAttribute text="{= ${i18n>contactDetailEmailPrefix} + ${contactDetail>/contact/email}}" />
+                            <ObjectAttribute text="{= ${i18n>contactDetailPecPrefix} + ${contactDetail>/contact/pec_email}}" />
+                            <ObjectAttribute text="{= ${i18n>contactDetailPhonePrefix} + ${contactDetail>/contact/primary_phone}}" active="{= !!${contactDetail>/contact/primary_phone} }" press="onCallPrimaryPhone" />
+                            <ObjectAttribute text="{= ${i18n>contactDetailAddressPrefix} + ${contactDetail>/contact/primary_address}}" />
+                        </attributes>
+                        <statuses>
+                            <ObjectStatus
+                                text="{contactDetail>/contact/status}"
+                                state="{= ${contactDetail>/contact/status} === 'Attivo' || ${contactDetail>/contact/status} === 'attivo' ? 'Success' : (${contactDetail>/contact/status} === 'Futuro' || ${contactDetail>/contact/status} === 'futuro' ? 'Warning' : 'None')}" />
+                        </statuses>
+                    </ObjectHeader>
+                </uxap:headerContent>
+                <uxap:sections>
+                    <uxap:ObjectPageSection id="contactDataSection" title="{i18n>contactDetailTabContactData}" showTitle="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <Panel headerText="{i18n>contactDetailSectionContactData}" expandable="true" expanded="true">
+                                        <content>
+                                            <f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+                                                <f:content>
+                                                    <Label text="{i18n>contactsDialogFieldFirstName}" />
+                                                    <Input value="{contactDetail>/contact/first_name}" />
+                                                    <Label text="{i18n>contactsDialogFieldLastName}" />
+                                                    <Input value="{contactDetail>/contact/last_name}" />
+                                                    <Label text="{i18n>contactsDialogFieldEmail}" />
+                                                    <Input value="{contactDetail>/contact/email}" type="Email" />
+                                                    <Label text="{i18n>contactsDialogFieldPec}" />
+                                                    <Input value="{contactDetail>/contact/pec_email}" type="Email" />
+                                                    <Label text="{i18n>contactsDialogFieldPrimaryPhone}" />
+                                                    <Input value="{contactDetail>/contact/primary_phone}" type="Tel" placeholder="{i18n>contactsDialogPhonePrimaryPlaceholder}" />
+                                                    <Label text="{i18n>contactsDialogFieldAdditionalPhones}" />
+                                                    <VBox width="100%">
+                                                        <items>
+                                                            <VBox
+                                                                width="100%"
+                                                                items="{ path: 'contactDetail>/phones' }">
+                                                                <items>
+                                                                    <HBox width="100%" alignItems="Center" class="sapUiTinyMarginBottom">
+                                                                        <items>
+                                                                            <Input
+                                                                                value="{contactDetail>phone}"
+                                                                                type="Tel"
+                                                                                width="100%"
+                                                                                placeholder="{i18n>contactsDialogPhoneAdditionalPlaceholder}" />
+                                                                            <Button
+                                                                                icon="sap-icon://less"
+                                                                                type="Transparent"
+                                                                                tooltip="{i18n>contactsDialogRemovePhoneButton}"
+                                                                                press="onRemovePhone" />
+                                                                        </items>
+                                                                    </HBox>
+                                                                </items>
+                                                            </VBox>
+                                                            <Button
+                                                                text="{i18n>contactsDialogAddPhoneButton}"
+                                                                icon="sap-icon://add"
+                                                                type="Transparent"
+                                                                press="onAddPhone" />
+                                                        </items>
+                                                    </VBox>
+                                                    <Label text="{i18n>contactsDialogFieldPrimaryAddress}" />
+                                                    <Input value="{contactDetail>/contact/primary_address}" placeholder="{i18n>contactsDialogAddressPrimaryPlaceholder}" />
+                                                    <Label text="{i18n>contactsDialogFieldAdditionalAddresses}" />
+                                                    <VBox width="100%">
+                                                        <items>
+                                                            <VBox
+                                                                width="100%"
+                                                                items="{ path: 'contactDetail>/addresses' }">
+                                                                <items>
+                                                                    <HBox width="100%" alignItems="Center" class="sapUiTinyMarginBottom">
+                                                                        <items>
+                                                                            <Input
+                                                                                value="{contactDetail>address_line}"
+                                                                                width="100%"
+                                                                                placeholder="{i18n>contactsDialogAddressAdditionalPlaceholder}" />
+                                                                            <Button
+                                                                                icon="sap-icon://less"
+                                                                                type="Transparent"
+                                                                                tooltip="{i18n>contactsDialogRemoveAddressButton}"
+                                                                                press="onRemoveAddress" />
+                                                                        </items>
+                                                                    </HBox>
+                                                                </items>
+                                                            </VBox>
+                                                            <Button
+                                                                text="{i18n>contactsDialogAddAddressButton}"
+                                                                icon="sap-icon://add"
+                                                                type="Transparent"
+                                                                press="onAddAddress" />
+                                                        </items>
+                                                    </VBox>
+                                                    <Label text="{i18n>contactsDialogFieldCategory}" />
+                                                    <Select selectedKey="{contactDetail>/contact/category}" items="{categoriesContact>/}">
+                                                        <core:Item key="{categoriesContact>key}" text="{categoriesContact>value}" />
+                                                    </Select>
+                                                    <Label text="{i18n>contactsDialogFieldStatus}" />
+                                                    <Select selectedKey="{contactDetail>/contact/status}" items="{statesContact>/}">
+                                                        <core:Item key="{statesContact>key}" text="{statesContact>value}" />
+                                                    </Select>
+                                                    <Label text="{i18n>contactDetailFieldInfo}" />
+                                                    <TextArea rows="4" value="{contactDetail>/contact/generic_info}" />
+                                                    <Label text="{i18n>contactsDialogFieldSellerProperties}" visible="{= ${contactDetail>/contact/category} === 'venditore' }" />
+                                                    <VBox width="100%" visible="{= ${contactDetail>/contact/category} === 'venditore' }">
+                                                        <items>
+                                                            <VBox
+                                                                width="100%"
+                                                                items="{ path: 'contactDetail>/sellerProperties' }">
+                                                                <items>
+                                                                    <HBox width="100%" alignItems="Center" class="sapUiTinyMarginBottom">
+                                                                        <items>
+                                                                            <Input
+                                                                                value="{contactDetail>display_value}"
+                                                                                width="100%"
+                                                                                placeholder="{i18n>contactsDialogSellerPropertyPlaceholder}"
+                                                                                showSuggestion="true"
+                                                                                startSuggestion="3"
+                                                                                suggest="onSuggestSellerProperty"
+                                                                                suggestionItemSelected="onSellerPropertySelected"
+                                                                                liveChange="onSellerPropertyLiveChange" />
+                                                                            <Button
+                                                                                icon="sap-icon://add"
+                                                                                type="Transparent"
+                                                                                tooltip="{i18n>contactsDialogAddSellerPropertyButton}"
+                                                                                press="onAddSellerProperty" />
+                                                                            <Button
+                                                                                icon="sap-icon://less"
+                                                                                type="Transparent"
+                                                                                tooltip="{i18n>contactsDialogRemoveSellerPropertyButton}"
+                                                                                visible="{= ${contactDetail>/sellerProperties}.length > 1 }"
+                                                                                press="onRemoveSellerProperty" />
+                                                                        </items>
+                                                                    </HBox>
+                                                                </items>
+                                                            </VBox>
+                                                            <Button
+                                                                text="{i18n>contactsDialogCreateMissingPropertyButton}"
+                                                                type="Transparent"
+                                                                icon="sap-icon://add-document"
+                                                                press="onOpenMissingPropertyDialog" />
+                                                        </items>
+                                                    </VBox>
+                                                </f:content>
+                                            </f:SimpleForm>
+                                            <Toolbar class="sapUiSmallMarginTop sapUiTinyMarginBottom">
+                                                <ToolbarSpacer />
+                                                <Button text="{i18n>contactDetailSaveButton}" type="Emphasized" icon="sap-icon://save" press="onSaveContact" />
+                                            </Toolbar>
+                                        </content>
+                                    </Panel>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        id="buyerProfileSection"
+                        title="{i18n>contactDetailTabBuyerProfile}"
+                        showTitle="false"
+                        visible="{= ${contactDetail>/contact/category} === 'acquirente' }">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <Panel headerText="{i18n>contactDetailSectionBuyerProfile}" expandable="true" expanded="true">
+                                        <content>
+                                            <f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+                                                <f:content>
+                                                    <Label text="{i18n>contactsDialogFieldRequestedArea}" />
+                                                    <Input value="{contactDetail>/buyerProfile/requested_area}" />
+                                                    <Label text="{i18n>contactsDialogFieldPropertyType}" />
+                                                    <Input value="{contactDetail>/buyerProfile/property_type}" />
+                                                    <Label text="{i18n>contactsDialogFieldFloorPreference}" />
+                                                    <Select selectedKey="{contactDetail>/buyerProfile/floor_preference}" items="{favoriteFloor>/}">
+                                                        <core:Item key="{favoriteFloor>key}" text="{favoriteFloor>value}" />
+                                                    </Select>
+                                                    <Label text="{i18n>contactsDialogFieldBudgetRenovated}" />
+                                                    <Input value="{contactDetail>/buyerProfile/purchase_price_renovated}" type="Number" />
+                                                    <Label text="{i18n>contactsDialogFieldBudgetToRenovate}" />
+                                                    <Input value="{contactDetail>/buyerProfile/purchase_price_to_renovate}" type="Number" />
+                                                    <Label text="{i18n>contactsDialogFieldMortgage}" />
+                                                    <Select selectedKey="{contactDetail>/buyerProfile/mortgage_type}" items="{valueMutuo>/}">
+                                                        <core:Item key="{valueMutuo>key}" text="{valueMutuo>value}" />
+                                                    </Select>
+                                                    <Label text="{i18n>contactsDialogFieldMortgageDetail}" visible="{= ${contactDetail>/buyerProfile/mortgage_type} === 'altro' }" />
+                                                    <TextArea
+                                                        rows="3"
+                                                        value="{contactDetail>/buyerProfile/mortgage_other}"
+                                                        visible="{= ${contactDetail>/buyerProfile/mortgage_type} === 'altro' }" />
+                                                    <Label text="{i18n>contactsDialogFieldPreferences}" />
+                                                    <VBox>
+                                                        <CheckBox text="{i18n>contactsDialogPreferenceBox}" selected="{contactDetail>/buyerProfile/preferences/box}" />
+                                                        <CheckBox text="{i18n>contactsDialogPreferenceParking}" selected="{contactDetail>/buyerProfile/preferences/posto_auto}" />
+                                                        <CheckBox text="{i18n>contactsDialogPreferenceCellar}" selected="{contactDetail>/buyerProfile/preferences/cantina}" />
+                                                        <CheckBox text="{i18n>contactsDialogPreferenceTerrace}" selected="{contactDetail>/buyerProfile/preferences/terrazzo}" />
+                                                        <CheckBox text="{i18n>contactsDialogPreferenceOther}" selected="{contactDetail>/buyerProfile/preferences/altro}" />
+                                                    </VBox>
+                                                    <Label text="{i18n>contactsDialogFieldPreferenceOther}" visible="{= ${contactDetail>/buyerProfile/preferences/altro} }" />
+                                                    <Input value="{contactDetail>/buyerProfile/preference_other}" visible="{= ${contactDetail>/buyerProfile/preferences/altro} }" />
+                                                </f:content>
+                                            </f:SimpleForm>
+                                        </content>
+                                    </Panel>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection id="historySection" title="{i18n>contactDetailTabHistory}" showTitle="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <Panel headerText="{i18n>contactDetailHistoryTitle}" expandable="true" expanded="true">
+                                        <content>
+                                            <HBox wrap="Wrap" justifyContent="Start">
+                                                <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryLastCall}">
+                                                    <content>
+                                                        <ObjectStatus text="{contactDetail>/history/lastCall}" state="Information" />
+                                                    </content>
+                                                </Panel>
+                                                <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryLastMeeting}">
+                                                    <content>
+                                                        <ObjectStatus text="{contactDetail>/history/lastMeeting}" state="Information" />
+                                                    </content>
+                                                </Panel>
+                                                <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryLastEmail}">
+                                                    <content>
+                                                        <ObjectStatus text="{contactDetail>/history/lastEmail}" state="Information" />
+                                                    </content>
+                                                </Panel>
+                                                <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryNextCall}">
+                                                    <content>
+                                                        <ObjectStatus text="{contactDetail>/history/nextCall}" state="Warning" />
+                                                    </content>
+                                                </Panel>
+                                                <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryNextMeeting}">
+                                                    <content>
+                                                        <ObjectStatus text="{contactDetail>/history/nextMeeting}" state="Warning" />
+                                                    </content>
+                                                </Panel>
+                                                <Panel width="18rem" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" headerText="{i18n>contactDetailHistoryNextEmail}">
+                                                    <content>
+                                                        <ObjectStatus text="{contactDetail>/history/nextEmail}" state="Warning" />
+                                                    </content>
+                                                </Panel>
+                                            </HBox>
+                                        </content>
+                                    </Panel>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection id="activitiesSection" title="{i18n>contactDetailTabActivities}" showTitle="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <Panel headerText="{i18n>contactDetailActivitiesTitle}" expandable="true" expanded="true">
+                                        <headerToolbar>
+                                            <OverflowToolbar>
+                                                <Title text="{i18n>contactDetailActivitiesTitle}" level="H4" />
+                                                <ToolbarSpacer />
+                                                <SearchField id="activitySearchField" width="14rem" placeholder="{i18n>contactDetailActivitiesFilterPlaceholder}" liveChange="onFilterActivities" search="onFilterActivities" />
+                                                <Select width="10rem" selectedKey="" change="onFilterActivities" id="activityStatusFilter" items="{activityStates>/}">
+                                                    <core:Item key="{activityStates>key}" text="{activityStates>value}" />
+                                                </Select>
+                                                <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddActivity" />
+                                            </OverflowToolbar>
+                                        </headerToolbar>
+                                        <content>
+                                            <List id="activitiesList" items="{contactDetail>/activities}" noDataText="{i18n>contactDetailActivitiesNoData}">
+                                                <CustomListItem>
+                                                    <VBox class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+                                                        <HBox justifyContent="SpaceBetween" alignItems="Start" wrap="Wrap">
+                                                            <Title text="{contactDetail>title}" level="H5" />
+                                                            <HBox alignItems="Center" renderType="Bare">
+                                                                <Text
+                                                                    text="{= ${contactDetail>reminder_at} ? ${i18n>contactDetailActivityFieldReminder} + ': ' + ${contactDetail>reminder_at} : '' }"
+                                                                    class="sapUiTinyMarginBegin sapUiTinyMarginTop" />
+                                                                <Button
+                                                                    icon="sap-icon://edit"
+                                                                    type="Transparent"
+                                                                    tooltip="{i18n>contactDetailEditActivityTitle}"
+                                                                    press="onEditActivity" />
+                                                            </HBox>
+                                                        </HBox>
+                                                        <Text
+                                                            text="{contactDetail>description}"
+                                                            visible="{= !!${contactDetail>description} }"
+                                                            class="sapUiTinyMarginTop" />
+                                                        <FlexBox wrap="Wrap" class="sapUiSmallMarginTop">
+                                                            <items>
+                                                                <tnt:InfoLabel
+                                                                    text="{ parts: [ { path: 'contactDetail>activity_type' }, { path: 'activityTypes>/' } ], formatter: 'formatter.lookupText' }"
+                                                                    colorScheme="{ path: 'contactDetail>activity_type', formatter: 'formatter.activityTypeColorScheme' }"
+                                                                    visible="{= !!${contactDetail>activity_type} }"
+                                                                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                                                <tnt:InfoLabel
+                                                                    text="{ path: 'contactDetail>priority', formatter: 'formatter.activityPriorityText' }"
+                                                                    colorScheme="{ path: 'contactDetail>priority', formatter: 'formatter.activityPriorityColorScheme' }"
+                                                                    visible="{= !!${contactDetail>priority} }"
+                                                                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                                                <ObjectStatus
+                                                                    text="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
+                                                                    state="{ parts: [ { path: 'contactDetail>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }"
+                                                                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom" />
+                                                            </items>
+                                                        </FlexBox>
+                                                    </VBox>
+                                                </CustomListItem>
+                                            </List>
+                                        </content>
+                                    </Panel>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection id="notesSection" title="{i18n>contactDetailTabNotes}" showTitle="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <Panel headerText="{i18n>contactDetailNotesTitle}" expandable="true" expanded="true">
+                                        <headerToolbar>
+                                            <OverflowToolbar>
+                                                <Title text="{i18n>contactDetailNotesTitle}" level="H4" />
+                                                <ToolbarSpacer />
+                                                <SearchField width="14rem" placeholder="{i18n>contactDetailNotesFilterPlaceholder}" liveChange="onFilterNotes" search="onFilterNotes" />
+                                                <Button text="{i18n>contactDetailAddButton}" icon="sap-icon://add" press="onAddNote" />
+                                            </OverflowToolbar>
+                                        </headerToolbar>
+                                        <content>
+                                            <List id="notesList" items="{contactDetail>/notes}" noDataText="{i18n>contactDetailNotesNoData}">
+                                                <StandardListItem title="{contactDetail>message}" description="{= ${i18n>contactDetailNoteCreatedAtPrefix} + ${contactDetail>created_at}}" />
+                                            </List>
+                                        </content>
+                                    </Panel>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                </uxap:sections>
+            </uxap:ObjectPageLayout>
         </content>
     </Page>
 </mvc:View>
