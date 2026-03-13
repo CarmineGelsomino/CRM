@@ -23,6 +23,11 @@ sap.ui.define([
                 return;
             }
 
+            if (oTile.getId().endsWith("activitiesTile")) {
+                this.navTo("activities");
+                return;
+            }
+
             MessageToast.show(oBundle.getText("homeModuleInPreparation", [oTile.getHeader()]));
         }
     });

@@ -44,7 +44,7 @@
                     </TileContent>
                 </GenericTile>
 
-                <GenericTile header="{i18n>homeTileActivitiesHeader}" subheader="{i18n>homeTileActivitiesSubheader}" press="onTilePress" frameType="TwoByOne">
+                <GenericTile id="activitiesTile" header="{i18n>homeTileActivitiesHeader}" subheader="{i18n>homeTileActivitiesSubheader}" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="{i18n>homeTileOpenModule}">
                         <NumericContent value="14" scale="{i18n>homeTileDefaultScale}" valueColor="Neutral" />
                     </TileContent>
