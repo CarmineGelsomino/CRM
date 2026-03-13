@@ -13,6 +13,11 @@ sap.ui.define([
             var oTile = oEvent.getSource();
             var oBundle = this.getResourceBundle();
 
+            if (oTile.getId().endsWith("calendarTodayTile")) {
+                this.navTo("calendarToday");
+                return;
+            }
+
             if (oTile.getId().endsWith("contactsTile")) {
                 this.navTo("contacts");
                 return;

@@ -21,7 +21,8 @@
         "sap.m": {},
         "sap.tnt": {},
         "sap.ui.core": {},
-        "sap.ui.layout": {}
+        "sap.ui.layout": {},
+        "sap.ui.unified": {}
       }
     },
     "models": {
@@ -127,6 +128,11 @@
           "pattern": "profile",
           "name": "userProfile",
           "target": "userProfile"
+        },
+        {
+          "pattern": "calendartoday",
+          "name": "calendarToday",
+          "target": "calendarToday"
         }
       ],
       "targets": {
@@ -157,6 +163,10 @@
         "userProfile": {
           "viewName": "UserProfile",
           "viewId": "userProfile"
+        },
+        "calendarToday": {
+          "viewName": "calendartoday.CalendarToday",
+          "viewId": "calendarToday"
         }
       }
     }
