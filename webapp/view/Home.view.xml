@@ -14,7 +14,7 @@
                 <Text text="{i18n>shellBarSubtitle}" class="sapUiTinyMarginTop" />
             </VBox>
             <HBox justifyContent="Center" gap="30px" renderType="Bare" wrap="Wrap">
-                <GenericTile header="{i18n>homeTileTodayBoardHeader}" subheader="{i18n>homeTileTodayBoardSubheader}" press="onTilePress" frameType="TwoByOne">
+                <GenericTile id="calendarTodayTile" header="{i18n>homeTileTodayBoardHeader}" subheader="{i18n>homeTileTodayBoardSubheader}" press="onTilePress" frameType="TwoByOne">
                     <TileContent footer="{i18n>homeTileOpenModule}">
                         <NumericContent value="14" scale="{i18n>homeTileDefaultScale}" valueColor="Neutral" />
                     </TileContent>

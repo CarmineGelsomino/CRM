@@ -1,0 +1,76 @@
+<mvc:View
+    controllerName="crm.controller.calendartoday.CalendarToday"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:unified="sap.ui.unified">
+    <Page class="sapUiResponsiveContentPadding" enableScrolling="false" title="{i18n>calendarTodayPageTitle}">
+        <customHeader>
+            <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
+        </customHeader>
+        <subHeader>
+            <Toolbar>
+                <Title text="{i18n>calendarTodayPageTitle}" level="H3" />
+                <ToolbarSpacer />
+                <Button icon="sap-icon://refresh" type="Transparent" text="{i18n>calendarTodayRefresh}" press="onRefresh" />
+            </Toolbar>
+        </subHeader>
+        <content>
+            <VBox fitContainer="true" class="sapUiSmallMarginTop">
+                <Toolbar>
+                    <SearchField
+                        width="22rem"
+                        placeholder="{i18n>calendarTodayFilterPlaceholder}"
+                        liveChange="onFilterActivities"
+                        search="onFilterActivities"
+                        value="{calendarToday>/search}" />
+                    <ToolbarSeparator />
+                    <Select width="12rem" selectedKey="{calendarToday>/status}" change="onFilterActivities" items="{calendarToday>/statusOptions}">
+                        <core:Item key="{calendarToday>key}" text="{calendarToday>value}" />
+                    </Select>
+                    <Select width="12rem" selectedKey="{calendarToday>/type}" change="onFilterActivities" items="{calendarToday>/typeOptions}">
+                        <core:Item key="{calendarToday>key}" text="{calendarToday>value}" />
+                    </Select>
+                    <ToolbarSpacer />
+                    <ObjectStatus text="{= ${calendarToday>/summary/total} + ' ' + ${i18n>calendarTodaySummaryActivities} }" state="Information" />
+                    <ObjectStatus text="{= ${calendarToday>/summary/contacts} + ' ' + ${i18n>calendarTodaySummaryContacts} }" state="Success" class="sapUiTinyMarginBegin" />
+                </Toolbar>
+
+                <OverflowToolbar class="sapUiTinyMarginTop sapUiTinyMarginBottom">
+                    <Button text="{i18n>calendarTodayEditButton}" type="Emphasized" icon="sap-icon://edit" press="onEditSelectedActivity" />
+                    <Button text="{i18n>calendarTodayDeleteButton}" type="Reject" icon="sap-icon://delete" press="onDeleteSelectedActivity" />
+                    <ToolbarSpacer />
+                    <Text text="{i18n>calendarTodaySelectionHint}" />
+                </OverflowToolbar>
+
+                <SinglePlanningCalendar
+                    id="todayPlanningCalendar"
+                    class="sapUiContentPadding"
+                    startDate="{calendarToday>/selectedDate}"
+                    fullDay="false"
+                    stickyMode="All"
+                    appointmentSelect="onAppointmentSelect"
+                    noDataText="{i18n>calendarTodayNoData}"
+                    rows="{calendarToday>/rows}"
+                    busy="{calendarToday>/isBusy}">
+                    <rows>
+                        <SinglePlanningCalendarRow
+                            title="{calendarToday>title}"
+                            text="{calendarToday>text}"
+                            icon="{calendarToday>icon}"
+                            appointments="{calendarToday>appointments}">
+                            <appointments>
+                                <unified:CalendarAppointment
+                                    startDate="{calendarToday>startDate}"
+                                    endDate="{calendarToday>endDate}"
+                                    title="{calendarToday>title}"
+                                    text="{calendarToday>description}"
+                                    type="{calendarToday>type}" />
+                            </appointments>
+                        </SinglePlanningCalendarRow>
+                    </rows>
+                </SinglePlanningCalendar>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
