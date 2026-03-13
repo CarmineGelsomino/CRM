@@ -127,6 +127,11 @@
           "pattern": "profile",
           "name": "userProfile",
           "target": "userProfile"
+        },
+        {
+          "pattern": "activities",
+          "name": "activities",
+          "target": "activities"
         }
       ],
       "targets": {
@@ -157,6 +162,10 @@
         "userProfile": {
           "viewName": "UserProfile",
           "viewId": "userProfile"
+        },
+        "activities": {
+          "viewName": "activityTile.Activities",
+          "viewId": "activities"
         }
       }
     }

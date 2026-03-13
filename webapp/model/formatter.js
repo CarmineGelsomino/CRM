@@ -59,6 +59,20 @@ sap.ui.define([], function () {
             };
 
             return mSchemes[sType] || 10;
+        },
+
+        formatDateTime: function (sValue) {
+            if (!sValue) {
+                return "";
+            }
+
+            var oDate = new Date(String(sValue).replace(" ", "T"));
+
+            if (isNaN(oDate.getTime())) {
+                return sValue;
+            }
+
+            return oDate.toLocaleString();
         }
     };
 });

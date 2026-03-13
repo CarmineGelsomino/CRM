@@ -1,0 +1,134 @@
+<mvc:View
+    controllerName="crm.controller.activityTile.Activities"
+    xmlns="sap.m"
+    xmlns:tnt="sap.tnt"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    core:require="{ formatter: 'crm/model/formatter' }">
+
+    <Page title="{i18n>activitiesPageTitle}" class="sapUiResponsiveContentPadding">
+        <customHeader>
+            <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
+        </customHeader>
+        <content>
+            <Title class="sapUiSmallMarginBottom" text="{i18n>activitiesPageTitle}" titleStyle="H2" />
+            <Panel class="sapUiTinyMarginBottom" expandable="true" expanded="true">
+                <headerToolbar>
+                    <Toolbar>
+                        <Title text="{i18n>activitiesFiltersTitle}" level="H5" />
+                    </Toolbar>
+                </headerToolbar>
+                <content>
+                    <f:SimpleForm
+                        editable="true"
+                        layout="ColumnLayout"
+                        labelSpanXL="2"
+                        labelSpanL="2"
+                        labelSpanM="12"
+                        labelSpanS="12"
+                        columnsXL="4"
+                        columnsL="4"
+                        columnsM="2">
+                        <Label text="{i18n>activitiesFilterSearchLabel}" labelFor="activitySearchFieldAll" />
+                        <SearchField
+                            id="activitySearchFieldAll"
+                            width="100%"
+                            value="{activitiesPage>/searchQuery}"
+                            placeholder="{i18n>activitiesFilterSearchPlaceholder}"
+                            liveChange="onFilterChange"
+                            search="onFilterChange" />
+
+                        <Label text="{i18n>activitiesFilterStatusLabel}" labelFor="activityStatusSelectAll" />
+                        <Select
+                            id="activityStatusSelectAll"
+                            selectedKey="{activitiesPage>/statusKey}"
+                            change="onFilterChange"
+                            width="100%"
+                            items="{activityStates>/}">
+                            <core:Item key="{activityStates>key}" text="{activityStates>value}" />
+                        </Select>
+
+                        <Label text="{i18n>activitiesFilterTypeLabel}" labelFor="activityTypeSelectAll" />
+                        <Select
+                            id="activityTypeSelectAll"
+                            selectedKey="{activitiesPage>/typeKey}"
+                            change="onFilterChange"
+                            width="100%"
+                            items="{activitiesPage>/typeFilters}">
+                            <core:Item key="{activitiesPage>key}" text="{activitiesPage>value}" />
+                        </Select>
+
+                        <Label text="{i18n>activitiesSortLabel}" labelFor="activitySortSelectAll" />
+                        <Select
+                            id="activitySortSelectAll"
+                            selectedKey="{activitiesPage>/sortKey}"
+                            change="onFilterChange"
+                            width="100%">
+                            <core:Item key="reminderDesc" text="{i18n>activitiesSortReminderDesc}" />
+                            <core:Item key="reminderAsc" text="{i18n>activitiesSortReminderAsc}" />
+                            <core:Item key="priorityDesc" text="{i18n>activitiesSortPriorityDesc}" />
+                            <core:Item key="priorityAsc" text="{i18n>activitiesSortPriorityAsc}" />
+                            <core:Item key="statusAsc" text="{i18n>activitiesSortStatusAsc}" />
+                            <core:Item key="statusDesc" text="{i18n>activitiesSortStatusDesc}" />
+                        </Select>
+                    </f:SimpleForm>
+                </content>
+            </Panel>
+
+            <Table
+                id="activitiesTable"
+                growing="true"
+                busy="{activitiesPage>/busy}"
+                items="{activitiesPage>/activities}"
+                noDataText="{i18n>activitiesNoData}">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="{= ${i18n>activitiesTableTitlePrefix} + ${activitiesPage>/activities}.length + ')' }" level="H3" />
+                        <ToolbarSpacer />
+                        <Button icon="sap-icon://refresh" tooltip="{i18n>activitiesRefreshTooltip}" press="onRefresh" />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="13rem"><Text text="{i18n>activitiesColumnActivity}" /></Column>
+                    <Column width="10rem"><Text text="{i18n>activitiesColumnType}" /></Column>
+                    <Column width="9rem"><Text text="{i18n>activitiesColumnStatus}" /></Column>
+                    <Column width="8rem"><Text text="{i18n>activitiesColumnPriority}" /></Column>
+                    <Column width="12rem"><Text text="{i18n>activitiesColumnReminder}" /></Column>
+                    <Column width="12rem"><Text text="{i18n>activitiesColumnContact}" /></Column>
+                    <Column width="11rem"><Text text="{i18n>activitiesColumnPhone}" /></Column>
+                    <Column width="14rem"><Text text="{i18n>activitiesColumnEmail}" /></Column>
+                    <Column width="8rem" hAlign="End"><Text text="{i18n>activitiesColumnActions}" /></Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <VBox>
+                                <Title text="{activitiesPage>title}" level="H6" wrapping="true" />
+                                <Text text="{activitiesPage>description}" maxLines="2" />
+                            </VBox>
+                            <tnt:InfoLabel
+                                text="{ parts: [ { path: 'activitiesPage>activity_type' }, { path: 'activityTypes>/' } ], formatter: 'formatter.lookupText' }"
+                                colorScheme="{ path: 'activitiesPage>activity_type', formatter: 'formatter.activityTypeColorScheme' }"
+                                visible="{= !!${activitiesPage>activity_type} }" />
+                            <ObjectStatus
+                                text="{ parts: [ { path: 'activitiesPage>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupText' }"
+                                state="{ parts: [ { path: 'activitiesPage>status' }, { path: 'activityStates>/' } ], formatter: 'formatter.lookupState' }" />
+                            <tnt:InfoLabel
+                                text="{ path: 'activitiesPage>priority', formatter: 'formatter.activityPriorityText' }"
+                                colorScheme="{ path: 'activitiesPage>priority', formatter: 'formatter.activityPriorityColorScheme' }" />
+                            <ObjectIdentifier title="{ path: 'activitiesPage>reminder_at', formatter: 'formatter.formatDateTime' }" text="{ path: 'activitiesPage>completed_at', formatter: 'formatter.formatDateTime' }" />
+                            <ObjectIdentifier title="{activitiesPage>contact_full_name}" text="{= ${activitiesPage>contact_id} ? 'ID ' + ${activitiesPage>contact_id} : '' }" />
+                            <Text text="{activitiesPage>contact_primary_phone}" />
+                            <Text text="{activitiesPage>contact_email}" />
+                            <HBox justifyContent="End">
+                                <Button icon="sap-icon://edit" type="Transparent" press="onEditActivity" />
+                                <Button icon="sap-icon://delete" type="Transparent" press="onDeleteActivity" />
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+    </Page>
+</mvc:View>
