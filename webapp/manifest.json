@@ -80,6 +80,10 @@
       "characteristicsProperty": {
         "type": "sap.ui.model.json.JSONModel",
         "uri": "model/modelCharacteristicsProperty.json"
+      },
+      "calendarTodayLegend": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/calendarTodayLegend.json"
       }
     },
     "routing": {

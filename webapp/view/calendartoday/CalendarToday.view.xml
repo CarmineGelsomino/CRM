@@ -4,20 +4,14 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:unified="sap.ui.unified">
-    <Page class="sapUiResponsiveContentPadding" enableScrolling="false" title="{i18n>calendarTodayPageTitle}">
+    <Page class="sapUiResponsiveContentPadding" enableScrolling="true" title="{i18n>calendarTodayPageTitle}">
         <customHeader>
             <core:Fragment fragmentName="crm.view.fragments.ShellBar" type="XML" />
         </customHeader>
-        <subHeader>
-            <Toolbar>
-                <Title text="{i18n>calendarTodayPageTitle}" level="H3" />
-                <ToolbarSpacer />
-                <Button icon="sap-icon://refresh" type="Transparent" text="{i18n>calendarTodayRefresh}" press="onRefresh" />
-            </Toolbar>
-        </subHeader>
         <content>
-            <VBox fitContainer="true" class="sapUiSmallMarginTop">
-                <Toolbar>
+            <Title class="sapUiSmallMargin" text="{i18n>calendarTodayPageTitle}" titleStyle="H2" />
+            <VBox>
+                <OverflowToolbar style="Clear">
                     <SearchField
                         width="22rem"
                         placeholder="{i18n>calendarTodayFilterPlaceholder}"
@@ -34,42 +28,55 @@
                     <ToolbarSpacer />
                     <ObjectStatus text="{= ${calendarToday>/summary/total} + ' ' + ${i18n>calendarTodaySummaryActivities} }" state="Information" />
                     <ObjectStatus text="{= ${calendarToday>/summary/contacts} + ' ' + ${i18n>calendarTodaySummaryContacts} }" state="Success" class="sapUiTinyMarginBegin" />
-                </Toolbar>
-
-                <OverflowToolbar class="sapUiTinyMarginTop sapUiTinyMarginBottom">
-                    <Button text="{i18n>calendarTodayEditButton}" type="Emphasized" icon="sap-icon://edit" press="onEditSelectedActivity" />
-                    <Button text="{i18n>calendarTodayDeleteButton}" type="Reject" icon="sap-icon://delete" press="onDeleteSelectedActivity" />
+                </OverflowToolbar>
+                <OverflowToolbar>
                     <ToolbarSpacer />
-                    <Text text="{i18n>calendarTodaySelectionHint}" />
+                    <Button tooltip="{i18n>contactDetailAddButton}" type="Emphasized" icon="sap-icon://add" press="onAddActivity" />
+                    <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>calendarTodayRefresh}" press="onRefresh" />
                 </OverflowToolbar>
 
                 <SinglePlanningCalendar
                     id="todayPlanningCalendar"
-                    class="sapUiContentPadding"
+                    class="sapUiContentPadding sapUiResponsiveMargin"
                     startDate="{calendarToday>/selectedDate}"
+                    startHour="{calendarToday>/startHour}"
+                    viewKey="Day"
                     fullDay="false"
                     stickyMode="All"
                     appointmentSelect="onAppointmentSelect"
                     noDataText="{i18n>calendarTodayNoData}"
-                    rows="{calendarToday>/rows}"
+                    appointments="{calendarToday>/appointments}"
                     busy="{calendarToday>/isBusy}">
-                    <rows>
-                        <SinglePlanningCalendarRow
+                    <views>
+                        <SinglePlanningCalendarDayView key="Day" title="Day" />
+                    </views>
+                    <appointments>
+                        <unified:CalendarAppointment
+                            startDate="{calendarToday>startDate}"
+                            endDate="{calendarToday>endDate}"
                             title="{calendarToday>title}"
                             text="{calendarToday>text}"
                             icon="{calendarToday>icon}"
-                            appointments="{calendarToday>appointments}">
-                            <appointments>
-                                <unified:CalendarAppointment
-                                    startDate="{calendarToday>startDate}"
-                                    endDate="{calendarToday>endDate}"
-                                    title="{calendarToday>title}"
-                                    text="{calendarToday>description}"
-                                    type="{calendarToday>type}" />
-                            </appointments>
-                        </SinglePlanningCalendarRow>
-                    </rows>
+                            tooltip="{calendarToday>tooltip}"
+                            color="{calendarToday>color}"
+                            type="{calendarToday>type}" />
+                    </appointments>
                 </SinglePlanningCalendar>
+
+                <FlexBox
+                    wrap="Wrap"
+                    alignItems="Center"
+                    class="sapUiSmallMarginTop sapUiTinyMarginBottom"
+                    items="{calendarTodayLegend>/items}">
+                    <items>
+                        <HBox alignItems="Center" class="sapUiSmallMarginEnd sapUiTinyMarginBottom">
+                            <items>
+                                <core:Icon src="sap-icon://circle-task-2" color="{calendarTodayLegend>colorHex}" class="sapUiTinyMarginEnd" />
+                                <Text text="{calendarTodayLegend>label}" wrapping="false" />
+                            </items>
+                        </HBox>
+                    </items>
+                </FlexBox>
             </VBox>
         </content>
     </Page>

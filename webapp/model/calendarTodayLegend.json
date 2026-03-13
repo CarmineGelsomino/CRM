@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "status": "da_fare",
+      "label": "Da fare",
+      "type": "Type08",
+      "colorHex": "#f4c430"
+    },
+    {
+      "status": "sospeso",
+      "label": "Sospeso",
+      "type": "Type05",
+      "colorHex": "#0a6ed1"
+    },
+    {
+      "status": "completato",
+      "label": "Completato",
+      "type": "Type10",
+      "colorHex": "#2b7d2b"
+    },
+    {
+      "status": "annullato",
+      "label": "Annullato",
+      "type": "Type01",
+      "colorHex": "#bb0000"
+    }
+  ]
+}
